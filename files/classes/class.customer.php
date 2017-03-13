@@ -138,8 +138,8 @@ public function MakeRegs($Mode="List")
 									</div>
 									<div class="col-lg-2 col-md-3 col-sm-2 hideMobile990">
 										<div class="listRowInner">
-											<span class="listTextStrong">Saldo</span>
-											<span class="emailTextResp"><span class="label label-success">$ 712.32</span>
+											<span class="listTextStrong">Deuda</span>
+											<span class="emailTextResp"><span class="label label-danger">$ 712.32</span>
 										</div>
 									</div>
 									<div class="col-lg-3 col-md-3 col-sm-2 hideMobile990">
@@ -785,7 +785,7 @@ public function MakeRegs($Mode="List")
                         </div>
                         
                         <br>
-                        <h4 class="subTitleB"><i class="fa fa-briefcase"></i> Corredores</h4>
+                        <h4 class="subTitleB"><i class="fa fa-truck"></i> Repartidores</h4>
                         <div id="agent_list_'.$ID.'" branch="'.$ID.'" class="row">
                             <div class="col-xs-12">
                                 '.insertElement('multiple','select_broker_'.$ID,$Brokers,'form-control select2 selectTags BrokerSelect','style="width:100%;" branch="'.$ID.'"',$this->fetchAssoc('admin_user',"admin_id,CONCAT(first_name,' ',last_name) as name","status='A' AND profile_id = 361",'name'),'0','Seleccione una Opci&oacute;n').'

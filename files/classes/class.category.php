@@ -5,7 +5,7 @@ class Category extends DataBase
 	var	$ID;
 	var $Data;
 	var $Products = array();
-	var $DefaultImgURL = '../../../skin/images/categories/default/default.jpg';
+	var $DefaultImgURL = '../../../skin/images/categories/default/default.png';
 	var $Table = 'product_category';
 	var $TableID = 'category_id';
 
@@ -102,7 +102,7 @@ public function MakeRegs($Mode="List")
 			if($Row->Data['parent'])
 				$Row->Data['parent'] = '<span class="label label-primary">'.ucfirst($Row->Data['parent']).'</span>';
 			else
-				$Row->Data['parent'] = '<span class="label label-warning">L&iacute;nea Principal</span>';
+				$Row->Data['parent'] = '<span class="label label-warning">Categor&iacute;a Principal</span>';
 			switch(strtolower($Mode))
 			{
 				case "list":
@@ -155,14 +155,14 @@ public function MakeRegs($Mode="List")
 				break;
 			}
         }
-        if(!$Regs) $Regs.= '<div class="callout callout-info"><h4><i class="icon fa fa-info-circle"></i> No se encontraron l&iacute;neas.</h4><p>Puede crear una l&iacute;nea haciendo click <a href="new.php">aqui</a>.</p></div>';
+        if(!$Regs) $Regs.= '<div class="callout callout-info"><h4><i class="icon fa fa-info-circle"></i> No se encontraron categor&iacute;as.</h4><p>Puede crear una categor&iacute;a haciendo click <a href="new.php">aqui</a>.</p></div>';
 		return $Regs;
 	}
 	
 	protected function InsertSearchField()
 	{
 		$Parents = array();
-		$Parents[] = array("menu_id"=>"0","title"=>"L&iacute;nea Principal");
+		$Parents[] = array("menu_id"=>"0","title"=>"Categor&iacute;a Principal");
 		$ParentsArray = $this->GetParentsArray();
 		foreach($ParentsArray as $Parent)
 		{
@@ -172,7 +172,7 @@ public function MakeRegs($Mode="List")
 		return '<!-- Name -->
           <div class="input-group">
             <span class="input-group-addon order-arrows sort-activated" order="title" mode="asc"><i class="fa fa-sort-alpha-asc"></i></span>
-            '.insertElement('text','title','','form-control','placeholder="L&iacute;nea"').'
+            '.insertElement('text','title','','form-control','placeholder="Categor&iacute;a"').'
           </div>
           <!-- Short Name -->
           <div class="input-group">
@@ -190,7 +190,7 @@ public function MakeRegs($Mode="List")
 	protected function InsertSearchButtons()
 	{
 		return '<!-- New Button -->
-		    	<a href="new.php"><button type="button" class="NewElementButton btn btnGreen animated fadeIn"><i class="fa fa-user-plus"></i> Nueva L&iacute;nea</button></a>
+		    	<a href="new.php"><button type="button" class="NewElementButton btn btnGreen animated fadeIn"><i class="fa fa-user-plus"></i> Nueva Categor&iacute;a</button></a>
 		    	<!-- /New Button -->';
 	}
 	

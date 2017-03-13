@@ -12,7 +12,7 @@
     <div class="box-header flex-justify-center">
       <div class="col-lg-8 col-sm-12">
         <div class="innerContainer">
-          <h4 class="subTitleB"><i class="fa fa-plus-circle"></i> Complete los campos para agregar una nueva l&iacute;nea</h4>
+          <h4 class="subTitleB"><i class="fa fa-plus-circle"></i> Complete los campos para agregar una nueva Categoría</h4>
             <div class="row form-group inline-form-custom-2">
               <div class="col-xs-12 inner">
                 <label>Nombre</label>
@@ -26,12 +26,12 @@
               </div>
               <div class="col-xs-12 col-sm-6 inner">
                 <label>Ubicaci&oacute;n</label>
-                <?php echo insertElement('select','parent_select','','form-control select2 selectTags',' style="width: 100%;height:auto!important;"',Utf8EncodeArray($DB->fetchAssoc("product_category","category_id,title","status='A' AND company_id=".$_SESSION['company_id'])),'0','L&iacute;nea Principal'); ?>
+                <?php echo insertElement('select','parent_select','','form-control select2 selectTags',' style="width: 100%;height:auto!important;"',$DB->fetchAssoc("product_category","category_id,title","status='A' AND company_id=".$_SESSION['company_id']),'0','L&iacute;nea Principal'); ?>
               </div>
             </div><!-- inline-form -->
             <hr>
             <div class="txC">
-              <button type="button" class="btn btn-success btnGreen" id="BtnCreate"><i class="fa fa-plus"></i> Crear L&iacute;nea</button>
+              <button type="button" class="btn btn-success btnGreen" id="BtnCreate"><i class="fa fa-plus"></i> Crear Categoría</button>
               <button type="button" class="btn btn-success btnBlue" id="BtnCreateNext"><i class="fa fa-plus"></i> Crear y Agregar Otra</button>
               <button type="button" class="btn btn-error btnRed" id="BtnCancel"><i class="fa fa-times"></i> Cancelar</button>
             </div>

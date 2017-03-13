@@ -12,7 +12,7 @@
   
   <div class="login-box-body">
     <div class="login-logo">
-    <span style="color:#FFF;font-size:1em;">Roller <i class="fa fa-cog"></i> Service</span>
+    <span style="color:#FFF;font-size:1em;"><b><i class="fa fa-shirtsinbulk"></i> San Cipriano</b></span>
   </div>
   <!-- /.login-logo -->
     <p class="login-box-msg" style="color:#CCC;">INICIAR SESI&Oacute;N</p>
@@ -38,7 +38,7 @@
         </div>
         <!-- /.col -->
       </div>
-    <a href="forgotuser.php">Olvid&eacute; mi contrase&ntilde;a</a><br>
+    <!--<a href="forgotuser.php">Olvid&eacute; mi contrase&ntilde;a</a><br>-->
   </div>
   <!-- /.login-box-body -->
 </div>

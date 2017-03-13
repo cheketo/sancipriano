@@ -202,7 +202,7 @@ class Login extends DataBase
 	{
 		session_destroy();
 		//Unset Cookies
-		setcookie("rollerservice", "", 0 ,"/");
+		setcookie("sancipriano", "", 0 ,"/");
 		setcookie("user", "", 0 ,"/");
 		setcookie("password", "", 0 ,"/");
 		setcookie("admin_id", "", 0 ,"/");

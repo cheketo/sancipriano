@@ -5,7 +5,7 @@ class Product extends DataBase
 	var	$ID;
 	var $Data;
 	var $Providers = array();
-	var $DefaultImgURL = '../../../skin/images/products/default/default.jpg';
+	var $DefaultImgURL = '../../../skin/images/products/default/default.png';
 	var $Table = 'product';
 	var $TableID = 'product_id';
 
@@ -82,16 +82,16 @@ public function MakeRegs($Mode="List")
 			{
 				case "list":
 					$RowBackground = $i % 2 == 0? '':' listRow2 ';
-					$Regs	.= '<div class="row listRow'.$RowBackground.$Restrict.'" id="row_'.$Row->ID.'" title="'.$Row->Data['code'].'">
+					$Regs	.= '<div class="row listRow'.$RowBackground.$Restrict.'" id="row_'.$Row->ID.'" title="'.$Row->Data['title'].'">
 									<div class="col-lg-3 col-md-3 col-sm-10 col-xs-10">
 										<div class="listRowInner" style="text-align:left!important;">
 											<img class="img-circle hideMobile990" style="margin-right:1em!important;" src="'.$Row->GetImg().'" alt="'.$Row->Data['cod'].'">
-											<span class="listTextStrong" style="margin-top:0.7em;">'.$Row->Data['code'].'</span>
+											<span class="listTextStrong" style="margin-top:0.7em;">'.$Row->Data['title'].'</span>
 										</div>
 									</div>
 									<div class="col-lg-3 col-md-3 col-sm-3 hideMobile990">
 										<div class="listRowInner">
-											<span class="smallTitle">L&iacute;nea</span>
+											<span class="smallTitle">Categor&iacute;a</span>
 											<span class="listTextStrong"><span class="label label-primary">'.ucfirst($Row->Data['category']).'</span></span>
 										</div>
 									</div>
@@ -114,10 +114,10 @@ public function MakeRegs($Mode="List")
 								</div>';
 				break;
 				case "grid":
-				$Regs	.= '<li id="grid_'.$Row->ID.'" class="RoundItemSelect roundItemBig'.$Restrict.'" title="'.$Row->Data['code'].'">
+				$Regs	.= '<li id="grid_'.$Row->ID.'" class="RoundItemSelect roundItemBig'.$Restrict.'" title="'.$Row->Data['title'].'">
 						            <div class="flex-allCenter imgSelector">
 						              <div class="imgSelectorInner">
-						                <img src="'.$Row->GetImg().'" alt="'.$Row->Data['code'].'" class="img-responsive">
+						                <img src="'.$Row->GetImg().'" alt="'.$Row->Data['title'].'" class="img-responsive">
 						                <div class="imgSelectorContent">
 						                  <div class="roundItemBigActions">
 						                    '.$Actions.'
@@ -126,7 +126,7 @@ public function MakeRegs($Mode="List")
 						                </div>
 						              </div>
 						              <div class="roundItemText">
-						                <p><b>'.$Row->Data['code'].'</b></p>
+						                <p><b>'.$Row->Data['title'].'</b></p>
 						                <p><span class="label label-primary">'.ucfirst($Row->Data['category']).'</span></p>
 						              </div>
 						            </div>
@@ -142,13 +142,13 @@ public function MakeRegs($Mode="List")
 	{
 		return '<!-- Name -->
           <div class="input-group">
-            <span class="input-group-addon order-arrows sort-activated" order="code" mode="asc"><i class="fa fa-sort-alpha-asc"></i></span>
-            '.insertElement('text','code','','form-control','placeholder="C&oacute;digo"').'
+            <span class="input-group-addon order-arrows sort-activated" order="title" mode="asc"><i class="fa fa-sort-alpha-asc"></i></span>
+            '.insertElement('text','title','','form-control','placeholder="Nombre"').'
           </div>
           <!-- Categories -->
           <div class="input-group">
             <span class="input-group-addon order-arrows" order="category" mode="asc"><i class="fa fa-sort-alpha-asc"></i></span>
-            '.insertElement('select','group','','form-control','',$this->fetchAssoc('product_category a, relation_product_category b','a.*',"a.category_id = b.category_id AND a.status = 'A' AND a.company_id = ".$_SESSION['company_id'],"a.title"),'', 'L&iacute;nea').'
+            '.insertElement('select','category','','form-control','',$this->fetchAssoc('product_category','category_id,title',"status = 'A' AND company_id = ".$_SESSION['company_id'],"title"),'', 'Categor&iacute;a').'
           </div>
           ';
 	}
@@ -166,7 +166,7 @@ public function MakeRegs($Mode="List")
 		$this->SetFields('b.*');
 		$this->SetWhere("b.company_id = ".$_SESSION['company_id']);
 		//$this->AddWhereString(" AND c.company_id = a.company_id");
-		$this->SetOrder('code');
+		$this->SetOrder('title');
 		$this->SetGroupBy("b.".$this->TableID);
 		
 		foreach($_POST as $Key => $Value)
@@ -174,7 +174,7 @@ public function MakeRegs($Mode="List")
 			$_POST[$Key] = $Value;
 		}
 			
-		if($_POST['code']) $this->SetWhereCondition("b.code","LIKE","%".$_POST['code']."%");
+		if($_POST['title']) $this->SetWhereCondition("b.title","LIKE","%".$_POST['title']."%");
 		if(!is_null($_POST['parent']))
 		{
 			switch($_POST['parent'])
@@ -259,7 +259,7 @@ public function MakeRegs($Mode="List")
 	
 	public function Insert()
 	{
-		$Code		= $_POST['code'];
+		$Title		= $_POST['title'];
 		$Category	= $_POST['category'];
 		$Price		= str_replace('$','',$_POST['price']);
 		$Brand		= $_POST['brand'];
@@ -277,7 +277,7 @@ public function MakeRegs($Mode="List")
 		if(!$StockMax) $StockMax = 0;
 		if(!$PriceFob) $PriceFob = 0;
 		if(!$PriceDispatch) $PriceDispatch = 0;
-		$Insert		= $this->execQuery('insert',$this->Table,'code,category_id,price,brand_id,rack,size,stock_min,stock_max,description,creation_date,company_id,created_by',"'".$Code."',".$Category.",".$Price.",".$Brand.",'".$Rack."','".$Size."',".$StockMin.",".$StockMax.",'".$Description."',NOW(),".$_SESSION['company_id'].",".$_SESSION['admin_id']);
+		$Insert		= $this->execQuery('insert',$this->Table,'title,category_id,price,brand_id,rack,size,stock_min,stock_max,description,creation_date,company_id,created_by',"'".$Title."',".$Category.",".$Price.",".$Brand.",'".$Rack."','".$Size."',".$StockMin.",".$StockMax.",'".$Description."',NOW(),".$_SESSION['company_id'].",".$_SESSION['admin_id']);
 		//echo $this->lastQuery();
 	}	
 	
@@ -286,7 +286,7 @@ public function MakeRegs($Mode="List")
 		$ID 		= $_POST['id'];
 		$Edit		= new Product($ID);
 		
-		$Code		= $_POST['code'];
+		$Title		= $_POST['title'];
 		$Category	= $_POST['category'];
 		$Price		= str_replace('$','',$_POST['price']);
 		$Brand		= $_POST['brand'];
@@ -299,7 +299,7 @@ public function MakeRegs($Mode="List")
 		if(!$StockMin) $StockMin = 0;
 		if(!$StockMax) $StockMax = 0;
 		
-		$Update		= $this->execQuery('update',$this->Table,"code='".$Code."',category_id=".$Category.",brand_id=".$Brand.",price=".$Price.",rack='".$Rack."',size='".$Size."',stock_min='".$StockMin."',stock_max='".$StockMax."',description='".$Description."',updated_by=".$_SESSION['admin_id'],$this->TableID."=".$ID);
+		$Update		= $this->execQuery('update',$this->Table,"title='".$Title."',category_id=".$Category.",brand_id=".$Brand.",price=".$Price.",rack='".$Rack."',size='".$Size."',stock_min='".$StockMin."',stock_max='".$StockMax."',description='".$Description."',updated_by=".$_SESSION['admin_id'],$this->TableID."=".$ID);
 		//echo $this->lastQuery();
 	}
 	
@@ -337,13 +337,13 @@ public function MakeRegs($Mode="List")
 	
 	public function Validate()
 	{
-		$Name 			= strtolower($_POST['code']);
-		$ActualName 	= strtolower($_POST['actualcode']);
+		$Name 			= strtolower($_POST['title']);
+		$ActualName 	= strtolower($_POST['actualtitle']);
 
 	    if($ActualName)
-	    	$TotalRegs  = $this->numRows($this->Table,'*',"code = '".$Name."' AND code<> '".$ActualName."'");
+	    	$TotalRegs  = $this->numRows($this->Table,'*',"title = '".$Name."' AND title<> '".$ActualName."'");
     	else
-		    $TotalRegs  = $this->numRows($this->Table,'*',"code = '".$Name."'");
+		    $TotalRegs  = $this->numRows($this->Table,'*',"title = '".$Name."'");
 		if($TotalRegs>0) echo $TotalRegs;
 	}
 }

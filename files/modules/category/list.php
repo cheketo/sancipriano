@@ -1,7 +1,7 @@
 <?php
   include('../../includes/inc.main.php');
   $New = new Category();
-  $Head->setTitle("L&iacute;neas");
+  $Head->setTitle("Categor&iacute;as");
   $Head->setIcon($Menu->GetHTMLicon());
   $Head->setSubTitle($Menu->GetTitle());
   $Head->setHead();

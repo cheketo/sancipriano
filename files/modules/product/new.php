@@ -27,7 +27,7 @@
         <div class="container productCategory2 animated fadeIn">
           <!-- Item -->
           <div class="categoryList">
-            <div class="categoryTitle"><span><b>L&iacute;neas</b> | Seleccione una L&iacute;nea</span></div>
+            <div class="categoryTitle"><span><b>Categorías</b> | Seleccione una Categoría</span></div>
             <ul>
               <?php 
                 $Categories = $Category->GetAllCategories();
@@ -79,7 +79,7 @@
           <h4 class="subTitleB"><i class="fa fa-cube"></i> Detalles del Art&iacute;culo</h4>
           
             <div class="form-group">
-              L&iacute;nea: <b><span id="category_selected"></span></b>
+              Categoría: <b><span id="category_selected"></span></b>
             </div>
             <!--<div class="form-group">-->
             <!--  <?php //echo insertElement('text','title','','form-control','placeholder="Nombre del Art&iacute;culo"') ?>-->
@@ -87,7 +87,7 @@
             <div class="row form-group inline-form-custom">
               <div class="col-xs-12 col-sm-4">
                 <?php //echo insertElement('text','short_title','','form-control','placeholder="Nombre Corto"') ?>
-                <?php echo insertElement('text','code','','form-control','placeholder="C&oacute;digo" validateEmpty="Ingrese un c&oacute;digo."') ?>
+                <?php echo insertElement('text','title','','form-control','placeholder="Nombre" validateEmpty="Ingrese un nombre."') ?>
               </div>
               <div class="col-xs-12 col-sm-4">
                 <?php echo insertElement('text','price','','form-control','placeholder="Precio" validateEmpty="Ingrese un precio." data-inputmask="\'alias\': \'numeric\', \'groupSeparator\': \'\', \'autoGroup\': true, \'digits\': 2, \'digitsOptional\': false, \'prefix\': \'$\', \'placeholder\': \'0\'"') ?>
@@ -105,9 +105,9 @@
                 <?php echo insertElement("hidden","brand"); ?>
               </div>
             </div>
-            <div class="form-group">
-              <?php echo insertElement('text','size','','form-control','placeholder="Medidas"') ?>
-            </div>
+            <!--<div class="form-group">-->
+            <!--  <?php echo insertElement('text','size','','form-control','placeholder="Medidas"') ?>-->
+            <!--</div>-->
             <div class="row form-group inline-form-custom">
               <div class="col-xs-12 col-sm-4">
                 <?php echo insertElement('text','stock','','form-control','placeholder="Stock Incial"') ?>
@@ -119,22 +119,22 @@
                 <?php echo insertElement('text','stock_max','','form-control','placeholder="Stock M&aacute;ximo"') ?>
               </div>
             </div>
-            <div class="form-group">
-              <?php echo insertElement('button','dispatch_data','Agregar datos de &uacute;ltima importaci&oacute;n','btn btn-warning','style="width:100%;"') ?>
-            </div>
-            <div class="row form-group inline-form-custom Hidden Dispatch animated fadeIn">
-              <div class="col-md-12">
-                <?php echo insertElement('text','dispatch','','form-control','placeholder="Desp. Aduana"') ?>
-              </div>
-            </div>
-            <div class="row form-group inline-form-custom Hidden Dispatch animated fadeIn">
-              <div class="col-xs-12 col-sm-6">
-                <?php echo insertElement('text','price_fob','','form-control','placeholder="Costo Fob"') ?>
-              </div>
-              <div class="col-xs-12 col-sm-6">
-                <?php echo insertElement('text','price_dispatch','','form-control','placeholder="Costo Desp."') ?>
-              </div>
-            </div>
+            <!--<div class="form-group">-->
+            <!--  <?php echo insertElement('button','dispatch_data','Agregar datos de &uacute;ltima importaci&oacute;n','btn btn-warning','style="width:100%;"') ?>-->
+            <!--</div>-->
+            <!--<div class="row form-group inline-form-custom Hidden Dispatch animated fadeIn">-->
+            <!--  <div class="col-md-12">-->
+            <!--    <?php echo insertElement('text','dispatch','','form-control','placeholder="Desp. Aduana"') ?>-->
+            <!--  </div>-->
+            <!--</div>-->
+            <!--<div class="row form-group inline-form-custom Hidden Dispatch animated fadeIn">-->
+            <!--  <div class="col-xs-12 col-sm-6">-->
+            <!--    <?php echo insertElement('text','price_fob','','form-control','placeholder="Costo Fob"') ?>-->
+            <!--  </div>-->
+            <!--  <div class="col-xs-12 col-sm-6">-->
+            <!--    <?php echo insertElement('text','price_dispatch','','form-control','placeholder="Costo Desp."') ?>-->
+            <!--  </div>-->
+            <!--</div>-->
             <!-- Description (Character Counter)-->
             <div class="form-group textWithCounter">
               <textarea id="description" name="description" class="text-center" placeholder="Descripción" rows="4" maxlength="150"></textarea>

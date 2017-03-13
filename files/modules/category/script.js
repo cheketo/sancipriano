@@ -21,9 +21,9 @@ $(function(){
 				procText = "creaci&oacute;n"
 			}
 
-			confirmText += " la l&iacute;nea '"+$("#title").val()+"'";
+			confirmText += " la categor&iacute;a '"+$("#title").val()+"'";
 
-			alertify.confirm(utf8_decode('¿Desea '+confirmText+' ?'), function(e){
+			alertify.confirm('¿Desea '+confirmText+' ?', function(e){
 				if(e)
 				{
 					var process		= '../../library/processes/proc.common.php?object=Category';

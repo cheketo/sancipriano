@@ -4,7 +4,7 @@
     $Edit         = new Brand($ID);
     $Data         = $Edit->GetData();
     ValidateID($Data);
-    $Edit->Data = Utf8EncodeArray($Edit->Data);
+    $Edit->Data = $Edit->Data;
     $Head->setTitle("Modificar Marca ".$Data['title']);
     $Head->setStyle('../../../vendors/select2/select2.min.css'); // Select Inputs With Tags
     $Head->setHead();

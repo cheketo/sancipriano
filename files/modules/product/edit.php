@@ -35,7 +35,7 @@
         <div class="container productCategory2 animated fadeIn">
           <!-- Item -->
           <div class="categoryList">
-            <div class="categoryTitle"><span><b>L&iacute;neas</b> | Seleccione una L&iacute;nea</span></div>
+            <div class="categoryTitle"><span><b>Categorías</b> | Seleccione una Categoría</span></div>
             <ul>
               <?php 
                 $Categories = $Category->GetAllCategories();
@@ -85,7 +85,7 @@
           <h4 class="subTitleB"><i class="fa fa-cube"></i> Detalles del Art&iacute;culo</h4>
           
             <div class="form-group">
-              L&iacute;nea: <b><span id="category_selected"></span></b> <button type="button" class="BackToCategory btn btn-warning"><i class="fa fa-pencil"></i></button>
+              Categoría: <b><span id="category_selected"></span></b> <button type="button" class="BackToCategory btn btn-warning"><i class="fa fa-pencil"></i></button>
             </div>
             <!--<div class="form-group">-->
             <!--  <?php //echo insertElement('text','title','','form-control','placeholder="Nombre del Art&iacute;culo"') ?>-->
@@ -93,7 +93,7 @@
             <div class="row form-group inline-form-custom">
               <div class="col-xs-12 col-sm-4">
                 <label for="code">C&oacute;digo:</label>
-                <?php echo insertElement('text','code',$Data['code'],'form-control','placeholder="C&oacute;digo" validateEmpty="Ingrese un c&oacute;digo."') ?>
+                <?php echo insertElement('text','title',$Data['title'],'form-control','placeholder="Nombre" validateEmpty="Ingrese un Nombre."') ?>
               </div>
               <div class="col-xs-12 col-sm-4">
                 <label for="price">Precio:</label>
@@ -114,10 +114,10 @@
                 <?php echo insertElement("hidden","brand",$Data['brand_id']); ?>
               </div>
             </div>
-            <div class="form-group">
-              <label for="size">Medidas:</label>
-              <?php echo insertElement('text','size',$Data['size'],'form-control','placeholder="Medidas"') ?>
-            </div>
+            <!--<div class="form-group">-->
+            <!--  <label for="size">Medidas:</label>-->
+            <!--  <?php echo insertElement('text','size',$Data['size'],'form-control','placeholder="Medidas"') ?>-->
+            <!--</div>-->
             <div class="row form-group inline-form-custom">
               <!--<div class="col-xs-12 col-sm-4">-->
               <!--  <?php echo insertElement('text','stock',$Data['stock'],'form-control','placeholder="Stock Incial"') ?>-->

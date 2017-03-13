@@ -4,7 +4,7 @@
     $Edit         = new Category($ID);
     $Data         = $Edit->GetData();
     ValidateID($Data);
-    $Edit->Data = Utf8EncodeArray($Edit->Data);
+    $Edit->Data = $Edit->Data;
     $Head->setTitle("Modificar L&iacute;nea ".$Data['title']);
     $Head->setStyle('../../../vendors/select2/select2.min.css'); // Select Inputs With Tags
     $Head->setHead();
@@ -19,7 +19,7 @@
     <div class="box-header flex-justify-center">
       <div class="col-lg-8 col-sm-12">
         <div class="innerContainer">
-          <h4 class="subTitleB"><i class="fa fa-plus-circle"></i> Complete los campos para modificar la l&iacute;nea</h4>
+          <h4 class="subTitleB"><i class="fa fa-plus-circle"></i> Complete los campos para modificar la Categoría</h4>
             
             <div class="row form-group inline-form-custom-2">
               <div class="col-xs-12 inner">
@@ -39,8 +39,7 @@
             </div><!-- inline-form -->
             <hr>
             <div class="txC">
-              <button type="button" class="btn btn-success btnGreen" id="BtnCreate"><i class="fa fa-plus"></i> Modificar L&iacute;nea</button>
-              <button type="button" class="btn btn-success btnBlue" id="BtnCreateNext"><i class="fa fa-plus"></i> Modificar y Agregar Otra</button>
+              <button type="button" class="btn btn-success btnGreen" id="BtnCreate"><i class="fa fa-plus"></i> Modificar Categoría</button>
               <button type="button" class="btn btn-error btnRed" id="BtnCancel"><i class="fa fa-times"></i> Cancelar</button>
             </div>
         </div>
