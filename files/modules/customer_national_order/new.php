@@ -1,6 +1,6 @@
 <?php
     include("../../includes/inc.main.php");
-    $New = new ProviderPurchaseOrder();
+    $New = new CustomerOrder();
     $Head->setTitle($Menu->GetTitle());
     $Head->setStyle('../../../vendors/select2/select2.min.css'); // Select Inputs With Tags
     $Head->setStyle('../../../vendors/datepicker/datepicker3.css'); // Date Picker Calendar
@@ -18,20 +18,20 @@
             <?php echo insertElement("hidden","type",'N'); ?>
             <?php //echo insertElement("hidden","total_items","1"); ?>
             <?php echo insertElement("hidden","items","1"); ?>
-            <h4 class="subTitleB"><i class="fa fa-building"></i> Proveedor</h4>
+            <h4 class="subTitleB"><i class="fa fa-building"></i> Cliente</h4>
             <div class="row form-group inline-form-custom">
               <div class="col-xs-12">
-                  <?php echo insertElement('select','providers','','form-control select2 selectTags','',$DB->fetchAssoc('product_provider','provider_id,name',"status='A' AND company_id=".$_SESSION['company_id'],'name'),'','Seleccione un Proveedor'); ?>
-                  <?php echo insertElement("text","provider",'','Hidden','validateEmpty="Seleccione un Proveedor"'); ?>
+                  <?php echo insertElement('select','customers','','form-control select2 selectTags','',$DB->fetchAssoc('customer_branch','customer_id,address',"company_id=".$_SESSION['company_id'],'name'),'','Seleccione un Proveedor'); ?>
+                  <?php echo insertElement("text","customer",'','Hidden','validateEmpty="Seleccione un cliente"'); ?>
               </div>
             </div>
-            <h4 class="subTitleB"><i class="fa fa-male"></i> Contacto</h4>
-            <div class="row form-group inline-form-custom">
-              <div class="col-xs-12">
-                  <div id="agent-wrapper"><?php echo insertElement('select','agents','','form-control select2 selectTags','','','0','Sin Contacto'); ?></div>
-                  <?php echo insertElement("text","agent",'','Hidden','validateEmpty="Seleccione un Contacto"'); ?>
-              </div>
-            </div>
+            <!--<h4 class="subTitleB"><i class="fa fa-male"></i> Contacto</h4>-->
+            <!--<div class="row form-group inline-form-custom">-->
+            <!--  <div class="col-xs-12">-->
+            <!--      <div id="agent-wrapper"><?php //echo insertElement('select','agents','','form-control select2 selectTags','','','0','Sin Contacto'); ?></div>-->
+            <!--      <?php //echo insertElement("text","agent",'','Hidden','validateEmpty="Seleccione un Contacto"'); ?>-->
+            <!--  </div>-->
+            <!--</div>-->
             
             <!--<h4 class="subTitleB"><i class="fa fa-money"></i> Moneda</h4>-->
             <!--<div class="row form-group inline-form-custom">-->

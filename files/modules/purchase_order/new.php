@@ -33,13 +33,13 @@
               </div>
             </div>
             
-            <!--<h4 class="subTitleB"><i class="fa fa-money"></i> Moneda</h4>-->
-            <!--<div class="row form-group inline-form-custom">-->
-            <!--  <div class="col-xs-12">-->
-            <!--    <?php echo insertElement('select','currency_selector','','form-control',' ',$DB->fetchAssoc('currency','currency_id,title',"",'title DESC'),'','Seleccione una Moneda'); ?>-->
-                <?php echo insertElement("text","currency",2,'Hidden','validateEmpty="Seleccione un Moneda"'); ?>
-            <!--  </div>-->
-            <!--</div>-->
+            <h4 class="subTitleB"><i class="fa fa-money"></i> Moneda</h4>
+            <div class="row form-group inline-form-custom">
+              <div class="col-xs-12">
+                <?php echo insertElement('select','currency_selector','','form-control',' ',$DB->fetchAssoc('currency','currency_id,title',"",'title DESC'),'','Seleccione una Moneda'); ?>
+                <?php echo insertElement("text","currency",'','Hidden','validateEmpty="Seleccione un Moneda"'); ?>
+              </div>
+            </div>
             <br>
             <h4 class="subTitleB"><i class="fa fa-cubes"></i> Art&iacute;culos</h4>
             
@@ -72,7 +72,7 @@
                   <form id="item_form_1" name="item_form_1">
                   <div class="col-xs-4 txC">
                     <span id="Item1" class="Hidden ItemText1"></span>
-                    <?php echo insertElement('select','items_1','','ItemField1 form-control select2 selectTags itemSelect','item="1"',$DB->fetchAssoc('product','product_id,title',"status='A'",'title'),'','Seleccione un Art&iacute;culo'); ?>
+                    <?php echo insertElement('select','items_1','','ItemField1 form-control select2 selectTags itemSelect','item="1"',$DB->fetchAssoc('product','product_id,code',"status='A'",'code'),'','Seleccione un Art&iacute;culo'); ?>
                     <?php echo insertElement("text","item_1",'','Hidden','validateEmpty="Seleccione un Art&iacute;culo"'); ?>
                   </div>
                   <div class="col-xs-1 txC">

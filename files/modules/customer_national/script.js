@@ -15,6 +15,24 @@ $(document).ready(function(){
 		
 		select2Focus();
 	}
+	
+	if($("#type").val()==4)
+	{
+		$("#additonal_configuration").removeClass("Hidden");
+	}else{
+		$("#additonal_configuration").addClass("Hidden");
+	}
+});
+
+$(function(){
+	$("#type").change(function(){
+		if($(this).val()==4)
+		{
+			$("#additonal_configuration").removeClass("Hidden");
+		}else{
+			$("#additonal_configuration").addClass("Hidden");
+		}
+	});	
 });
 
 function select2Broker()

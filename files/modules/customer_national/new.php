@@ -5,6 +5,8 @@
     $Head->setStyle('../../../vendors/select2/select2.min.css'); // Select Inputs With Tags
     $Head->setStyle('../../../skin/css/maps.css'); // Google Maps CSS
     $Head->setHead();
+    
+    $PriceConfiguration = $DB->fetchAssoc("product_configuration","*","status='A'","creation_date");
     include('../../includes/inc.top.php');
     
 ?>
@@ -39,6 +41,20 @@
                   <span class="input-group-addon"><i class="fa fa-book"></i></span>
                   <?php echo insertElement('select','iva_select','','form-control select2 selectTags','',$DB->fetchAssoc('config_iva_type','type_id,name',"status='A'",'name'),'','Seleccione una Opci&oacute;n'); ?>
                   <?php echo insertElement("hidden","iva"); ?>
+                </span>
+              </div>
+            </div>
+            <div id="additonal_configuration" class="row form-group inline-form-custom Hidden">
+              <div class="col-xs-12 col-sm-6">
+                <span class="input-group">
+                  <span class="input-group-addon"><i class="fa fa-percent"></i></span>
+                  <?php echo insertElement('text','additional_percentage',$PriceConfiguration[0]['additional_percentage_wholesaler'],'form-control',' placeholder="Aumento Porcentaje" validateOnlyNumbers="Ingrese n&uacute;meros &uacute;nicamente." validateEmpty="Ingrese un n&uacute;mero."'); ?>
+                </span>
+              </div>
+              <div class="col-xs-12 col-sm-6">
+                <span class="input-group">
+                  <span class="input-group-addon"><i class="fa fa-dollar"></i></span>
+                  <?php echo insertElement('text','additional_price',$PriceConfiguration[0]['additional_price_wholesaler'],'form-control',' placeholder="Aumento Valor Fijo" validateEmpty="Ingrese un n&uacute;mero." validateOnlyNumbers="Ingrese n&uacute;meros &uacute;nicamente."'); ?>
                 </span>
               </div>
             </div>

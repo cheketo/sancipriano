@@ -24,7 +24,7 @@
             <div class="row form-group inline-form-custom-2">
               <div class="col-xs-12 inner">
                 <label>Nombre</label>
-                <?php echo insertElement('text','title',$Data['title'],'form-control','placeholder="Ingrese un Nombre" validateEmpty="Ingrese un nombre." validateFromFile="../../library/processes/proc.common.php///El nombre ya existe///action:=validate///actualtitle:='.utf8_encode($Data['title']).'///object:=Category"'); ?>
+                <?php echo insertElement('text','title',$Data['title'],'form-control','placeholder="Ingrese un Nombre" validateEmpty="Ingrese un nombre." validateFromFile="../../library/processes/proc.common.php///El nombre ya existe///action:=validate///actualtitle:='.$Data['title'].'///object:=Category"'); ?>
               </div>
             </div><!-- inline-form -->
             <div class="row form-group inline-form-custom-2">
@@ -34,7 +34,7 @@
               </div>
               <div class="col-xs-12 col-sm-6 inner">
                 <label>Ubicaci&oacute;n</label>
-                <?php echo insertElement('select','parent_select',$Data['parent_id'],'form-control select2 selectTags',' style="width: 100%;height:auto!important;"',Utf8EncodeArray($DB->fetchAssoc("product_category","category_id,title","status='A' AND company_id=".$_SESSION['company_id'])),'0','L&iacute;nea Principal'); ?>
+                <?php echo insertElement('select','parent_select',$Data['parent_id'],'form-control select2 selectTags',' style="width: 100%;height:auto!important;"',$DB->fetchAssoc("product_category","category_id,title","status='A' AND company_id=".$_SESSION['company_id']),'0','L&iacute;nea Principal'); ?>
               </div>
             </div><!-- inline-form -->
             <hr>

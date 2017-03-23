@@ -1,11 +1,11 @@
 <?php
 
-class ProviderPurchaseOrder extends DataBase
+class CustomerOrder extends DataBase
 {
 	var	$ID;
 	var $Data;
 	var $Items 			= array();
-	var $Table			= "product_provider_purchase_order";
+	var $Table			= "customer_order";
 	var $TableID		= "order_id";
 	
 	const DEFAULTIMG	= "../../../skin/images/providers/default/order.png";
@@ -15,14 +15,14 @@ class ProviderPurchaseOrder extends DataBase
 		$this->Connect();
 		if($ID!=0)
 		{
-			$Data = $this->fetchAssoc($this->Table,"*",$this->TableID."=".$ID);
+			$Data = $this->fetchAssoc($this->Table.' a LEFT JOIN customer b ON (a.customer_id=b.customer_id) LEFT JOIN customer_branch c ON (a.branch_id=c.branch_id)',"a.*,c.address",$this->TableID."=".$ID,'');
 			$this->Data = $Data[0];
 			$this->ID = $ID;
 			$this->Data['items'] = $this->GetItems();
-			$Provider = $this->fetchAssoc("product_provider","name","provider_id=".$this->Data['provider_id']);
-			$this->Data['provider'] = $Provider[0]['name'];
-			$Quantity = $this->fetchAssoc("product_provider_purchase_order_item","SUM(quantity) AS total",$this->TableID."=".$this->ID);
-			$this->Data['quantity'] = $Quantity[0]['total'];
+			// $Provider = $this->fetchAssoc("product_provider","name","provider_id=".$this->Data['customer_id']);
+			// $this->Data['provider'] = $Provider[0]['name'];
+			// $Quantity = $this->fetchAssoc("product_provider_purchase_order_item","SUM(quantity) AS total",$this->TableID."=".$this->ID);
+			// $this->Data['quantity'] = $Quantity[0]['total'];
 		}
 	}
 	
@@ -33,9 +33,8 @@ class ProviderPurchaseOrder extends DataBase
 			$this->Items = $this->fetchAssoc(
 				$this->Table."_item a 
 				LEFT JOIN product b ON (a.product_id = b.product_id)
-				LEFT JOIN currency c ON (a.currency_id = c.currency_id)
 				",
-				"a.*,(a.price * a.quantity) AS total,c.prefix AS currency,b.title",
+				"a.*,(a.price * a.quantity) AS total,b.title",
 				$this->TableID."=".$this->ID,'a.item_id');
 		}
 		return $this->Items;
@@ -60,7 +59,7 @@ public function MakeRegs($Mode="List")
 		//echo $this->lastQuery();
 		for($i=0;$i<count($Rows);$i++)
 		{
-			$Row	=	new ProviderPurchaseOrder($Rows[$i][$this->TableID]);
+			$Row	=	new CustomerOrder($Rows[$i][$this->TableID]);
 			//var_dump($Row);
 			// $UserGroups = $Row->GetGroups();
 			// $Groups='';
@@ -513,6 +512,40 @@ public function MakeRegs($Mode="List")
 			//$HTML = insertElement('select','agents','','form-control select2 selectTags',' style="width: 100%;height:auto!important;"','','0','Sin Contacto');
 		}
 		echo $HTML;
+	}
+	
+// 	SELECT a.cost + ( (
+// a.cost * b.additional_percentage_retailer
+// ) /100 ) AS price
+// FROM product a, product_configuration b
+// WHERE a.product_id =5
+// LIMIT 0 , 30
+	
+	public function Getitemprice()
+	{
+		$Product	= new Product($_PSOT['item']);
+		$Cost		= $Product->Data['cost'];
+		$Variation  = $Product->Data['variation_id']==1? "percentage":"price";
+		$Config		= $this->fetchAssoc('product_configuration','*',"status='A' AND company_id=".$_SESSION['company_id'],'creation_date DESC');
+		//echo $this->lastQuery(); die;
+		$Customer	= new Customer($_PSOT['customer']);
+		switch(intval($Customer->Data['type_id']))
+		{
+			case 1:
+				$Field = $Config[0]["additional_".$Variation."_retailer"];
+			break;
+			case 2:
+				$Field = $Config[0]["additional_".$Variation."_wholesaler"];
+			break;
+			default:
+				$Field	= $Customer->Data['additional_'.$Variation];
+			break;
+		}
+		echo "Field:".$_PSOT['customer'];die;
+		$AdditionalPrice = $Variation=="percentage"? ($Cost*$Field)/100 : $Field ;
+		$Price = $Cost + $AdditionalPrice;
+		return $Price;
+		
 	}
 	
 	public function Addorderitem()

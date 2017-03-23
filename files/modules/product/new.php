@@ -8,6 +8,8 @@
     $Category = new Category();
     include('../../includes/inc.top.php');
     
+    $Variation = $DB->fetchAssoc('product_variation','variation_id,title');
+    
     // HIDDEN ELEMENTS
     echo insertElement("hidden","action",'insert');
     echo insertElement("hidden","category");
@@ -85,15 +87,23 @@
             <!--  <?php //echo insertElement('text','title','','form-control','placeholder="Nombre del Art&iacute;culo"') ?>-->
             <!--</div>-->
             <div class="row form-group inline-form-custom">
-              <div class="col-xs-12 col-sm-4">
+              <div class="col-xs-12 col-sm-7">
                 <?php //echo insertElement('text','short_title','','form-control','placeholder="Nombre Corto"') ?>
                 <?php echo insertElement('text','title','','form-control','placeholder="Nombre" validateEmpty="Ingrese un nombre."') ?>
               </div>
-              <div class="col-xs-12 col-sm-4">
-                <?php echo insertElement('text','price','','form-control','placeholder="Precio" validateEmpty="Ingrese un precio." data-inputmask="\'alias\': \'numeric\', \'groupSeparator\': \'\', \'autoGroup\': true, \'digits\': 2, \'digitsOptional\': false, \'prefix\': \'$\', \'placeholder\': \'0\'"') ?>
-              </div>
-              <div class="col-xs-12 col-sm-4">
+              <div class="col-xs-12 col-sm-5">
                 <?php echo insertElement('text','rack','','form-control','placeholder="Estanter&iacute;a"') ?>
+              </div>
+            </div>
+            <div class="row form-group inline-form-custom">
+              <div class="col-xs-12 col-sm-2">
+                <?php echo insertElement('text','cost','','form-control priceInput','placeholder="Costo" validateEmpty="Ingrese un costo." data-inputmask="\'alias\': \'numeric\', \'groupSeparator\': \'\', \'autoGroup\': true, \'digits\': 2, \'digitsOptional\': false, \'prefix\': \'$\', \'placeholder\': \'0\'"') ?>
+              </div>
+              <div class="col-xs-12 col-sm-5">
+                <?php echo insertElement('select','variation','','form-control','validateEmpty="Seleccione una variaci&oacute;n."',$Variation,'','Seleccionar Variaci&oacute;n') ?>
+              </div>
+              <div class="col-xs-12 col-sm-5">
+                <?php echo insertElement('select','size','','form-control','validateEmpty="Seleccione una medida."',$DB->fetchAssoc("product_size","size_id,title"),'','Seleccionar Medida') ?>
               </div>
             </div>
             <div class="row form-group inline-form-custom">

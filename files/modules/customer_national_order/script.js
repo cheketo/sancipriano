@@ -47,15 +47,16 @@ $(document).ready(function(){
 			setItemSelect2(item);
 		});
 		
-		$('#providers').select2({placeholder: {id: '',text: 'Seleccione un Proveedor'}});
-		$('#providers').on("select2:select", function (e) { $("#provider").val(e.params.data.id);fillAgentSelect(); });
-		$('#providers').on("select2:unselect", function (e) { $("#provider").val(''); });
+		
+		$('#customers').select2({placeholder: {id: '',text: 'Seleccione un Cliente'}});
+/*----->No funciona la asignación al campo oculto */$('#customers').on("select2:select", function (e) { $("#customer").val(e.params.data.id);});//fillAgentSelect(); });
+		$('#customers').on("select2:unselect", function (e) { $("#customer").val(''); });
 		
 		
 		
-		$('#currency_selector').select2({placeholder: {id: '',text: 'Seleccione una Moneda'}});
-		$('#currency_selector').on("select2:select", function (e) { $("#currency").val(e.params.data.id); });
-		$('#currency_selector').on("select2:unselect", function (e) { $("#currency").val(''); });
+		// $('#currency_selector').select2({placeholder: {id: '',text: 'Seleccione una Moneda'}});
+		// $('#currency_selector').on("select2:select", function (e) { $("#currency").val(e.params.data.id); });
+		// $('#currency_selector').on("select2:unselect", function (e) { $("#currency").val(''); });
 		
 		
 		
@@ -68,8 +69,34 @@ $(document).ready(function(){
 function setItemSelect2(id)
 {
 	$('#items_'+id).select2({placeholder: {id: '',text: 'Seleccione un Artículo'}});
-	$('#items_'+id).on("select2:select", function (e) { $("#item_"+id).val(e.params.data.id); });
+	$('#items_'+id).on("select2:select", function (e) {
+		$("#item_"+id).val(e.params.data.id);
+		getProductPrice(e.params.data.id);
+	});
 	$('#items_'+id).on("select2:unselect", function (e) { $("#item_"+id).val(''); });
+}
+
+function getProductPrice(id)
+{
+	var customer = $("#customer").val();
+	var process = '../../library/processes/proc.common.php';
+	var string	= 'item='+ id +'&customer='+customer+'&action=getitemprice&object=CustomerOrder';
+	$.ajax({
+        type: "POST",
+        url: process,
+        data: string,
+        cache: false,
+        success: function(data){
+            if(data)
+            {
+            	console.log(data);
+                return data;
+            }else{
+            	notifyError('Hubo un error al calcular el precio del producto');
+                console.log('Sin información devuelta. Item='+id);
+            }
+        }
+    });
 }
 
 function setAgentSelect2()

@@ -13,7 +13,7 @@ $(function(){
 				procText = "creaci&oacute;n"
 			}
 
-			confirmText += " el art&iacute;culo '"+utf8_encode($("#code").val())+"'";
+			confirmText += " el art&iacute;culo '"+utf8_encode($("#title").val())+"'";
 
 			alertify.confirm(utf8_decode('¿Desea '+confirmText+' ?'), function(e){
 				if(e)
@@ -21,9 +21,9 @@ $(function(){
 					var process		= '../../library/processes/proc.common.php?object=Product';
 					if(BtnID=="BtnCreate")
 					{
-						var target		= 'list.php?element='+utf8_encode($('#code').val())+'&msg='+ $("#action").val();
+						var target		= 'list.php?element='+utf8_encode($('#title').val())+'&msg='+ $("#action").val();
 					}else{
-						var target		= 'new.php?element='+utf8_encode($('#code').val())+'&msg='+ $("#action").val();
+						var target		= 'new.php?element='+utf8_encode($('#title').val())+'&msg='+ $("#action").val();
 					}
 					var haveData	= function(returningData)
 					{
@@ -87,8 +87,8 @@ $(document).ready(function() {
     // $('#price,#price_fob,#price_dispatch').mask('00000000.00',{reverse: true});
     if($('#stock').length>0)
       $('#stock,#stock_min,#stock_max').mask('000000000000',{reverse: true});
-    if($('#price').length>0)
-      $('#price').inputmask();
+    if($('.priceInput').length>0)
+      $('.priceInput').inputmask();
 });
 
 ///////// Select Product/Item ////////////////////////
@@ -153,20 +153,7 @@ $('input, textarea').keyup(function() {
 });
 
 
-/////////////////////// Categories Behavior DEMO ///////////////////////////
-
-
-//-----  Highlight Selected MAIN Category----- //
-// $(".squareMenuMain").children().click(function() {
-//   $('.squareItemMenu').addClass('squareItemDisabled');
-//   $('.squareItemMenu').removeClass('squareItemActive');
-//   $('.squareItemMenu .arrow-css').addClass('Hidden');
-
-//   $(this).removeClass('squareItemDisabled');
-//   $(this).addClass('squareItemActive');
-//   $('.arrow-css', this).removeClass('Hidden');
-// })
-
+/////////////////////// Categories ///////////////////////////
 
 
 $(function(){
@@ -180,3 +167,82 @@ $(function(){
       $('.ProductDetails').removeClass('Hidden');
     });
 });
+
+
+/////////////////////// LIST FUNCTIONS ///////////////////////////
+$(function(){
+  $("#selected_ids").on('change',function(){
+      var ids = $(this).val();
+      ids = ids.split(",");
+      if(ids.length>1)
+      {
+        $("#MoreActions").removeClass("Hidden");
+      }else{
+        $("#MoreActions").addClass("Hidden");
+        $("#MoreActionsBody").addClass("Hidden");
+      }
+  });
+  
+  
+  $('#MoreActions').click(function(){
+    $('#MoreActionsBody').toggleClass('Hidden');
+  });
+  
+  $(".updatePrice").click(function(){
+    var operation = $(this).attr("operation");
+    var type = $(this).attr("price_type");
+    var mode = $(this).attr("mode");
+    var value;
+    var ids = $("#selected_ids").val();
+    if(mode=="#")
+    {
+      var mode_text="pesos";
+    }else{
+      var mode_text=mode;
+    }
+    if(operation=="add")
+    {
+      var operation_text = "aumentar";
+    }else{
+      var operation_text = "disminu&iacute;r";
+    }
+    if(type=="r")
+    {
+      var type_text = "minorista";
+      value = $("#retail_price").val();
+    }else{
+      var type_text = "mayorista";
+      value = $("#mayorist_price").val();
+    }
+    var confirmText = operation_text+" "+value+" "+mode_text+" el precio "+type_text+" de los productos seleccionados";
+    alertify.confirm(utf8_decode('¿Desea '+confirmText+' ?'), function(e){
+      
+      var string      = 'ids='+ ids + '&action=update_price&object=Product&operation='+operation+'&mode='+mode+'&type='+type+'&value='+value;
+      var finished = true;
+      $.ajax({
+          type: "POST",
+          url: '../../library/processes/proc.common.php',
+          data: string,
+          cache: false,
+          async: false,
+          success: function(data){
+              if(data)
+              {
+                finished = false;
+                notifyError('Hubo un error al intentar cambiar los precios '+type_text);
+                console.log(data);
+              }else{
+                notifySuccess('Precios '+type_text+' modificados correctamente');
+              }
+          }
+      });
+      if(finished)
+      {
+        $(".searchButton").click();
+      }
+    });
+  });
+  
+});
+
+

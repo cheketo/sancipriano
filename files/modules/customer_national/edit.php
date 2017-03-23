@@ -7,6 +7,8 @@
     ValidateID($Data);
     $Branches = $DB->fetchAssoc('customer_branch a, geolocation_country b, geolocation_province c, geolocation_region d, geolocation_zone e','a.*,b.name as country, c.name as province, d.name as region, e.name as zone','a.country_id = b.country_id AND a.province_id = c.province_id AND a.region_id = d.region_id AND a.zone_id = e.zone_id AND customer_id='.$ID,'a.branch_id');
     
+    //if($Data['type_id']==4) $Class="Hidden";
+    
     $Head->setTitle($Data['name']);
     $Head->setSubTitle($Menu->GetTitle());
     $Head->setStyle('../../../vendors/select2/select2.min.css'); // Select Inputs With Tags
@@ -50,6 +52,21 @@
                 </span>
               </div>
             </div>
+            <div id="additonal_configuration" class="row form-group inline-form-custom <?php echo $Class; ?>">
+              <div class="col-xs-12 col-sm-6">
+                <span class="input-group">
+                  <span class="input-group-addon"><i class="fa fa-percent"></i></span>
+                  <?php echo insertElement('text','additional_percentage',$Data['additional_percentage'],'form-control',' placeholder="Aumento Porcentaje" validateOnlyNumbers="Ingrese n&uacute;meros &uacute;nicamente." validateEmpty="Ingrese un n&uacute;mero."'); ?>
+                </span>
+              </div>
+              <div class="col-xs-12 col-sm-6">
+                <span class="input-group">
+                  <span class="input-group-addon"><i class="fa fa-dollar"></i></span>
+                  <?php echo insertElement('text','additional_price',$Data['additional_price'],'form-control',' placeholder="Aumento Valor Fijo" validateEmpty="Ingrese un n&uacute;mero." validateOnlyNumbers="Ingrese n&uacute;meros &uacute;nicamente."'); ?>
+                </span>
+              </div>
+            </div>
+            
             <div class="row form-group inline-form-custom">
               <div class="col-xs-12 col-sm-6">
                 <span class="input-group">

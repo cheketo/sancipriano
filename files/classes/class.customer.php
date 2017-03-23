@@ -346,6 +346,8 @@ public function MakeRegs($Mode="List")
 		$IVA			= $_POST['iva'];
 		$GrossIncome	= $_POST['gross_income_number'];
 		$International	= $_POST['international'];
+		$AdditionalPer	= $_POST['additional_percentage'];
+		$AdditionalPri	= $_POST['additional_price'];
 		
 		//VALIDATIONS
 		if(!$Name) echo 'Falta Nombre';
@@ -354,7 +356,7 @@ public function MakeRegs($Mode="List")
 		if(!$IVA) echo 'IVA incompleto';
 		if(!$GrossIncome) echo 'IIBB incompleto';
 		
-		$Insert			= $this->execQuery('INSERT',$this->Table,'type_id,name,cuit,iva,iibb,international,creation_date,created_by,company_id',"'".$Type."','".$Name."',".$CUIT.",".$IVA.",".$GrossIncome.",'".$International."',NOW(),".$_SESSION['admin_id'].",".$_SESSION['company_id']);
+		$Insert			= $this->execQuery('INSERT',$this->Table,'type_id,name,cuit,iva,additional_price,additional_percentage,iibb,international,creation_date,created_by,company_id',"'".$Type."','".$Name."',".$CUIT.",".$IVA.",".$AdditionalPri.",".$AdditionalPer.",".$GrossIncome.",'".$International."',NOW(),".$_SESSION['admin_id'].",".$_SESSION['company_id']);
 		//echo $this->lastQuery();
 		$NewID 		= $this->GetInsertId();
 		$New 	= new Customer($NewID);
@@ -382,6 +384,8 @@ public function MakeRegs($Mode="List")
 		$CUIT			= str_replace('-','',$_POST['cuit']);
 		$IVA			= $_POST['iva'];
 		$GrossIncome	= $_POST['gross_income_number'];
+		$AdditionalPer	= $_POST['additional_percentage'];
+		$AdditionalPri	= $_POST['additional_price'];
 		
 		// CREATE NEW IMAGE IF EXISTS
 		if($Image!=$Edit->Data['logo'])
@@ -397,7 +401,7 @@ public function MakeRegs($Mode="List")
 			}
 		}
 		
-		$Update		= $this->execQuery('update',$this->Table,"name='".$Name."',type_id='".$Type."',cuit=".$CUIT.",iva='".$IVA."',iibb='".$GrossIncome."',updated_by=".$_SESSION['admin_id'],$this->TableID."=".$ID);
+		$Update		= $this->execQuery('update',$this->Table,"name='".$Name."',type_id='".$Type."',cuit=".$CUIT.",iva='".$IVA."',additional_price='".$AdditionalPri."',additional_percentage='".$AdditionalPer."',iibb='".$GrossIncome."',updated_by=".$_SESSION['admin_id'],$this->TableID."=".$ID);
 		//echo $this->lastQuery();
 		$Edit->InsertBranchInfo(1);
 		
