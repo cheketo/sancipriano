@@ -22,7 +22,7 @@
             <div class="row form-group inline-form-custom">
               <div class="col-xs-12">
                   <?php echo insertElement('select','customers','','form-control select2 selectTags','',$DB->fetchAssoc('customer_branch','customer_id,address',"company_id=".$_SESSION['company_id'],'name'),'','Seleccione un Proveedor'); ?>
-                  <?php echo insertElement("text","customer",'','Hidden','validateEmpty="Seleccione un cliente"'); ?>
+                  <?php echo insertElement("text",'customer','','Hidden','validateEmpty="Seleccione un cliente"'); ?>
               </div>
             </div>
             <!--<h4 class="subTitleB"><i class="fa fa-male"></i> Contacto</h4>-->
@@ -55,10 +55,7 @@
                 <div class="col-xs-1 txC">
                   <strong>Cantidad</strong>
                 </div>
-                <div class="col-xs-2 txC">
-                  <strong>Fecha Entrega</strong>
-                </div>
-                <div class="col-xs-1 txC"><strong>Costo</strong></div>
+                <div class="col-xs-3 txC"><strong>Costo</strong></div>
                 <div class="col-xs-3 txC">
                   <strong>Acciones</strong>
                 </div>
@@ -83,11 +80,7 @@
                     <span id="Quantity1" class="Hidden ItemText1"></span>
                     <?php echo insertElement('text','quantity_1','','ItemField1 form-control calcable QuantityItem','data-inputmask="\'mask\': \'9{+}\'" placeholder="Cantidad" validateEmpty="Ingrese una cantidad"'); ?>
                   </div>
-                  <div class="col-xs-2 txC">
-                    <span id="Date1" class="Hidden ItemText1 OrderDate"></span>
-                    <?php echo insertElement('text','date_1','','ItemField1 form-control delivery_date','placeholder="Fecha de Entrega" validateEmpty="Ingrese una fecha"'); ?>
-                  </div>
-                  <div id="item_number_1" class="col-xs-1 txC item_number" total="0" item="1">$ 0.00</div>
+                  <div id="item_number_1" class="col-xs-3 txC item_number" total="0" item="1">$ 0.00</div>
                   <div class="col-xs-3 txC">
   									  <button type="button" id="SaveItem1" class="btn btnGreen SaveItem" style="margin:0px;" item="1"><i class="fa fa-check"></i></button>
   									  <button type="button" id="EditItem1" class="btn btnBlue EditItem Hidden" style="margin:0px;" item="1"><i class="fa fa-pencil"></i></button>

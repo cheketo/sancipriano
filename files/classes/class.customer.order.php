@@ -523,28 +523,34 @@ public function MakeRegs($Mode="List")
 	
 	public function Getitemprice()
 	{
-		$Product	= new Product($_PSOT['item']);
-		$Cost		= $Product->Data['cost'];
-		$Variation  = $Product->Data['variation_id']==1? "percentage":"price";
-		$Config		= $this->fetchAssoc('product_configuration','*',"status='A' AND company_id=".$_SESSION['company_id'],'creation_date DESC');
-		//echo $this->lastQuery(); die;
-		$Customer	= new Customer($_PSOT['customer']);
-		switch(intval($Customer->Data['type_id']))
+		if(intval($_POST['customer'])>0)
 		{
-			case 1:
-				$Field = $Config[0]["additional_".$Variation."_retailer"];
-			break;
-			case 2:
-				$Field = $Config[0]["additional_".$Variation."_wholesaler"];
-			break;
-			default:
-				$Field	= $Customer->Data['additional_'.$Variation];
-			break;
+			$Product	= new Product($_POST['item']);
+			$Cost		= $Product->Data['cost'];
+			$Variation  = $Product->Data['variation_id']==1? "percentage":"price";
+			$Config		= $this->fetchAssoc('product_configuration','*',"status='A' AND company_id=".$_SESSION['company_id'],'creation_date DESC');
+			//echo $this->lastQuery(); die;
+			$Customer	= new Customer($_POST['customer']);
+			switch(intval($Customer->Data['type_id']))
+			{
+				case 1:
+					$Field = $Config[0]["additional_".$Variation."_retailer"];
+				break;
+				case 2:
+					$Field = $Config[0]["additional_".$Variation."_wholesaler"];
+				break;
+				default:
+					$Field	= $Customer->Data['additional_'.$Variation];
+				break;
+			}
+			
+			$AdditionalPrice = $Variation=="percentage"? ($Cost*$Field)/100 : $Field ;
+			$Price = $Cost + $AdditionalPrice;
+			echo $Price;
+		}else{
+			echo '0.00';
 		}
-		echo "Field:".$_PSOT['customer'];die;
-		$AdditionalPrice = $Variation=="percentage"? ($Cost*$Field)/100 : $Field ;
-		$Price = $Cost + $AdditionalPrice;
-		return $Price;
+		die;
 		
 	}
 	

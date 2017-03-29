@@ -37,10 +37,6 @@ $(document).ready(function(){
 	
 	if($('.selectTags').length>0)
 	{
-		// $('#province_select').select2({placeholder: {id: '0',text: 'Seleccione una Provincia'}});
-		// $('#province_select').on("select2:select", function (e) {$("#province").val(e.params.data.id); fillZoneSelect();});
-		// $('#province_select').on("select2:unselect", function (e) { $("#province").val(''); });
-		
 		setAgentSelect2();
 		$(".itemSelect").each(function(){
 			var item = $(this).attr('item');
@@ -49,18 +45,11 @@ $(document).ready(function(){
 		
 		
 		$('#customers').select2({placeholder: {id: '',text: 'Seleccione un Cliente'}});
-/*----->No funciona la asignación al campo oculto */$('#customers').on("select2:select", function (e) { $("#customer").val(e.params.data.id);});//fillAgentSelect(); });
+		$('#customers').on("select2:select", function (e) { $("#customer").val(e.params.data.id);recalculateItemPrice()});//fillAgentSelect(); });
 		$('#customers').on("select2:unselect", function (e) { $("#customer").val(''); });
 		
 		
 		
-		// $('#currency_selector').select2({placeholder: {id: '',text: 'Seleccione una Moneda'}});
-		// $('#currency_selector').on("select2:select", function (e) { $("#currency").val(e.params.data.id); });
-		// $('#currency_selector').on("select2:unselect", function (e) { $("#currency").val(''); });
-		
-		
-		
-		// $('#province').on("change", function (event) {event.preventDefault();  });
 		select2Focus();
 		
 	}
@@ -68,15 +57,15 @@ $(document).ready(function(){
 
 function setItemSelect2(id)
 {
-	$('#items_'+id).select2({placeholder: {id: '',text: 'Seleccione un Artículo'}});
+	$('#items_'+id).select2({placeholder: {id: '',text: 'Seleccione un Producto'}});
 	$('#items_'+id).on("select2:select", function (e) {
 		$("#item_"+id).val(e.params.data.id);
-		getProductPrice(e.params.data.id);
+		getProductPrice(e.params.data.id,id);
 	});
 	$('#items_'+id).on("select2:unselect", function (e) { $("#item_"+id).val(''); });
 }
 
-function getProductPrice(id)
+function getProductPrice(id,fieldID)
 {
 	var customer = $("#customer").val();
 	var process = '../../library/processes/proc.common.php';
@@ -85,12 +74,17 @@ function getProductPrice(id)
         type: "POST",
         url: process,
         data: string,
-        cache: false,
+        async: false,
         success: function(data){
             if(data)
             {
-            	console.log(data);
-                return data;
+            	var decimal = data.substr(data.indexOf("."));
+            	if(decimal.length==2)
+            	{
+            		data = data + "0";
+            	}
+            	
+				$("#price_"+fieldID).val(data);
             }else{
             	notifyError('Hubo un error al calcular el precio del producto');
                 console.log('Sin información devuelta. Item='+id);
@@ -99,6 +93,14 @@ function getProductPrice(id)
     });
 }
 
+function recalculateItemPrice()
+{
+	$(".itemSelect").each(function(e){
+		var id = $(this).attr("id").substr($(this).attr("id").indexOf("_")+1);
+		console.log(id);
+		getProductPrice(e.params.data.id,id);
+	});
+}
 function setAgentSelect2()
 {
 	$('#agents').select2({placeholder: {id: '',text: 'Seleccione un Contacto'}});
