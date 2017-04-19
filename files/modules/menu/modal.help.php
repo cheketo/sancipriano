@@ -1,6 +1,6 @@
 <!-- Help Modal Trigger -->
 <button type="button" class="btn btn-success btnGrey" data-toggle="modal" data-target="#helpModal" ><i class="fa fa-question-circle"></i> Ayuda</button>
- <!-- Help Modal Trigger -->
+<!-- Help Modal Trigger -->
 <!-- //// HELP MODAL //// -->
 <div id="helpModal" class="modal fade" role="dialog">
   <div class="modal-dialog">

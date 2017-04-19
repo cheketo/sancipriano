@@ -30,12 +30,8 @@ class CustomerOrder extends DataBase
 	{
 		if(empty($this->Items))
 		{
-			$this->Items = $this->fetchAssoc(
-				$this->Table."_item a 
-				LEFT JOIN product b ON (a.product_id = b.product_id)
-				",
-				"a.*,(a.price * a.quantity) AS total,b.title",
-				$this->TableID."=".$this->ID,'a.item_id');
+			$this->Items = $this->fetchAssoc($this->Table."_item a LEFT JOIN product b ON (a.product_id = b.product_id) LEFT JOIN currency c ON (a.currency_id=c.currency_id)","a.*,(a.price * a.quantity) AS total,b.title,c.prefix as currency",$this->TableID."=".$this->ID,'a.item_id');
+				//echo $this->lastQuery();
 		}
 		return $this->Items;
 	}
@@ -59,25 +55,18 @@ public function MakeRegs($Mode="List")
 		//echo $this->lastQuery();
 		for($i=0;$i<count($Rows);$i++)
 		{
+			
 			$Row	=	new CustomerOrder($Rows[$i][$this->TableID]);
-			//var_dump($Row);
-			// $UserGroups = $Row->GetGroups();
-			// $Groups='';
-			// foreach($UserGroups as $Group)
-			// {
-			// 	$Groups .= '<span class="label label-warning">'.$Group['title'].'</span> ';
+			$Actions	= 	'<span class="roundItemActionsGroup"><a><button type="button" class="btn btnGreen ExpandButton" title="Ver detalle" id="expand_'.$Row->ID.'"><i class="fa fa-plus"></i></button></a>';
+			
+			// if($Row->Data['status']=="P" || $Row->Data['status']=="I"){
+			// 	$Actions	.= '<a class="associateElement" order="'.$Row->ID.'" id="activate_'.$Row->ID.'"><button type="button" class="btn btn-dropbox" title="Asociar a reparto"><i class="fa fa-sign-out"></i></button></a>';
 			// }
-			// if(!$Groups) $Groups = 'Ninguno';
-			$Actions	= 	'<span class="roundItemActionsGroup"><a><button type="button" class="btn btnGreen ExpandButton" id="expand_'.$Row->ID.'"><i class="fa fa-plus"></i></button></a>';
 			
-			if($Row->Data['status']=="P" || $Row->Data['status']=="I"){
-				$Actions	.= '<a class="activateElement" process="../../library/processes/proc.common.php" id="activate_'.$Row->ID.'"><button type="button" class="btn btnGreen"><i class="fa fa-check-circle"></i></button></a>';
-			}
-			
-			if($Row->Data['status']=="P")
+			if($Row->Data['status']=="P" || $Row->Data['status']=="W")
 			{
-				$Actions	.= 	'<a href="edit.php?id='.$Row->ID.'"><button type="button" class="btn btnBlue"><i class="fa fa-pencil"></i></button></a>';
-				$Actions	.= '<a class="deleteElement" process="../../library/processes/proc.common.php" id="delete_'.$Row->ID.'"><button type="button" class="btn btnRed"><i class="fa fa-trash"></i></button></a>';
+				$Actions	.= 	'<a href="edit.php?id='.$Row->ID.'"><button type="button" class="btn btnBlue" title="Editar orden"><i class="fa fa-pencil"></i></button></a>';
+				$Actions	.= '<a class="deleteElement" process="../../library/processes/proc.common.php" title="Eliminar orden" id="delete_'.$Row->ID.'"><button type="button" class="btn btnRed"><i class="fa fa-trash"></i></button></a>';
 				
 			}
 			$Actions	.= '</span>';
@@ -104,7 +93,6 @@ public function MakeRegs($Mode="List")
 								<div class="col-md-3 col-sm-6">
 									<div class="listRowInner">
 										<span class="listTextStrong">'.$Item['title'].'</span>
-										<span class="listTextStrong"><span class="label label-warning"><i class="fa fa-calendar"></i> '.$DeliveryDate.'</span></span>
 									</div>
 								</div>
 								<div class="col-md-3 hideMobile990">
@@ -128,7 +116,7 @@ public function MakeRegs($Mode="List")
 									
 							</div>';
 			}
-			$Items .='</div>';
+			$Items .= '</div>';
 			switch(strtolower($Mode))
 			{
 				case "list":
@@ -143,15 +131,19 @@ public function MakeRegs($Mode="List")
 					$Regs	.= '<div class="row listRow'.$RowBackground.'" id="row_'.$Row->ID.'" title="una orden de compra">
 									<div class="col-lg-3 col-md-5 col-sm-8 col-xs-10">
 										<div class="listRowInner">
-											<img class="img-circle" style="border-radius:0%!important;" src="'.$Row->GetImg().'" alt="'.$Row->Data['name'].'">
-											<span class="listTextStrong">'.$Row->Data['provider'].'</span>
-											<span class="smallDetails"><i class="fa fa-calendar"></i> '.$OrderDate.'</span>
+											<img class="img-circle" style="border-radius:0%!important;" src="'.$Row->GetImg().'" alt="'.$Row->Data['address'].'">
+											<span class="listTextStrong">'.$Row->Data['address'].'</span>
+											<span class="listTextStrong">
+												<span class="label label-warning">
+													<i class="fa fa-calendar"></i> '.$OrderDate.'
+												</span>
+											</span>
 										</div>
 									</div>
 									<div class="col-lg-3 col-md-3 col-sm-2 hideMobile990">
 										<div class="listRowInner">
 											<span class="listTextStrong">Cant. Total</span>
-											<span class="listTextStrong"><span class="label label-primary">'.$Row->Data['quantity'].'</span></span>
+											<span class="listTextStrong"><span class="label label-primary">'.$Rows[$i]['quantity'].'</span></span>
 										</div>
 									</div>
 									<div class="col-lg-2 col-md-3 col-sm-2 hideMobile990">
@@ -171,10 +163,10 @@ public function MakeRegs($Mode="List")
 								</div>';
 				break;
 				case "grid":
-				$Regs	.= '<li id="grid_'.$Row->ID.'" class="RoundItemSelect roundItemBig'.$Restrict.'" title="'.$Row->Data['name'].'">
+				$Regs	.= '<li id="grid_'.$Row->ID.'" class="RoundItemSelect roundItemBig'.$Restrict.'" title="'.$Row->Data['customer'].'">
 						            <div class="flex-allCenter imgSelector">
 						              <div class="imgSelectorInner">
-						                <img src="'.$Row->GetImg().'" alt="'.$Row->Data['name'].'" class="img-responsive">
+						                <img src="'.$Row->GetImg().'" alt="'.$Row->Data['customer'].'" class="img-responsive">
 						                <div class="imgSelectorContent">
 						                  <div class="roundItemBigActions">
 						                    '.$Actions.'
@@ -183,16 +175,16 @@ public function MakeRegs($Mode="List")
 						                </div>
 						              </div>
 						              <div class="roundItemText">
-						                <p><b>'.$Row->Data['name'].'</b></p>
-						                <p>'.ucfirst($Row->Data['iibb']).'</p>
-						                <p>('.$Row->Data['cuit'].')</p>
+						                <p><b>'.$Row->Data['customer'].'</b></p>
+						                <p>'.$Date.'</p>
+						                <p>('.$Row->Data['quantity'].')</p>
 						              </div>
 						            </div>
 						          </li>';
 				break;
 			}
         }
-        if(!$Regs) $Regs.= '<div class="callout callout-info"><h4><i class="icon fa fa-info-circle"></i> No se encontraron ordenes de compras a proveedores.</h4><p>Puede crear una orden haciendo click <a href="new.php">aqui</a>.</p></div>';
+        if(!$Regs) $Regs.= '<div class="callout callout-info"><h4><i class="icon fa fa-info-circle"></i> No se encontraron ordenes de compras.</h4><p>Puede crear una orden haciendo click <a href="new.php">aqui</a>.</p></div>';
 		return $Regs;
 	}
 	
@@ -201,17 +193,12 @@ public function MakeRegs($Mode="List")
 		return '<!-- Provider -->
           <div class="input-group">
             <span class="input-group-addon order-arrows" order="name" mode="asc"><i class="fa fa-sort-alpha-asc"></i></span>
-            '.insertElement('text','name','','form-control','placeholder="Proveedor"').'
+            '.insertElement('text','name','','form-control','placeholder="Cliente"').'
           </div>
           <!-- Title -->
           <div class="input-group">
             <span class="input-group-addon order-arrows" order="title" mode="asc"><i class="fa fa-sort-alpha-asc"></i></span>
             '.insertElement('text','title','','form-control','placeholder="Art&iacute;culo"').'
-          </div>
-          <!-- Agent -->
-          <div class="input-group">
-            <span class="input-group-addon order-arrows" order="agent" mode="asc"><i class="fa fa-sort-alpha-asc"></i></span>
-            '.insertElement('text','agent','','form-control','placeholder="Contacto"').'
           </div>
           <!-- Delivery Date -->
           <div class="input-group">
@@ -228,18 +215,23 @@ public function MakeRegs($Mode="List")
 	
 	protected function InsertSearchButtons()
 	{
-		return '<!-- New Button -->
-		    	<a href="new.php" title="Crear nueva orden de compra a proveedores"><button type="button" class="NewElementButton btn btnGreen animated fadeIn"><i class="fa fa-plus-square"></i></button></a>
+		if($_REQUEST['status'])
+			$Status = $_REQUEST['status'];
+		else
+			$Status = 'P';
+		$HTML = '<!-- New Button -->
+		    	<a href="new.php" title="Crear nueva orden de compra"><button type="button" class="NewElementButton btn btnGreen animated fadeIn"><i class="fa fa-plus-square"></i></button></a>
 		    	<!-- /New Button -->';
+		if($Status=='P' || $Status=='W') $HTML .= '<button type="button" title="Asociar a un repartidor" class="btn btnBlue animated fadeIn Hidden" id="Associate"><i class="fa fa-sign-out"></i></button>';
+		return $HTML;
 	}
 	
 	public function ConfigureSearchRequest()
 	{
-		$this->SetTable($this->Table.' a LEFT JOIN product_provider_purchase_order_item b ON (b.order_id=a.order_id) LEFT JOIN product c ON (b.product_id = c.product_id) LEFT JOIN product_provider d ON (d.provider_id=a.provider_id) LEFT JOIN product_provider_agent e ON (e.agent_id = a.agent_id)');
-		$this->SetFields('a.order_id,a.type,a.total,a.extra,a.status,a.payment_status,a.delivery_status,d.name as provider,SUM(b.quantity) as quantity');
+		$this->SetTable($this->Table.' a LEFT JOIN customer_order_item b ON (b.order_id=a.order_id) LEFT JOIN product c ON (b.product_id = c.product_id) LEFT JOIN customer_branch d ON (d.customer_id=a.customer_id)');
+		$this->SetFields('a.order_id,a.type,a.total,a.extra,a.status,a.payment_status,a.delivery_status,d.address as customer,SUM(b.quantity) as quantity');
 		$this->SetWhere("a.company_id=".$_SESSION['company_id']);
 		//$this->AddWhereString(" AND c.company_id = a.company_id");
-		$this->SetOrder('a.delivery_date');
 		$this->SetGroupBy("a.".$this->TableID);
 		
 		foreach($_POST as $Key => $Value)
@@ -247,14 +239,13 @@ public function MakeRegs($Mode="List")
 			$_POST[$Key] = $Value;
 		}
 			
-		if($_POST['name']) $this->SetWhereCondition("d.name","LIKE","%".$_POST['name']."%");
-		if($_POST['agent']) $this->SetWhereCondition("e.name","LIKE","%".$_POST['agent']."%");
+		if($_POST['name']) $this->SetWhereCondition("d.address","LIKE","%".$_POST['name']."%");
 		if($_POST['title']) $this->SetWhereCondition("c.title","LIKE","%".$_POST['title']."%");
 		if($_POST['extra']) $this->SetWhereCondition("a.extra","LIKE","%".$_POST['extra']."%");
 		if($_POST['delivery_date'])
 		{
 			$_POST['delivery_date'] = implode("-",array_reverse(explode("/",$_POST['delivery_date'])));
-			$this->AddWhereString(" AND (a.delivery_date = '".$_POST['delivery_date']."' OR b.delivery_date='".$_POST['delivery_date']."')");
+			$this->SetWhereCondition("a.delivery_date","=",$_POST['delivery_date']);
 		}
 		
 		
@@ -265,13 +256,6 @@ public function MakeRegs($Mode="List")
 		}else{
 			$this->SetWhereCondition("a.status","=","P");
 		}
-		
-		// $Prefix = "a.";
-		// $Order = 'delivery_date';
-		// $Mode = 'ASC';
-		//$this->SetOrder($Order);
-		if($_POST['view_order_field'])
-		{
 			if(strtolower($_POST['view_order_mode'])=="desc")
 				$Mode = "DESC";
 			else
@@ -281,23 +265,20 @@ public function MakeRegs($Mode="List")
 			switch($Order)
 			{
 				case "name": 
-					$Order = 'name';
+					$Order = 'address';
 					$Prefix = "d.";
 				break;
 				case "title": 
 					$Order = 'title';
 					$Prefix = "c.";
 				break;
-				case "agent": 
-					$Order = 'name';
-					$Prefix = "e.";
-				break;
 				default:
-						$Prefix = "a.";	
+					$Order = 'delivery_date';
+					$Prefix = "a.";	
 				break;
 			}
 			$this->SetOrder($Prefix.$Order." ".$Mode);
-		}
+		// }
 		if($_POST['regsperview'])
 		{
 			$this->SetRegsPerView($_POST['regsperview']);
@@ -333,29 +314,23 @@ public function MakeRegs($Mode="List")
 		{
 			if($_POST['item_'.$I])
 			{
-				$ItemDate = implode("-",array_reverse(explode("/",$_POST['date_'.$I])));
-				$Items[] = array('id'=>$_POST['item_'.$I],'price'=>$_POST['price_'.$I],'quantity'=>$_POST['quantity_'.$I], 'delivery_date'=>$ItemDate );
-				if(!$Date)
-				{
-					$Date = $ItemDate;
-				}
-				if(strtotime($ItemDate." 00:00:00") > strtotime($Date." 00:00:00")){
-					$Date = $LastDate;
-				}
+				$Items[] = array('id'=>$_POST['item_'.$I],'price'=>$_POST['price_'.$I],'quantity'=>$_POST['quantity_'.$I]);
 			}
 		}
 		
 		// Basic Data
 		$Type			= $_POST['type'];
-		$ProviderID		= $_POST['provider'];
-		$AgentID 		= $_POST['agent']? $_POST['agent']: 0;
+		$BranchID		= $_POST['customer'];
 		$CurrencyID		= $_POST['currency'];
 		$Extra			= $_POST['extra'];
 		$Total			= $_POST['total_price'];
 		$Admin			= new AdminData($_SESSION['admin_id']);
 		$Status			= $Admin->IsOwner()? "A" : "P";
+		$Date			= implode("-",array_reverse(explode("/",$_POST['delivery_date'])));
+		$Customer 		= $this->fetchAssoc('customer_branch','customer_id',"branch_id=".$BranchID);
+		$CustomerID		= $Customer[0]['customer_id'];
 		
-		$Insert			= $this->execQuery('insert',$this->Table,'type,provider_id,agent_id,currency_id,extra,total,delivery_date,status,creation_date,created_by,company_id',"'".$Type."',".$ProviderID.",".$AgentID.",".$CurrencyID.",'".$Extra."',".$Total.",'".$Date."','".$Status."',NOW(),".$_SESSION['admin_id'].",".$_SESSION['company_id']);
+		$Insert			= $this->execQuery('insert',$this->Table,'type,branch_id,customer_id,currency_id,extra,total,delivery_date,status,creation_date,created_by,company_id',"'".$Type."',".$BranchID.",".$CustomerID.",".$CurrencyID.",'".$Extra."',".$Total.",'".$Date."','".$Status."',NOW(),".$_SESSION['admin_id'].",".$_SESSION['company_id']);
 		//echo $this->lastQuery();
 		$NewID 		= $this->GetInsertId();
 		$New 	= new ProviderPurchaseOrder($NewID);
@@ -365,9 +340,9 @@ public function MakeRegs($Mode="List")
 		{
 			if($Fields)
 				$Fields .= "),(";
-			$Fields .= $NewID.",".$ProviderID.",".$Item['id'].",".$Item['price'].",".$Item['quantity'].",'".$Item['delivery_date']."',".$CurrencyID.",NOW(),".$_SESSION['admin_id'].",".$_SESSION['company_id'];
+			$Fields .= $NewID.",".$CustomerID.",".$Item['id'].",".$Item['price'].",".$Item['quantity'].",'".$Date."',".$CurrencyID.",NOW(),".$_SESSION['admin_id'].",".$_SESSION['company_id'];
 		}
-		$this->execQuery('insert','product_provider_purchase_order_item','order_id,provider_id,product_id,price,quantity,delivery_date,currency_id,creation_date,created_by,company_id',$Fields);
+		$this->execQuery('insert','customer_order_item','order_id,customer_id,product_id,price,quantity,delivery_date,currency_id,creation_date,created_by,company_id',$Fields);
 		//echo $this->lastQuery();
 		
 	}
@@ -406,19 +381,7 @@ public function MakeRegs($Mode="List")
 		$Website 		= strtolower($_POST['website']);
 		$Fax			= $_POST['fax'];
 		
-		// CREATE NEW IMAGE IF EXISTS
-		if($Image!=$Edit->Data['logo'])
-		{
-			if($Image!=$Edit->GetDefaultImg())
-			{
-				if(file_exists($Edit->GetImg()))
-					unlink($Edit->GetImg());
-				$Dir 	= array_reverse(explode("/",$Image));
-				$Temp 	= $Image;
-				$Image 	= $Edit->ImgGalDir().$Dir[0];
-				copy($Temp,$Image);
-			}
-		}
+		
 		
 		$Update		= $this->execQuery('update','product_provider',"name='".$Name."',postal_code='".$PostalCode."',address='".$Address."',cuit=".$CUIT.",iva='".$IVA."',gross_income_tax='".$GrossIncome."',email='".$Email."',fax='".$Fax."',phone='".$Phone."',website='".$Website."',country_id=".$CountryID.",province_id='".$ProvinceID."',region_id=".$RegionID.",zone_id='".$ZoneID."',lat=".$Lat.",lng=".$Lng.",logo='".$Image."',updated_by=".$_SESSION['admin_id'],"provider_id=".$ID);
 		//echo $this->lastQuery();
@@ -514,42 +477,42 @@ public function MakeRegs($Mode="List")
 		echo $HTML;
 	}
 	
-// 	SELECT a.cost + ( (
-// a.cost * b.additional_percentage_retailer
-// ) /100 ) AS price
-// FROM product a, product_configuration b
-// WHERE a.product_id =5
-// LIMIT 0 , 30
-	
-	public function Getitemprice()
+	public function Getitemprices()
 	{
-		if(intval($_POST['customer'])>0)
+		if(intval($_POST['customer'])>0 && $_POST['items'])
 		{
-			$Product	= new Product($_POST['item']);
-			$Cost		= $Product->Data['cost'];
-			$Variation  = $Product->Data['variation_id']==1? "percentage":"price";
 			$Config		= $this->fetchAssoc('product_configuration','*',"status='A' AND company_id=".$_SESSION['company_id'],'creation_date DESC');
-			//echo $this->lastQuery(); die;
-			$Customer	= new Customer($_POST['customer']);
-			switch(intval($Customer->Data['type_id']))
-			{
-				case 1:
-					$Field = $Config[0]["additional_".$Variation."_retailer"];
-				break;
-				case 2:
-					$Field = $Config[0]["additional_".$Variation."_wholesaler"];
-				break;
-				default:
-					$Field	= $Customer->Data['additional_'.$Variation];
-				break;
-			}
+			$Branch 	= $this->fetchAssoc('customer_branch','customer_id',"branch_id=".$_POST['customer']);
 			
-			$AdditionalPrice = $Variation=="percentage"? ($Cost*$Field)/100 : $Field ;
-			$Price = $Cost + $AdditionalPrice;
-			echo $Price;
-		}else{
-			echo '0.00';
+			$Customer	= new Customer($Branch[0]['customer_id']);
+			//echo $Customer->Data['type_id'];die;
+			$Prices = array();
+			$Items = explode(",",$_POST['items']);
+			foreach($Items as $Item)
+			{
+				$Product	= new Product($Item);
+				$Cost		= $Product->Data['cost'];
+				$Variation  = $Product->Data['variation_id']==1? "percentage":"price";
+				
+				switch(intval($Customer->Data['type_id']))
+				{
+					case 1:
+						$Field = $Config[0]["additional_".$Variation."_retailer"];
+					break;
+					case 2:
+						$Field = $Config[0]["additional_".$Variation."_wholesaler"];
+					break;
+					default:
+						$Field	= $Customer->Data['additional_'.$Variation];
+					break;
+				}
+				
+				$AdditionalPrice = $Variation=="percentage"? ($Cost*$Field)/100 : $Field ;
+				$Price = $Cost + $AdditionalPrice;
+				$Prices[] = round($Price);
+			}
 		}
+		echo implode(",",$Prices);
 		die;
 		
 	}
@@ -567,8 +530,7 @@ public function MakeRegs($Mode="List")
                 <form id="item_form_'.$ID.'">
                 <div class="col-xs-4 txC">
                 	<span id="Item'.$ID.'" class="Hidden ItemText'.$ID.'"></span>
-                  '.insertElement('select','items_'.$ID,'','ItemField'.$ID.' form-control select2 selectTags','',$this->fetchAssoc('product','product_id,title',"status='A' AND company_id=".$_SESSION['company_id'],'title'),'','Seleccione un Art&iacute;culo').'
-                  '.insertElement("text","item_".$ID,'','Hidden','validateEmpty="Seleccione un Art&iacute;culo"').'
+                  '.insertElement('select','item_'.$ID,'','ItemField'.$ID.' form-control selectChosen itemSelect','data-placeholder="Seleccione un Art&iacute;culo" validateEmpty="Seleccione un Art&iacute;culo" item="'.$ID.'"',$this->fetchAssoc('product','product_id,title',"status='A' AND company_id=".$_SESSION['company_id'],'title'),'',' ').'
                 </div>
                 <div class="col-xs-1 txC">
                 	<span id="Price'.$ID.'" class="Hidden ItemText'.$ID.'"></span>
@@ -578,11 +540,8 @@ public function MakeRegs($Mode="List")
                 	<span id="Quantity'.$ID.'" class="Hidden ItemText'.$ID.'"></span>
                   '.insertElement('text','quantity_'.$ID,'','ItemField'.$ID.' form-control calcable QuantityItem','data-inputmask="\'mask\': \'9{+}\'" placeholder="Cantidad" validateEmpty="Ingrese una cantidad"').'
                 </div>
-                <div class="col-xs-2 txC">
-                  <span id="Date'.$ID.'" class="Hidden ItemText'.$ID.' OrderDate"></span>
-                  '.insertElement('text','date_'.$ID,'','ItemField'.$ID.' form-control delivery_date','placeholder="Fecha de Entrega" validateEmpty="Ingrese una fecha"').'
-                </div>
-                <div  id="item_number_'.$ID.'" class="col-xs-1 txC item_number" total="0" item="'.$ID.'">'.$TotalPrice.'</div>
+                
+                <div  id="item_number_'.$ID.'" class="col-xs-3 txC item_number" total="0" item="'.$ID.'">'.$TotalPrice.'</div>
                 <div class="col-xs-3 txC">
 				  <button type="button" id="SaveItem'.$ID.'" class="btn btnGreen SaveItem" style="margin:0px;" item="'.$ID.'"><i class="fa fa-check"></i></button>
 				  <button type="button" id="EditItem'.$ID.'" class="btn btnBlue EditItem Hidden" style="margin:0px;" item="'.$ID.'"><i class="fa fa-pencil"></i></button>
@@ -591,6 +550,15 @@ public function MakeRegs($Mode="List")
 				</form>
             </div>';
             echo $HTML;
+	}
+	
+	public function Associate()
+	{
+		$IDs = $_POST['selected']."0";
+		$Admin = $_POST['user'];
+		if(intval($Admin)>0)
+			$this->execQuery('update',$this->Table,"status='W', delivery_man_id=".$Admin,'order_id IN ('.$IDs.')');
+		
 	}
 }
 ?>

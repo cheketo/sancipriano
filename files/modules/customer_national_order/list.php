@@ -2,7 +2,8 @@
   include('../../includes/inc.main.php');
   
   $Status = $_GET['status'] ? $_GET['status'] : 'P';
-  switch ($Status) {
+  switch ($Status)
+  {
     case 'P':
         $Title = "Pendientes";
       break;
@@ -16,9 +17,10 @@
         $Title = "Eliminadas";
       break;
   }
-  $Company = new ProviderPurchaseOrder();
+  $Order = new CustomerOrder();
+  $Head->setStyle('../../../vendors/chosen-js/bootstrap-chosen.css'); // Select Inputs With Tags
   $Head->setStyle('../../../vendors/datepicker/datepicker3.css'); // Date Picker Calendar
-  $Head->setTitle("Ordenes de Compra a Proveedores ".$Title);
+  $Head->setTitle("Ordenes de Compra ".$Title);
   $Head->setIcon($Menu->GetHTMLicon());
   $Head->setSubTitle($Menu->GetTitle());
   $Head->setHead();
@@ -28,13 +30,14 @@
   
   /* Body Content */ 
   // Search List Box
-  $Company->ConfigureSearchRequest();
-  echo $Company->InsertSearchList();
+  $Order->ConfigureSearchRequest();
+  echo $Order->InsertSearchList();
   // Help Modal
-  //include('modal.help.php');
+  include('modal.associate.php');
   
   /* Footer */
   $Foot->setScript('../../../vendors/datepicker/bootstrap-datepicker.js');
   $Foot->SetScript('../../js/script.searchlist.js');
+  $Foot->setScript('../../../vendors/chosen-js/chosen.jquery.js');
   include('../../includes/inc.bottom.php');
 ?>

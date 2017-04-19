@@ -2,27 +2,26 @@
     include("../../includes/inc.main.php");
     
     $ID     = $_GET['id'];
-    $Edit   = new ProviderPurchaseOrder($ID);
+    $Edit   = new CustomerOrder($ID);
     $Data   = $Edit->GetData();
     ValidateID($Data['order_id']);
     $Status = $Edit->Data['status'];
-    if($Status!='P')
+    if($Status!='P' && $Status!='W')
     {
       header('Location: list.php?error=status');
 			die();
     }
-    $Agents = $DB->fetchAssoc('product_provider_agent','agent_id,name','provider_id='.$Edit->Data['provider_id']);
-    $Items  = $DB->fetchAssoc('product_provider_purchase_order_item a INNER JOIN product b ON (a.product_id = b.product_id)','b.title AS product,a.*,(a.price * a.quantity) AS total','order_id='.$ID);
+    $Items  = $DB->fetchAssoc('customer_order_item a INNER JOIN product b ON (a.product_id = b.product_id)','b.title AS product,a.*,(a.price * a.quantity) AS total','order_id='.$ID);
+    $Branch = $DB->fetchAssoc('customer_branch','address','branch_id='.$Data['branch_id']);
+    $Branch = $Branch[0]['address'];
     
     
-    
-    $Head->setTitle("Editar Orden de ".$Data['provider']);
+    $Head->setTitle("Editar Orden de ".$Branch);
     $Head->setSubTitle($Menu->GetTitle());
-    $Head->setTitle("Editar Orden de ".$Data['provider']);
+    $Head->setTitle("Editar Orden de ".$Branch);
     $Head->setSubTitle($Menu->GetTitle());
-    $Head->setStyle('../../../vendors/select2/select2.min.css'); // Select Inputs With Tags
+    $Head->setStyle('../../../vendors/chosen-js/bootstrap-chosen.css'); // Select Inputs With Tags
     $Head->setStyle('../../../vendors/datepicker/datepicker3.css'); // Date Picker Calendar
-    $Head->setStyle('../../../skin/css/maps.css'); // Google Maps CSS
     $Head->setHead();
     include('../../includes/inc.top.php');
 ?>
@@ -35,44 +34,18 @@
             <?php echo insertElement("hidden","action",'update'); ?>
             <?php echo insertElement("hidden","id",$ID); ?>
             <?php echo insertElement("hidden","type",'N'); ?>
-            <?php //echo insertElement("hidden","total_items","1"); ?>
             <?php echo insertElement("hidden","items",count($Items)); ?>
             <h4 class="subTitleB"><i class="fa fa-building"></i> Proveedor</h4>
             <div class="row form-group inline-form-custom">
               <div class="col-xs-12">
-                  <?php echo insertElement('select','providers',$Edit->Data['provider_id'],'form-control select2 selectTags','',$DB->fetchAssoc('product_provider','provider_id,name',"status='A' AND company_id=".$_SESSION['company_id'],'name'),'','Seleccione un Proveedor'); ?>
-                  <?php echo insertElement("text","provider",$Edit->Data['provider_id'],'Hidden','validateEmpty="Seleccione un Proveedor"'); ?>
-              </div>
-            </div>
-            <h4 class="subTitleB"><i class="fa fa-male"></i> Contacto</h4>
-            <div class="row form-group inline-form-custom">
-              <div class="col-xs-12">
-                  
-                    <?php if(empty($Agents))
-                          {
-                            //echo insertElement('select','agents',0,'form-control select2 selectTags','disabled=disabled','','0','Sin Contacto');  
-                            echo '<div id="agent-wrapper"><select id="agents" class="form-control select2 selectTags" disabled="disabled" style="width: 100%;"><option value="0">Sin Contacto</option</select></div>';
-                          }else{
-                            echo '<div id="agent-wrapper">';
-                            echo insertElement('select','agents',$Edit->Data['agent_id'],'form-control select2 selectTags','',$Agents);  
-                            echo '</div>';
-                            
-                            
-                          }
-                          echo insertElement("text","agent",$Edit->Data['agent_id'],'Hidden');
-                     ?>
-                  </div>
-                  <?php //echo insertElement("text","agent",$Edit->Data['agent_id'],'Hidden','validateEmpty="Seleccione un Contacto"'); ?>
+                  <?php echo insertElement('select','customer',$Edit->Data['branch_id'],'form-control chosenSelect','data-placeholder="Seleccione un Cliente" validateEmpty="Seleccione un cliente"',$DB->fetchAssoc('customer_branch','branch_id,address',"company_id=".$_SESSION['company_id'],'name'),'',' '); ?>
               </div>
             </div>
             
-            <!--<h4 class="subTitleB"><i class="fa fa-money"></i> Moneda</h4>-->
-            <!--<div class="row form-group inline-form-custom">-->
-            <!--  <div class="col-xs-12">-->
-            <!--    <?php echo insertElement('select','currency_selector',$Edit->Data['currency_id'],'form-control',' ',$DB->fetchAssoc('currency','currency_id,title',"",'title DESC'),'','Seleccione una Moneda'); ?>-->
-                <?php echo insertElement("text","currency",$Edit->Data['currency_id'],'Hidden','validateEmpty="Seleccione un Moneda"'); ?>
-            <!--  </div>-->
-            <!--</div>-->
+           
+            
+            
+           
             <br>
             <h4 class="subTitleB"><i class="fa fa-cubes"></i> Art&iacute;culos</h4>
             
@@ -183,6 +156,7 @@
           </div>
           <!--</form>-->
         </div>
+      </div>
       </div>
     </div><!-- box -->
   </div><!-- box -->

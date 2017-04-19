@@ -352,9 +352,10 @@ public function MakeRegs($Mode="List")
 		//VALIDATIONS
 		if(!$Name) echo 'Falta Nombre';
 		if(!$Type) echo 'Tipo incompleto';
-		if(!$CUIT) echo 'CUIT incompleto';
-		if(!$IVA) echo 'IVA incompleto';
-		if(!$GrossIncome) echo 'IIBB incompleto';
+		if(!$CUIT) echo $CUIT=0;
+		if(!$IVA) echo $IVA =0;
+		if(!$GrossIncome) $GrossIncome = 0;
+		// echo 'IIBB incompleto';
 		
 		$Insert			= $this->execQuery('INSERT',$this->Table,'type_id,name,cuit,iva,additional_price,additional_percentage,iibb,international,creation_date,created_by,company_id',"'".$Type."','".$Name."',".$CUIT.",".$IVA.",".$AdditionalPri.",".$AdditionalPer.",".$GrossIncome.",'".$International."',NOW(),".$_SESSION['admin_id'].",".$_SESSION['company_id']);
 		//echo $this->lastQuery();
@@ -718,8 +719,8 @@ public function MakeRegs($Mode="List")
                             </div>
                             <div class="col-sm-6 col-xs-12">
                                 <span class="input-group">
-                                    <span class="input-group-addon"><i class="fa fa-fax"></i></span>
-                                    '.insertElement('text','fax_'.$ID,$Data['fax'],'form-control',' placeholder="Fax"').'
+                                    <span class="input-group-addon"><i class="fa fa-mobile"></i></span>
+                                    '.insertElement('text','fax_'.$ID,$Data['fax'],'form-control',' placeholder="Celular"').'
                                 </span>
                             </div>
                         </div>

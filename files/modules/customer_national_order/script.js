@@ -35,77 +35,105 @@ $(document).ready(function(){
 	setDatePicker();
 	priceImputMask(1);
 	
-	if($('.selectTags').length>0)
+	if($('.chosenSelect').length>0)
 	{
-		setAgentSelect2();
 		$(".itemSelect").each(function(){
 			var item = $(this).attr('item');
-			setItemSelect2(item);
+			setItemChosen(item);
 		});
 		
+		if($('#customer').length>0)
+		{
+			$('#customer').chosen();
+			recalculateItemPrice();
+		}
 		
-		$('#customers').select2({placeholder: {id: '',text: 'Seleccione un Cliente'}});
-		$('#customers').on("select2:select", function (e) { $("#customer").val(e.params.data.id);recalculateItemPrice()});//fillAgentSelect(); });
-		$('#customers').on("select2:unselect", function (e) { $("#customer").val(''); });
-		
-		
-		
-		select2Focus();
+		if($('#user_id').length>0)
+		{
+			$('#user_id').chosen();
+		}
 		
 	}
 });
 
-function setItemSelect2(id)
+function setItemChosen(id)
 {
-	$('#items_'+id).select2({placeholder: {id: '',text: 'Seleccione un Producto'}});
-	$('#items_'+id).on("select2:select", function (e) {
-		$("#item_"+id).val(e.params.data.id);
-		getProductPrice(e.params.data.id,id);
+	$('#item_'+id).chosen();
+	$('#item_'+id).on('change',function(){
+		getProductsPrices($('#item_'+id).val(),id);
 	});
-	$('#items_'+id).on("select2:unselect", function (e) { $("#item_"+id).val(''); });
 }
 
-function getProductPrice(id,fieldID)
+function getProductsPrices(values,ids)
 {
 	var customer = $("#customer").val();
 	var process = '../../library/processes/proc.common.php';
-	var string	= 'item='+ id +'&customer='+customer+'&action=getitemprice&object=CustomerOrder';
-	$.ajax({
-        type: "POST",
-        url: process,
-        data: string,
-        async: false,
-        success: function(data){
-            if(data)
-            {
-            	var decimal = data.substr(data.indexOf("."));
-            	if(decimal.length==2)
-            	{
-            		data = data + "0";
-            	}
-            	
-				$("#price_"+fieldID).val(data);
-            }else{
-            	notifyError('Hubo un error al calcular el precio del producto');
-                console.log('Sin información devuelta. Item='+id);
-            }
-        }
-    });
+	var string	= 'items='+ values +'&customer='+customer+'&action=Getitemprices&object=CustomerOrder';
+	if(values.length>0 && parseInt(customer)>0)
+	{
+		if(ids)
+		{
+			ids = ids +'';
+			$.ajax({
+		        type: "POST",
+		        url: process,
+		        data: string,
+		        success: function(data){
+		            if(data)
+		            {
+		            	console.log(data);
+		            	var prices = data.split(",");
+		            	var items = ids.split(",");
+		            	var decimal;
+		            	prices.forEach(function(price,index){
+		            		decimal = price.substr(price.indexOf("."));
+			            	if(decimal.length==1)
+			            	{
+			            		price = price + ".00";
+			            	}
+			            	if(decimal.length==2)
+			            	{
+			            		price = price + "0";
+			            	}
+			            	$("#price_"+items[index]).val(price);
+			            	$("#Price"+items[index]).html("$ "+price);
+		            	});
+		            }else{
+		            	notifyError('Hubo un error al calcular el precio del producto');
+		                console.log('Sin información devuelta. Item='+id);
+		            }
+		        }
+		    });
+		}
+	}
 }
 
 function recalculateItemPrice()
 {
-	$(".itemSelect").each(function(e){
-		var id = $(this).attr("id").substr($(this).attr("id").indexOf("_")+1);
-		console.log(id);
-		getProductPrice(e.params.data.id,id);
+	$('#customer').change(function(e){
+		e.stopImmediatePropagation();
+		var ids="";
+		var values = "";
+		var first = true;
+		$(".itemSelect").each(function(){
+			var id = $(this).attr("item");
+			var value = $("#item_"+id).val();
+			if(value)
+			{
+				if(first)
+				{
+					ids = id;
+					values = value;
+					first = false;
+				}else{
+					ids = ids+","+id;
+					values = values + ","+value;
+				}
+			}
+		});
+		getProductsPrices(values,ids);
 	});
-}
-function setAgentSelect2()
-{
-	$('#agents').select2({placeholder: {id: '',text: 'Seleccione un Contacto'}});
-	$('#agents').on("select2:select", function (e) { $("#agent").val(e.params.data.id); });
-	$('#agents').on("select2:unselect", function (e) { $("#agent").val(''); });
+	
 }
 
 function setDatePicker()
@@ -146,10 +174,11 @@ function priceImputMask(id)
 //////////////////////////// ORDER ITEMS //////////////////////////////////
 function addOrderItem()
 {
-	$("#add_order_item").click(function(){
+	$("#add_order_item").on('click',function(e){
+		e.stopImmediatePropagation();
 		var id		= parseInt($("#items").val())+1;
 		var process = '../../library/processes/proc.common.php';
-		var string	= 'item='+ id +'&action=addorderitem&object=ProviderPurchaseOrder';
+		var string	= 'item='+ id +'&action=addorderitem&object=CustomerOrder';
 		$.ajax({
 	        type: "POST",
 	        url: process,
@@ -162,7 +191,7 @@ function addOrderItem()
 	                //$("#item_row_"+$("#items").val()).after(data);
 	                $(".ItemRow:last-child").after(data);
 	                $("#items").val(id);
-	                setItemSelect2(id);
+	                setItemChosen(id);
 	                saveItem();
 	                editItem();
 	                deleteItem();
@@ -172,6 +201,7 @@ function addOrderItem()
 	                calculateRowPrice();
 	                priceImputMask(id);
 	                updateRowBackground();
+	                recalculateItemPrice();
 	            }else{
 	                console.log('Sin información devuelta. Item='+id);
 	            }
@@ -188,7 +218,7 @@ function saveItem()
 		if(validate.validateFields('item_form_'+id))
 		{
 			var item_id = $("#item_"+id).val();
-			var item = $("#items_"+id).children('option[value="'+item_id+'"]').html();
+			var item = $("#item_"+id).children('option[value="'+item_id+'"]').html();
 			var price = $("#price_"+id).val();
 			var quantity = $("#quantity_"+id).val();
 			var delivery = $("#date_"+id).val();
@@ -198,7 +228,7 @@ function saveItem()
 			$("#Date"+id).html(delivery);
 			$("#SaveItem"+id+",.ItemField"+id).addClass('Hidden');
 			$("#EditItem"+id+",.ItemText"+id).removeClass('Hidden');
-			$("#items_"+id).next().addClass('Hidden');
+			$("#item_"+id).next().addClass('Hidden');
 		}
 	});
 }
@@ -209,7 +239,7 @@ function editItem()
 		var id = $(this).attr("item");
 		$("#SaveItem"+id+",.ItemField"+id).removeClass('Hidden');
 		$("#EditItem"+id+",.ItemText"+id).addClass('Hidden');
-		$("#items_"+id).next().removeClass('Hidden');
+		$("#item_"+id).next().removeClass('Hidden');
 	});
 }
 
@@ -330,7 +360,7 @@ $(function(){
 			alertify.confirm(utf8_decode('¿Desea '+confirmText+' ?'), function(e){
 				if(e)
 				{
-					var process		= '../../library/processes/proc.common.php?object=ProviderPurchaseOrder';
+					var process		= '../../library/processes/proc.common.php?object=CustomerOrder';
 					if(BtnID=="BtnCreate")
 					{
 						var target		= 'list.php?msg='+ $("#action").val();
@@ -372,36 +402,78 @@ $(function(){
 
 
 
+///////////////////////////// LIST ACTIONS /////////////////////////////////
+$(document).ready(function(){
+	activateModal();
+	
+	$("#selected_ids").on('change',function(){
+		var ids = $(this).val();
+		ids = ids.split(",");
+		if(ids.length>1)
+		{
+			$("#Associate").removeClass("Hidden");
+		}else{
+			$("#Associate").addClass("Hidden");
+		}
+	});
+	  
+	/// SHOW MODAL
+	$('#Associate').click(function(){
+		$("#associateModal").show();
+	});
+	
+	/// HIDE MODAL
+	$('.close,#associate_user').click(function(){
+		$("#associateModal").hide();	
+	});
+	
+	$('#associate_user').click(function(){
+		var finished = true;
+		var user	= $('#user_id').val();
+		var selected = $("#selected_ids").val();
+		var process = '../../library/processes/proc.common.php';
+		var string	= 'selected='+selected+'&user='+ user +'&action=associate&object=CustomerOrder';
+		$.ajax({
+	        type: "POST",
+	        url: process,
+	        data: string,
+	        cache: false,
+        	async: false,
+	        success: function(data){
+	            if(data)
+	            {
+	            	finished = false;
+	                console.log(data);
+	                notifyError('Ha ocurrido un error. Por favor, intente nuevamente.');
+	            }else{
+	            	
+	                // var ids = $('#selected_ids').val().split(',');
+	                // $('#UnselectAll').click();
+	                // ids.forEach(removeRow);
+	            }
+	        }
+	    });
+	    if(finished)
+		{
+			$(".searchButton").click();
+		}
+	});
+	
+	
+});
 
-// ///////////////////////// LOAD AGENT SELECT ////////////////////////////////
-function fillAgentSelect()
+function removeRow(id)
 {
-	var provider = $('#provider').val();
-	var process = '../../library/processes/proc.common.php';
-
-	var string      = 'provider='+ provider +'&action=fillagents&object=ProviderPurchaseOrder';
-
-    var data;
-    $.ajax({
-        type: "POST",
-        url: process,
-        data: string,
-        cache: false,
-        success: function(data){
-            if(data)
-            {
-                $('#agent-wrapper').html(data);
-                $("#agent").val('');
-            }else{
-                $('#agent-wrapper').html('<select id="agents" class="form-control select2 selectTags" disabled="disabled" style="width: 100%;"><option value="0">Sin Contacto</option</select>');
-                $("#agent").val(0);
-            }
-            if($('#agents').length)
-			{
-				setAgentSelect2();
-	            select2Focus();
-			}
-        }
-    });
+	// unselectRow(id);
+	$('#row_'+id).remove();
+	$('#grid_'+id).remove();
 }
 
+function activateModal()
+{
+	$('.associateElement').on('click',function(e){
+		e.preventDefault();
+		e.stopPropagation();
+		$('#associateModal').show();
+	});
+}

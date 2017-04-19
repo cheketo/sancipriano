@@ -62,7 +62,7 @@
               <div class="col-xs-12 col-sm-6">
                 <span class="input-group">
                   <span class="input-group-addon"><i class="fa fa-file-text-o"></i></span>
-                  <?php echo insertElement('text','cuit','','form-control','data-inputmask="\'mask\': \'99-99999999-9\'" placeholder="N&uacute;mero CUIT" validateEmpty="Ingrese un CUIT."'); ?>
+                  <?php echo insertElement('text','cuit','','form-control','data-inputmask="\'mask\': \'99-99999999-9\'" placeholder="N&uacute;mero CUIT"'); ?>
                 </span>
               </div>
               <div class="col-xs-12 col-sm-6">

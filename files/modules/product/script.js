@@ -72,9 +72,10 @@ $(document).ready(function(){
     ///////////////////////// SELECT2 /////////////////////////////////
 	if($('.selectTags').length>0)
 	{
-		$('.selectTags').select2({placeholder: {id: '',text: 'Seleccionar Marca'},allowClear: true});
-		$('.selectTags').on("select2:select", function (e) { $("#brand").val(e.params.data.id); });
-		$('.selectTags').on("select2:unselect", function (e) { $("#brand").val(''); });
+		// $('.selectTags').select2({placeholder: {id: '',text: 'Seleccionar Marca'},allowClear: true});
+		// $('.selectTags').on("select2:select", function (e) { $("#brand").val(e.params.data.id); });
+		// $('.selectTags').on("select2:unselect", function (e) { $("#brand").val(''); });
+		$('.selectTags').chosen();
 	}
 });
 /////////// Show or Hide Icons On subtop //////////////////////

@@ -2,9 +2,8 @@
     include("../../includes/inc.main.php");
     $New = new CustomerOrder();
     $Head->setTitle($Menu->GetTitle());
-    $Head->setStyle('../../../vendors/select2/select2.min.css'); // Select Inputs With Tags
+    $Head->setStyle('../../../vendors/chosen-js/bootstrap-chosen.css'); // Select Inputs With Tags
     $Head->setStyle('../../../vendors/datepicker/datepicker3.css'); // Date Picker Calendar
-    $Head->setStyle('../../../skin/css/maps.css'); // Google Maps CSS
     $Head->setHead();
     include('../../includes/inc.top.php');
 ?>
@@ -21,25 +20,12 @@
             <h4 class="subTitleB"><i class="fa fa-building"></i> Cliente</h4>
             <div class="row form-group inline-form-custom">
               <div class="col-xs-12">
-                  <?php echo insertElement('select','customers','','form-control select2 selectTags','',$DB->fetchAssoc('customer_branch','customer_id,address',"company_id=".$_SESSION['company_id'],'name'),'','Seleccione un Proveedor'); ?>
-                  <?php echo insertElement("text",'customer','','Hidden','validateEmpty="Seleccione un cliente"'); ?>
+                  <?php echo insertElement('select','customer','','form-control chosenSelect','data-placeholder="Seleccione un Cliente" validateEmpty="Seleccione un cliente"',$DB->fetchAssoc('customer_branch','branch_id,address',"company_id=".$_SESSION['company_id'],'name'),'',' '); ?>
               </div>
             </div>
-            <!--<h4 class="subTitleB"><i class="fa fa-male"></i> Contacto</h4>-->
-            <!--<div class="row form-group inline-form-custom">-->
-            <!--  <div class="col-xs-12">-->
-            <!--      <div id="agent-wrapper"><?php //echo insertElement('select','agents','','form-control select2 selectTags','','','0','Sin Contacto'); ?></div>-->
-            <!--      <?php //echo insertElement("text","agent",'','Hidden','validateEmpty="Seleccione un Contacto"'); ?>-->
-            <!--  </div>-->
-            <!--</div>-->
             
-            <!--<h4 class="subTitleB"><i class="fa fa-money"></i> Moneda</h4>-->
-            <!--<div class="row form-group inline-form-custom">-->
-            <!--  <div class="col-xs-12">-->
-            <!--    <?php echo insertElement('select','currency_selector','','form-control',' ',$DB->fetchAssoc('currency','currency_id,title',"",'title DESC'),'','Seleccione una Moneda'); ?>-->
                 <?php echo insertElement("text","currency",2,'Hidden','validateEmpty="Seleccione un Moneda"'); ?>
-            <!--  </div>-->
-            <!--</div>-->
+            
             <br>
             <h4 class="subTitleB"><i class="fa fa-cubes"></i> Art&iacute;culos</h4>
             
@@ -69,8 +55,7 @@
                   <form id="item_form_1" name="item_form_1">
                   <div class="col-xs-4 txC">
                     <span id="Item1" class="Hidden ItemText1"></span>
-                    <?php echo insertElement('select','items_1','','ItemField1 form-control select2 selectTags itemSelect','item="1"',$DB->fetchAssoc('product','product_id,title',"status='A'",'title'),'','Seleccione un Art&iacute;culo'); ?>
-                    <?php echo insertElement("text","item_1",'','Hidden','validateEmpty="Seleccione un Art&iacute;culo"'); ?>
+                    <?php echo insertElement('select','item_1','','ItemField1 form-control chosenSelect itemSelect','item="1" data-placeholder="Seleccione un Art&iacute;culo"',$DB->fetchAssoc('product','product_id,title',"status='A'",'title'),'',' '); ?>
                   </div>
                   <div class="col-xs-1 txC">
                     <span id="Price1" class="Hidden ItemText1"></span>
@@ -113,13 +98,11 @@
                 <button type="button" id="add_order_item" class="btn btn-warning"><i class="fa fa-plus"></i> <strong>Agregar Art&iacute;culo</strong></button>
               </div>
               <div class="col-sm-6 col-xs-12 txC">
-                <div class="input-group">
-                <div class="input-group-btn">
-                  <button type="button" id="ChangeDates" class="btn bg-teal" style="margin:0px;"><i class="fa fa-flash"></i></button>
-                </div>
+                <span class="input-group">
+                  <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
                 <!-- /btn-group -->
-                <?php echo insertElement('text','change_date','','form-control delivery_date',' placeholder="Modificar la fecha de todos los art&iacute;culos"'); ?>
-              </div>
+                <?php echo insertElement('text','delivery_date','','form-control delivery_date',' placeholder="Fecha de entrega"'); ?>
+                </span>
               </div>
             </div>
             
@@ -141,7 +124,8 @@
   </div><!-- box -->
 <?php
 $Foot->setScript('../../../vendors/inputmask3/jquery.inputmask.bundle.min.js');
-$Foot->setScript('../../../vendors/select2/select2.min.js');
+// $Foot->setScript('../../../vendors/select2/select2.min.js');
+$Foot->setScript('../../../vendors/chosen-js/chosen.jquery.js');
 $Foot->setScript('../../../vendors/datepicker/bootstrap-datepicker.js');
 include('../../includes/inc.bottom.php');
 ?>

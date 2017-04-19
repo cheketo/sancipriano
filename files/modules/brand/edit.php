@@ -42,7 +42,7 @@
   </div>
 
   <!-- Help Modal Trigger -->
-  <?php include ('modal.icon.php'); ?>
+  <?php //include ('modal.icon.php'); ?>
   <!-- //// HELP MODAL //// -->
   <!-- Help Modal -->
 <?php

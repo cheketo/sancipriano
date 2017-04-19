@@ -2,7 +2,7 @@
     include("../../includes/inc.main.php");
     $Head->setTitle($Menu->GetTitle());
     $Head->setStyle('../../../vendors/bootstrap-switch/bootstrap-switch.css'); // Switch On Off
-    $Head->setStyle('../../../vendors/select2/select2.min.css'); // Select Inputs With Tags
+    $Head->setStyle('../../../vendors/chosen-js/bootstrap-chosen.css'); // Bootstrap Select Input
     $Head->setHead();
     
     $Category = new Category();
@@ -103,7 +103,7 @@
                 <?php echo insertElement('select','variation','','form-control','validateEmpty="Seleccione una variaci&oacute;n."',$Variation,'','Seleccionar Variaci&oacute;n') ?>
               </div>
               <div class="col-xs-12 col-sm-5">
-                <?php echo insertElement('select','size','','form-control','validateEmpty="Seleccione una medida."',$DB->fetchAssoc("product_size","size_id,title"),'','Seleccionar Medida') ?>
+                <?php echo insertElement('select','size','','form-control','data-placeholder="Seleccionar Medida" validateEmpty="Seleccione una medida."',$DB->fetchAssoc("product_size","size_id,title"),'',' ') ?>
               </div>
             </div>
             <div class="row form-group inline-form-custom">
@@ -111,7 +111,7 @@
               <!--  <?php //echo insertElement('text','rack','','form-control','placeholder="Estanter&iacute;a"') ?>-->
               <!--</div>-->
               <div class="col-xs-12 col-sm-12">
-                <?php echo insertElement('select','brand_select','','form-control  select2 selectTags','validateEmpty="Ingrese una marca." style="width:100%;height:auto!important;"',$DB->fetchAssoc("product_brand","brand_id,name","status='A' AND company_id=".$_SESSION['company_id']),'','Seleccionar Marca') ?>
+                <?php echo insertElement('select','brand','','form-control  selectTags','validateEmpty="Ingrese una marca." style="width:100%;height:auto!important;"',$DB->fetchAssoc("product_brand","brand_id,name","status='A' AND company_id=".$_SESSION['company_id']),'','Seleccionar Marca') ?>
                 <?php echo insertElement("hidden","brand"); ?>
               </div>
             </div>
@@ -171,6 +171,6 @@
 $Foot->setScript('../../../vendors/bootstrap-switch/script.bootstrap-switch.min.js');
 $Foot->setScript('../../../vendors/jquery-mask/src/jquery.mask.js');
 $Foot->setScript('../../../vendors/inputmask3/jquery.inputmask.bundle.min.js');
-$Foot->setScript('../../../vendors/select2/select2.min.js');
+$Foot->setScript('../../../vendors/chosen-js/chosen.jquery.js'); // Bootstrap Select Input
 include('../../includes/inc.bottom.php');
 ?>
