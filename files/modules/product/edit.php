@@ -120,8 +120,7 @@
               <!--</div>-->
               <div class="col-xs-12 col-sm-12">
                 <label for="brand_select">Marca:</label>
-                <?php echo insertElement('select','brand_select',$Data['brand_id'],'form-control  select2 selectTags','validateEmpty="Ingrese una marca." style="width:100%;height:auto!important;"',$DB->fetchAssoc("product_brand","brand_id,name","status='A' AND company_id=".$_SESSION['company_id']),'','Seleccionar Marca') ?>
-                <?php echo insertElement("hidden","brand",$Data['brand_id']); ?>
+                <?php echo insertElement('select','brand',$Data['brand_id'],'form-control selectTags','validateEmpty="Ingrese una marca." style="width:100%;height:auto!important;"',$DB->fetchAssoc("product_brand","brand_id,name","status='A' AND company_id=".$_SESSION['company_id']),'','Seleccionar Marca') ?>
               </div>
             </div>
             <!--<div class="form-group">-->
@@ -129,9 +128,9 @@
             <!--  <?php echo insertElement('text','size',$Data['size'],'form-control','placeholder="Medidas"') ?>-->
             <!--</div>-->
             <div class="row form-group inline-form-custom">
-              <!--<div class="col-xs-12 col-sm-4">-->
-              <!--  <?php echo insertElement('text','stock',$Data['stock'],'form-control','placeholder="Stock Incial"') ?>-->
-              <!--</div>-->
+              <div class="col-xs-12 col-sm-4">
+                <?php echo insertElement('text','stock',$Data['stock'],'form-control','placeholder="Stock Incial"') ?>
+              </div>
               <div class="col-xs-12 col-sm-6">
                 <label for="stock_min">Stock M&iacute;nimo:</label>
                 <?php echo insertElement('text','stock_min',$Data['stock_min'],'form-control','placeholder="Stock M&iacute;nimo"') ?>
@@ -141,22 +140,7 @@
                 <?php echo insertElement('text','stock_max',$Data['stock_max'],'form-control','placeholder="Stock M&aacute;ximo"') ?>
               </div>
             </div>
-            <!--<div class="form-group">-->
-            <!--  <?php echo insertElement('button','dispatch_data','Agregar datos de &uacute;ltima importaci&oacute;n','btn btn-warning','style="width:100%;"') ?>-->
-            <!--</div>-->
-            <!--<div class="row form-group inline-form-custom Hidden Dispatch animated fadeIn">-->
-            <!--  <div class="col-md-12">-->
-            <!--    <?php echo insertElement('text','dispatch','','form-control','placeholder="Desp. Aduana"') ?>-->
-            <!--  </div>-->
-            <!--</div>-->
-            <!--<div class="row form-group inline-form-custom Hidden Dispatch animated fadeIn">-->
-            <!--  <div class="col-xs-12 col-sm-6">-->
-            <!--    <?php echo insertElement('text','price_fob','','form-control','placeholder="Costo Fob"') ?>-->
-            <!--  </div>-->
-            <!--  <div class="col-xs-12 col-sm-6">-->
-            <!--    <?php echo insertElement('text','price_dispatch','','form-control','placeholder="Costo Desp."') ?>-->
-            <!--  </div>-->
-            <!--</div>-->
+            
             <!-- Description (Character Counter)-->
             <label for="description">Descripci&oacute;n:</label>
             <div class="form-group textWithCounter">

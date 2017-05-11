@@ -112,7 +112,6 @@
               <!--</div>-->
               <div class="col-xs-12 col-sm-12">
                 <?php echo insertElement('select','brand','','form-control  selectTags','validateEmpty="Ingrese una marca." style="width:100%;height:auto!important;"',$DB->fetchAssoc("product_brand","brand_id,name","status='A' AND company_id=".$_SESSION['company_id']),'','Seleccionar Marca') ?>
-                <?php echo insertElement("hidden","brand"); ?>
               </div>
             </div>
             <!--<div class="form-group">-->

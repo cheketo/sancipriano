@@ -58,12 +58,45 @@ class Menu extends DataBase
 	{
 		if($ID==0)
 		{
-			$Menu = $this->fetchAssoc('menu','menu_id,parent_id',"link LIKE '%".$this->getLink()."%'");
+			$Menues = $this->fetchAssoc('menu','menu_id,parent_id,link',"link LIKE '%".$this->getLink()."%'");
+			if(count($Menues)>1)
+			{
+				$ChosenMenu[1] = 0;
+				foreach($Menues as $Key => $Menu)
+				{
+					$I=-1;
+					$Link = $Menu['link'];
+					$Link = explode("?",$Link);
+					$Args = $Link[1];
+					if($Args)
+					{
+						$Args = explode('&',$Args);
+						foreach($Args as $Arg)
+						{
+							$Arg = explode('=',$Arg);
+							if($_GET[$Arg[0]]==$Arg[1])
+								$I++;
+						}
+						if($I>=$ChosenMenu[1])
+						{
+							$ChosenMenu[0] = $Menues[$Key];
+							$ChosenMenu[1] = $I;
+						}
+					}else{
+						if($ChosenMenu[1]==0)
+							$ChosenMenu[0] = $Menues[$Key];
+					}
+				}
+				$Menu = $ChosenMenu[0];
+			}else{
+				$Menu = $Menues[0];
+			}
 		}else{
-			$Menu = $this->fetchAssoc('menu','menu_id,parent_id',"menu_id = ".$ID);
+			$Menues = $this->fetchAssoc('menu','menu_id,parent_id',"menu_id = ".$ID);
+			$Menu	= $Menues[0];
 		}
-		$MenuID 	= $Menu[0]['menu_id'];
-		$ParentID	= $Menu[0]['parent_id'];
+		$MenuID 	= $Menu['menu_id'];
+		$ParentID	= $Menu['parent_id'];
 		if($ParentID==0)
 		{
 			return $MenuID;
