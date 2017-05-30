@@ -352,8 +352,8 @@ public function MakeRegs($Mode="List")
 		//VALIDATIONS
 		if(!$Name) echo 'Falta Nombre';
 		if(!$Type) echo 'Tipo incompleto';
-		if(!$CUIT) echo $CUIT=0;
-		if(!$IVA) echo $IVA =0;
+		if(!$CUIT) $CUIT=0;
+		if(!$IVA) $IVA =0;
 		if(!$GrossIncome) $GrossIncome = 0;
 		// echo 'IIBB incompleto';
 
