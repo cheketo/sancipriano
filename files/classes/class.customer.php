@@ -79,13 +79,14 @@ public function MakeRegs($Mode="List")
 			// 	$Groups .= '<span class="label label-warning">'.$Group['title'].'</span> ';
 			// }
 			// if(!$Groups) $Groups = 'Ninguno';
-			$Actions	= 	'<span class="roundItemActionsGroup"><a><button type="button" class="btn btnGreen ExpandButton" id="expand_'.$Row->ID.'"><i class="fa fa-plus"></i></button></a>';
-			$Actions	.= 	'<a href="edit.php?id='.$Row->ID.'"><button type="button" class="btn btnBlue"><i class="fa fa-pencil"></i></button></a>';
+			$Actions	= 	'<span class="roundItemActionsGroup"><a><button type="button" class="btn bg-navy ExpandButton" id="expand_'.$Row->ID.'"><i class="fa fa-plus"></i></button></a> ';
+			$Actions	.= 	'<a aria-label="Cuenta Corriente" class="hint--bottom hint--bounce hint--success" href="view.php?id='.$Row->ID.'"><button type="button" class="btn btn-success"><i class="fa fa-dollar"></i></button></a>';
+			$Actions	.= 	'<a aria-label="Editar" class="hint--bottom hint--bounce hint--info" href="edit.php?id='.$Row->ID.'"><button type="button" class="btn btnBlue"><i class="fa fa-pencil"></i></button></a>';
 			if($Row->Data['status']=="A")
 			{
-				$Actions	.= '<a class="deleteElement" process="../../library/processes/proc.common.php" id="delete_'.$Row->ID.'"><button type="button" class="btn btnRed"><i class="fa fa-trash"></i></button></a>';
+				$Actions	.= '<a aria-label="Eliminar" class="hint--bottom hint--bounce hint--error deleteElement" process="../../library/processes/proc.common.php" id="delete_'.$Row->ID.'"><button type="button" class="btn btnRed"><i class="fa fa-trash"></i></button></a>';
 			}else{
-				$Actions	.= '<a class="activateElement" process="../../library/processes/proc.common.php" id="activate_'.$Row->ID.'"><button type="button" class="btn btnGreen"><i class="fa fa-check-circle"></i></button></a>';
+				$Actions	.= '<a aria-label="Activar" class="hint--bottom hint--bounce hint--success activateElement" process="../../library/processes/proc.common.php" id="activate_'.$Row->ID.'"><button type="button" class="btn btnGreen"><i class="fa fa-check-circle"></i></button></a>';
 			}
 			$Actions	.= '</span>';
 			// echo '<pre>';
@@ -120,7 +121,10 @@ public function MakeRegs($Mode="List")
 
 							</div>';
 			}
-
+			
+			$BalanceClass = $Row->Data['balance']>=0?'success':'danger';
+			$Row->Data['balance'] = $Row->Data['balance']? $Row->Data['balance']: '0.00';
+			
 			switch(strtolower($Mode))
 			{
 				case "list":
@@ -138,8 +142,8 @@ public function MakeRegs($Mode="List")
 									</div>
 									<div class="col-lg-2 col-md-3 col-sm-2 hideMobile990">
 										<div class="listRowInner">
-											<span class="listTextStrong">Deuda</span>
-											<span class="emailTextResp"><span class="label label-danger">$ 712.32</span>
+											<span class="listTextStrong">Saldo</span>
+											<span class="emailTextResp"><span class="label label-'.$BalanceClass.'">$ '.$Row->Data['balance'].'</span>
 										</div>
 									</div>
 									<div class="col-lg-3 col-md-3 col-sm-2 hideMobile990">
@@ -221,7 +225,7 @@ public function MakeRegs($Mode="List")
 	protected function InsertSearchButtons()
 	{
 		return '<!-- New Button -->
-		    	<a href="new.php"><button type="button" class="NewElementButton btn btnGreen animated fadeIn"><i class="fa fa-user-plus"></i> Nuevo Cliente</button></a>
+		    	<a aria-label="Nuevo Cliente" class="hint--bottom hint--bounce hint--success" href="new.php"><button type="button" class="NewElementButton btn btnGreen animated fadeIn"><i class="fa fa-user-plus"></i></button></a>
 		    	<!-- /New Button -->';
 	}
 
@@ -793,7 +797,7 @@ public function MakeRegs($Mode="List")
                         <h4 class="subTitleB"><i class="fa fa-truck"></i> Repartidores</h4>
                         <div id="agent_list_'.$ID.'" branch="'.$ID.'" class="row">
                             <div class="col-xs-12">
-                                '.insertElement('multiple','select_broker_'.$ID,$Brokers,'form-control select2 selectTags BrokerSelect','style="width:100%;" branch="'.$ID.'"',$this->fetchAssoc('admin_user',"admin_id,CONCAT(first_name,' ',last_name) as name","status='A' AND profile_id = 361",'name'),'0','Seleccione una Opci&oacute;n').'
+                                '.insertElement('multiple','select_broker_'.$ID,$Brokers,'form-control select2 selectTags BrokerSelect','style="width:100%;" branch="'.$ID.'"',$this->fetchAssoc('admin_user a INNER JOIN relation_admin_group b ON (a.admin_id=b.admin_id)',"a.admin_id,CONCAT(a.first_name,' ',a.last_name) AS name","b.group_id=1 AND status='A'",'name'),'0','Seleccione una Opci&oacute;n').'
                                 '.insertElement('hidden','brokers_'.$ID,$Brokers).'
                             </div>
                         </div>

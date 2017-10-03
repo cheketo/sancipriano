@@ -133,6 +133,18 @@
 		return $Array;
 	}
 	
+	function DBDate($Date)
+	{
+		$Date = explode(" ",$Date);
+		return implode('/',array_reverse(explode("-",$Date[0])));
+	}
+	
+	function ToDBDate($Date)
+	{
+		$Date = explode(" ",$Date);
+		return implode('-',array_reverse(explode("/",$Date[0])));
+	}
+	
 	function DateTimeFormat($DateTime,$Mode='')
 	// Returns a formated date
 	{

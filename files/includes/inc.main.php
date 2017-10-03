@@ -40,4 +40,7 @@
 	$Foot	= new Foot();
 	/* SETTING MENU OF THE DOCUMENT */
 	$Menu = new Menu();
+	
+	/* CHANGE STATUS FOR EXPIRED DELIVERYS */
+	CustomerDelivery::CheckExpired($DB);
 ?>

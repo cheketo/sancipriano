@@ -4,9 +4,12 @@ class CustomerOrder extends DataBase
 {
 	var	$ID;
 	var $Data;
+	var $Delivery;
+	var $DeliveryMan;
 	var $Items 			= array();
 	var $Table			= "customer_order";
 	var $TableID		= "order_id";
+	var $MovementConcept = 'Orden de Compra Nº';
 	
 	const DEFAULTIMG	= "../../../skin/images/providers/default/order.png";
 
@@ -19,10 +22,6 @@ class CustomerOrder extends DataBase
 			$this->Data = $Data[0];
 			$this->ID = $ID;
 			$this->Data['items'] = $this->GetItems();
-			// $Provider = $this->fetchAssoc("product_provider","name","provider_id=".$this->Data['customer_id']);
-			// $this->Data['provider'] = $Provider[0]['name'];
-			// $Quantity = $this->fetchAssoc("product_provider_purchase_order_item","SUM(quantity) AS total",$this->TableID."=".$this->ID);
-			// $this->Data['quantity'] = $Quantity[0]['total'];
 		}
 	}
 	
@@ -30,10 +29,46 @@ class CustomerOrder extends DataBase
 	{
 		if(empty($this->Items))
 		{
-			$this->Items = $this->fetchAssoc($this->Table."_item a LEFT JOIN product b ON (a.product_id = b.product_id) LEFT JOIN currency c ON (a.currency_id=c.currency_id)","a.*,(a.price * a.quantity) AS total,b.title,c.prefix as currency",$this->TableID."=".$this->ID,'a.item_id');
+			$this->Items = $this->fetchAssoc($this->Table."_item a LEFT JOIN product b ON (a.product_id = b.product_id) LEFT JOIN currency c ON (a.currency_id=c.currency_id) INNER JOIN product_size d ON (d.size_id=b.size_id)","a.*,(a.price * a.quantity) AS total,b.title,d.prefix AS size,d.decimal,c.prefix as currency",$this->TableID."=".$this->ID,'a.item_id');
 				//echo $this->lastQuery();
 		}
 		return $this->Items;
+	}
+	
+	public function GetDelivery()
+	{
+		if(!$this->Delivery)
+		{
+			$this->Delivery = $this->fetchAssoc('customer_delivery','*','delivery_id='.$this->Data['delivery_id']);
+			$this->Delivery = $this->Delivery[0];
+		}
+		return $this->Delivery;
+	}
+	
+	public function GetDeliveryMan()
+	{
+		if($this->Data['delivery_id'])
+		{
+			$Delivery = $this->GetDelivery();
+			if(!$this->DeliveryMan)
+			{
+				$this->DeliveryMan = $this->fetchAssoc('admin_user','*','admin_id='.$Delivery['delivery_man_id']);
+				$this->DeliveryMan = $this->DeliveryMan[0];
+				$this->Data['delivery_man'] = $this->DeliveryMan['first_name'].' '.$this->DeliveryMan['last_name'];
+			}
+		}
+		return $this->DeliveryMan;
+	}
+	
+	public function GetTotalFinal($OrderID)
+	{
+		if($OrderID>0)
+		{
+			$Total = $this->fetchAssoc("customer_order_item","SUM((price*quantity_delivered)) AS total","delivered='Y' AND order_id=".$OrderID);
+			return $Total[0]['total'];
+		}else{
+			return 0;
+		}
 	}
 
 	public function GetDefaultImg()
@@ -63,12 +98,23 @@ public function MakeRegs($Mode="List")
 			// 	$Actions	.= '<a class="associateElement" order="'.$Row->ID.'" id="activate_'.$Row->ID.'"><button type="button" class="btn btn-dropbox" title="Asociar a reparto"><i class="fa fa-sign-out"></i></button></a>';
 			// }
 			
-			if($Row->Data['status']=="P" || $Row->Data['status']=="W")
+			if($Row->Data['status']=="P" || $Row->Data['status']=="A")
 			{
-				$Actions	.= 	'<a href="edit.php?id='.$Row->ID.'"><button type="button" class="btn btnBlue" title="Editar orden"><i class="fa fa-pencil"></i></button></a>';
-				$Actions	.= '<a class="deleteElement" process="../../library/processes/proc.common.php" title="Eliminar orden" id="delete_'.$Row->ID.'"><button type="button" class="btn btnRed"><i class="fa fa-trash"></i></button></a>';
+				if($Row->Data['delivery_status']=="P")
+					$Actions	.= 	'<a href="edit.php?id='.$Row->ID.'"><button type="button" class="btn btnBlue" title="Editar orden"><i class="fa fa-pencil"></i></button></a>';
 				
+				if($Row->Data['status']=="A" && $Row->Data['type']=="Y")
+					$Actions	.= 	'<a href="payment.php?id='.$Row->ID.'"><button type="button" class="btn btnGreen" title="Pagar Orden"><i class="fa fa-dollar"></i></button></a>';
+				if($Row->Data['delivery_id']==0)
+					$Actions	.= '<a class="deleteElement" process="../../library/processes/proc.common.php" title="Eliminar orden" id="delete_'.$Row->ID.'"><button type="button" class="btn btnRed"><i class="fa fa-trash"></i></button></a>';
+				
+			}elseif($Row->Data['status']=="V"){
+				$Actions	.= 	'<a href="edit.php?id='.$Row->ID.'"><button type="button" class="btn btn-bitbucket" title="Reactivar orden"><i class="fa fa-refresh"></i></button></a>';
+				$Actions	.= '<a class="deleteElement" process="../../library/processes/proc.common.php" title="Eliminar orden" id="delete_'.$Row->ID.'"><button type="button" class="btn btnRed"><i class="fa fa-trash"></i></button></a>';
+			}elseif($Row->Data['status']=="F"){
+				$Actions	.= 	'<a href="print.php?id='.$Row->ID.'" target="_blank"><button type="button" class="btn btn-info" title="Imprimir Recibo"><i class="fa fa-print"></i></button></a>';	
 			}
+			
 			$Actions	.= '</span>';
 			// echo '<pre>';
 			// print_r($Row->Data['items']);
@@ -125,6 +171,16 @@ public function MakeRegs($Mode="List")
 											<span class="emailTextResp">'.$Row->Data['extra'].'</span>
 										</div>
 									</div>';
+						
+						if($Row->Data['delivery_id'])
+						{
+							$DeliveryMan	= $Row->GetDeliveryMan();
+							$Col3Title = 'Repartidor';
+							$Col3Value = $DeliveryMan['first_name']." ".$DeliveryMan['last_name'];
+						}else{
+							$Col3Title = 'Cant. Total';
+							$Col3Value = $Rows[$i]['quantity'];
+						}
 									
 					$RowBackground = $i % 2 == 0? '':' listRow2 ';
 					
@@ -142,8 +198,8 @@ public function MakeRegs($Mode="List")
 									</div>
 									<div class="col-lg-3 col-md-3 col-sm-2 hideMobile990">
 										<div class="listRowInner">
-											<span class="listTextStrong">Cant. Total</span>
-											<span class="listTextStrong"><span class="label label-primary">'.$Rows[$i]['quantity'].'</span></span>
+											<span class="listTextStrong">'.$Col3Title.'</span>
+											<span class="listTextStrong"><span class="label label-primary">'.$Col3Value.'</span></span>
 										</div>
 									</div>
 									<div class="col-lg-2 col-md-3 col-sm-2 hideMobile990">
@@ -184,12 +240,17 @@ public function MakeRegs($Mode="List")
 				break;
 			}
         }
-        if(!$Regs) $Regs.= '<div class="callout callout-info"><h4><i class="icon fa fa-info-circle"></i> No se encontraron ordenes de compras.</h4><p>Puede crear una orden haciendo click <a href="new.php">aqui</a>.</p></div>';
+        if(!$Regs) $Regs.= '<div class="callout callout-info"><h4><i class="icon fa fa-info-circle"></i> No se encontraron ordenes de compras.</h4><p>Puede crear una orden haciendo click <a href="new.php?type='.$_GET['type'].'">aqui</a>.</p></div>';
 		return $Regs;
 	}
 	
 	protected function InsertSearchField()
 	{
+		if($_GET['delivery_date']=="today")
+		{
+			$Date = date("d/m/Y");
+		}
+		
 		return '<!-- Provider -->
           <div class="input-group">
             <span class="input-group-addon order-arrows" order="name" mode="asc"><i class="fa fa-sort-alpha-asc"></i></span>
@@ -203,7 +264,7 @@ public function MakeRegs($Mode="List")
           <!-- Delivery Date -->
           <div class="input-group">
             <span class="input-group-addon order-arrows sort-activated" order="delivery_date" mode="asc"><i class="fa fa-sort-alpha-asc"></i></span>
-            '.insertElement('text','delivery_date','','form-control delivery_date','placeholder="Entrega"').'
+            '.insertElement('text','delivery_date',$Date,'form-control delivery_date','placeholder="Entrega"').'
           </div>
           <!-- Extra -->
           <div class="input-group">
@@ -220,9 +281,9 @@ public function MakeRegs($Mode="List")
 		else
 			$Status = 'P';
 		$HTML = '<!-- New Button -->
-		    	<a href="new.php" title="Crear nueva orden de compra"><button type="button" class="NewElementButton btn btnGreen animated fadeIn"><i class="fa fa-plus-square"></i></button></a>
+		    	<a href="new.php?type='.$_GET['type'].'" title="Crear nueva orden de compra"><button type="button" class="NewElementButton btn btnGreen animated fadeIn"><i class="fa fa-plus-square"></i></button></a>
 		    	<!-- /New Button -->';
-		if($Status=='P' || $Status=='W') $HTML .= '<button type="button" title="Asociar a un repartidor" class="btn btnBlue animated fadeIn Hidden" id="Associate"><i class="fa fa-sign-out"></i></button>';
+		if(($Status=='P' || $Status=='A') && $_GET['type']=='N') $HTML .= '<button type="button" title="Asociar a un repartidor" class="btn btnBlue animated fadeIn Hidden" id="Associate"><i class="fa fa-sign-out"></i></button>';
 		return $HTML;
 	}
 	
@@ -242,10 +303,16 @@ public function MakeRegs($Mode="List")
 		if($_POST['name']) $this->SetWhereCondition("d.address","LIKE","%".$_POST['name']."%");
 		if($_POST['title']) $this->SetWhereCondition("c.title","LIKE","%".$_POST['title']."%");
 		if($_POST['extra']) $this->SetWhereCondition("a.extra","LIKE","%".$_POST['extra']."%");
-		if($_POST['delivery_date'])
+		if($_REQUEST['delivery_date'])
 		{
-			$_POST['delivery_date'] = implode("-",array_reverse(explode("/",$_POST['delivery_date'])));
-			$this->SetWhereCondition("a.delivery_date","=",$_POST['delivery_date']);
+			if($_POST['delivery_date'])
+			{
+				$_POST['delivery_date'] = implode("-",array_reverse(explode("/",$_POST['delivery_date'])));
+				$this->SetWhereCondition("a.delivery_date","=",$_POST['delivery_date']);
+			}elseif($_GET['delivery_date']=="today"){
+				$Date = date("Y-m-d");
+				$this->SetWhereCondition("a.delivery_date","=",$Date);
+			}
 		}
 		
 		
@@ -256,28 +323,35 @@ public function MakeRegs($Mode="List")
 		}else{
 			$this->SetWhereCondition("a.status","=","P");
 		}
-			if(strtolower($_POST['view_order_mode'])=="desc")
-				$Mode = "DESC";
-			else
-				$Mode = $_POST['view_order_mode'];
-			
-			$Order = strtolower($_POST['view_order_field']);
-			switch($Order)
-			{
-				case "name": 
-					$Order = 'address';
-					$Prefix = "d.";
-				break;
-				case "title": 
-					$Order = 'title';
-					$Prefix = "c.";
-				break;
-				default:
-					$Order = 'delivery_date';
-					$Prefix = "a.";	
-				break;
-			}
-			$this->SetOrder($Prefix.$Order." ".$Mode);
+		
+		if($_REQUEST['type'])
+		{
+			if($_POST['type']) $this->SetWhereCondition("a.type","=", $_POST['type']);
+			if($_GET['type']) $this->SetWhereCondition("a.type","=", $_GET['type']);	
+		}
+		
+		if(strtolower($_POST['view_order_mode'])=="desc")
+			$Mode = "DESC";
+		else
+			$Mode = $_POST['view_order_mode'];
+		
+		$Order = strtolower($_POST['view_order_field']);
+		switch($Order)
+		{
+			case "name": 
+				$Order = 'address';
+				$Prefix = "d.";
+			break;
+			case "title": 
+				$Order = 'title';
+				$Prefix = "c.";
+			break;
+			default:
+				$Order = 'delivery_date';
+				$Prefix = "a.";	
+			break;
+		}
+		$this->SetOrder($Prefix.$Order." ".$Mode);
 		// }
 		if($_POST['regsperview'])
 		{
@@ -319,13 +393,12 @@ public function MakeRegs($Mode="List")
 		}
 		
 		// Basic Data
-		$Type			= $_POST['type'];
+		$Type			= $_POST['order_type'];
 		$BranchID		= $_POST['customer'];
 		$CurrencyID		= $_POST['currency'];
 		$Extra			= $_POST['extra'];
 		$Total			= $_POST['total_price'];
-		$Admin			= new AdminData($_SESSION['admin_id']);
-		$Status			= $Admin->IsOwner()? "A" : "P";
+		$Status			= $Type=="Y"? "A":"P";
 		$Date			= implode("-",array_reverse(explode("/",$_POST['delivery_date'])));
 		$Customer 		= $this->fetchAssoc('customer_branch','customer_id',"branch_id=".$BranchID);
 		$CustomerID		= $Customer[0]['customer_id'];
@@ -333,7 +406,7 @@ public function MakeRegs($Mode="List")
 		$Insert			= $this->execQuery('insert',$this->Table,'type,branch_id,customer_id,currency_id,extra,total,delivery_date,status,creation_date,created_by,company_id',"'".$Type."',".$BranchID.",".$CustomerID.",".$CurrencyID.",'".$Extra."',".$Total.",'".$Date."','".$Status."',NOW(),".$_SESSION['admin_id'].",".$_SESSION['company_id']);
 		//echo $this->lastQuery();
 		$NewID 		= $this->GetInsertId();
-		$New 	= new ProviderPurchaseOrder($NewID);
+		$New 	= new CustomerOrder($NewID);
 		
 		// INSERT ITEMS
 		foreach($Items as $Item)
@@ -342,15 +415,26 @@ public function MakeRegs($Mode="List")
 				$Fields .= "),(";
 			$Fields .= $NewID.",".$CustomerID.",".$Item['id'].",".$Item['price'].",".$Item['quantity'].",'".$Date."',".$CurrencyID.",NOW(),".$_SESSION['admin_id'].",".$_SESSION['company_id'];
 		}
+		
 		$this->execQuery('insert','customer_order_item','order_id,customer_id,product_id,price,quantity,delivery_date,currency_id,creation_date,created_by,company_id',$Fields);
 		//echo $this->lastQuery();
-		
+		if($Type=="N")
+		{
+			if($_POST['delivery_man'])
+				$this->Associate($NewID,$_POST['delivery_man']);
+			
+			// INSERT MOVEMENT
+			// Movement::InsertMovement($Total,$CustomerID,1,$this->MovementConcept.$NewID,$NewID);
+		}else{
+			// INSERT MOVEMENT
+			// Movement::InsertMovement($Total,$CustomerID,1,'Compra en Local Nº'.$NewID,$NewID);
+		}
 	}
 	
 	public function Update()
 	{
 		$ID 	= $_POST['id'];
-		$Edit	= new ProviderPurchaseOrder($ID);
+		$Edit	= new CustomerOrder($ID);
 		
 		// ITEMS DATA
 		$Items = array();
@@ -358,33 +442,28 @@ public function MakeRegs($Mode="List")
 		{
 			if($_POST['item_'.$I])
 			{
-				$ItemDate = implode("-",array_reverse(explode("/",$_POST['date_'.$I])));
-				$Items[] = array('id'=>$_POST['item_'.$I],'price'=>$_POST['price_'.$I],'quantity'=>$_POST['quantity_'.$I], 'delivery_date'=>$ItemDate );
-				if(!$Date)
-				{
-					$Date = $ItemDate;
-				}
-				if(strtotime($ItemDate." 00:00:00") > strtotime($Date." 00:00:00")){
-					$Date = $LastDate;
-				}
+				$Items[] = array('id'=>$_POST['item_'.$I],'price'=>$_POST['price_'.$I],'quantity'=>$_POST['quantity_'.$I]);
 			}
 		}
 		
 		// Basic Data
-		$Type 			= $_POST['type'];
-		$Name			= $_POST['name'];
-		$CUIT			= str_replace('-','',$_POST['cuit']);
-		$IVA			= $_POST['iva'];
-		$GrossIncome	= $_POST['gross_income_number'];
-		$Email 			= strtolower($_POST['email']);
-		$Phone			= $_POST['phone'];
-		$Website 		= strtolower($_POST['website']);
-		$Fax			= $_POST['fax'];
+		$Type			= $_POST['order_type'];
+		$BranchID		= $_POST['customer'];
+		$CurrencyID		= $_POST['currency']?$_POST['currency']:2;
+		$Extra			= $_POST['extra'];
+		$Total			= $_POST['total_price'];
+		$Status			= "P";
+		$Date			= implode("-",array_reverse(explode("/",$_POST['delivery_date'])));
+		$Customer 		= $this->fetchAssoc('customer_branch','customer_id',"branch_id=".$BranchID);
+		$CustomerID		= $Customer[0]['customer_id'];
 		
 		
 		
-		$Update		= $this->execQuery('update','product_provider',"name='".$Name."',postal_code='".$PostalCode."',address='".$Address."',cuit=".$CUIT.",iva='".$IVA."',gross_income_tax='".$GrossIncome."',email='".$Email."',fax='".$Fax."',phone='".$Phone."',website='".$Website."',country_id=".$CountryID.",province_id='".$ProvinceID."',region_id=".$RegionID.",zone_id='".$ZoneID."',lat=".$Lat.",lng=".$Lng.",logo='".$Image."',updated_by=".$_SESSION['admin_id'],"provider_id=".$ID);
+		$Update		= $this->execQuery('update','customer_order',"type='".$Type."',branch_id=".$BranchID.",customer_id='".$CustomerID."',currency_id=".$CurrencyID.",extra='".$Extra."',total=".$Total.",delivery_date='".$Date."',status='".$Status."',updated_by=".$_SESSION['admin_id'],"order_id=".$ID);
 		//echo $this->lastQuery();
+		
+		if($_POST['delivery_man'] && $Type=='N')
+			$this->Associate($ID,$_POST['delivery_man']);
 		
 		// PROCESS AGENTS
 		$Agents = array();
@@ -394,31 +473,53 @@ public function MakeRegs($Mode="List")
 				$Agents[] = array('name'=>ucfirst($_POST['agent_name_'.$i]),'charge'=>ucfirst($_POST['agent_charge_'.$i]),'email'=>$_POST['agent_email_'.$i],'phone'=>$_POST['agent_phone_'.$i],'extra'=>$_POST['agent_extra_'.$i]);
 		}
 		
-		// DELETE OLD AGENTS
-		$this->execQuery('delete','product_provider_agent',"provider_id = ".$ID);
+		// DELETE OLD ITEMS
+		$this->execQuery('delete','customer_order_item',"order_id = ".$ID);
 		
-		// INSERT NEW AGENTS
-		foreach($Agents as $Agent)
+		// INSERT ITEMS
+		foreach($Items as $Item)
 		{
 			if($Fields)
 				$Fields .= "),(";
-			$Fields .= $ID.",'".$Agent['name']."','".$Agent['charge']."','".$Agent['email']."','".$Agent['phone']."','".$Agent['extra']."'";
+			$Fields .= $ID.",".$CustomerID.",".$Item['id'].",".$Item['price'].",".$Item['quantity'].",'".$Date."',".$CurrencyID.",NOW(),".$_SESSION['admin_id'].",".$_SESSION['company_id'];
 		}
-		$this->execQuery('insert','product_provider_agent','provider_id,name,charge,email,phone,extra',$Fields);
+		$this->execQuery('insert','customer_order_item','order_id,customer_id,product_id,price,quantity,delivery_date,currency_id,creation_date,created_by,company_id',$Fields);
+		//echo $this->lastQuery();
+		if($Type=="N")
+		{
+			// UPDATE MOVEMENT
+			// Movement::UpdateMovementByOrderID($Total,$CustomerID,1,$this->MovementConcept.$ID,$ID);
+		}else{
+			// UPDATE MOVEMENT
+			Movement::UpdateMovementByOrderID($Total,$CustomerID,1,'Compra en Local Nº'.$ID,$ID);
+		}
 	}
 	
 	public function Activate()
 	{
 		$ID	= $_POST['id'];
-		$Order = new ProviderPurchaseOrder($ID);
+		$Order = new CustomerOrder($ID);
 		$Status = $Order->Data['status'] == 'I'? 'P' : 'A';
+		Movement::ActivateOrdersMovements($ID);
 		$this->execQuery('update',$this->Table,"status = '".$Status."'",$this->TableID."=".$ID);
 	}
 	
 	public function Delete()
 	{
+		// INSERT MOVEMENT??
 		$ID	= $_POST['id'];
+		Movement::DeleteOrdersMovements($ID);
 		$this->execQuery('update',$this->Table,"status = 'I'",$this->TableID."=".$ID);
+		$Order = $this->fetchAssoc($this->Table,'*','order_id = '.$ID);
+		$Order = $Order[0];
+		if($Order['delivery_id']>0)
+		{
+			$OldDelivery = $this->fetchAssoc($this->Table,'*'," order_id<>".$Order['order_id']." AND delivery_id=".$Order['delivery_id']);
+			if(count($OldDelivery)<1)
+			{
+				$this->execQuery('DELETE','customer_delivery','delivery_id='.$Order['delivery_id']);
+			}
+		}
 	}
 	
 	public function Search()
@@ -530,18 +631,18 @@ public function MakeRegs($Mode="List")
                 <form id="item_form_'.$ID.'">
                 <div class="col-xs-4 txC">
                 	<span id="Item'.$ID.'" class="Hidden ItemText'.$ID.'"></span>
-                  '.insertElement('select','item_'.$ID,'','ItemField'.$ID.' form-control selectChosen itemSelect','data-placeholder="Seleccione un Art&iacute;culo" validateEmpty="Seleccione un Art&iacute;culo" item="'.$ID.'"',$this->fetchAssoc('product','product_id,title',"status='A' AND company_id=".$_SESSION['company_id'],'title'),'',' ').'
+                  '.insertElement('select','item_'.$ID,'','ItemField'.$ID.' form-control selectChosen chosenSelect itemSelect','data-placeholder="Seleccione un Art&iacute;culo" validateEmpty="Seleccione un Art&iacute;culo" item="'.$ID.'"',$this->fetchAssoc('product a INNER JOIN product_brand b ON (a.brand_id=b.brand_id)',"a.product_id,CONCAT(a.title,' - ',b.name) AS title","a.status='A' AND a.company_id=".$_SESSION['company_id'],'title'),'',' ').'
                 </div>
                 <div class="col-xs-1 txC">
                 	<span id="Price'.$ID.'" class="Hidden ItemText'.$ID.'"></span>
-                  '.insertElement('text','price_'.$ID,'','ItemField'.$ID.' form-control calcable','data-inputmask="\'mask\': \'9{+}.99\'" placeholder="Precio" validateEmpty="Ingrese un precio"').'
+                  '.insertElement('text','price_'.$ID,'','ItemField'.$ID.' txC form-control calcable','data-inputmask="\'mask\': \'9{+}.99\'" placeholder="Precio" validateEmpty="Ingrese un precio"').'
                 </div>
                 <div class="col-xs-1 txC">
                 	<span id="Quantity'.$ID.'" class="Hidden ItemText'.$ID.'"></span>
-                  '.insertElement('text','quantity_'.$ID,'','ItemField'.$ID.' form-control calcable QuantityItem','data-inputmask="\'mask\': \'9{+}\'" placeholder="Cantidad" validateEmpty="Ingrese una cantidad"').'
+                  '.insertElement('text','quantity_'.$ID,'','ItemField'.$ID.' txC form-control calcable QuantityItem','data-inputmask="\'mask\': \'9{+}\'" placeholder="Cantidad" validateEmpty="Ingrese una cantidad"').'
                 </div>
                 
-                <div  id="item_number_'.$ID.'" class="col-xs-3 txC item_number" total="0" item="'.$ID.'">'.$TotalPrice.'</div>
+                <div  id="item_number_'.$ID.'" class="col-xs-3 txC item_number txC" total="0" item="'.$ID.'">'.$TotalPrice.'</div>
                 <div class="col-xs-3 txC">
 				  <button type="button" id="SaveItem'.$ID.'" class="btn btnGreen SaveItem" style="margin:0px;" item="'.$ID.'"><i class="fa fa-check"></i></button>
 				  <button type="button" id="EditItem'.$ID.'" class="btn btnBlue EditItem Hidden" style="margin:0px;" item="'.$ID.'"><i class="fa fa-pencil"></i></button>
@@ -552,13 +653,151 @@ public function MakeRegs($Mode="List")
             echo $HTML;
 	}
 	
-	public function Associate()
+	public function Customerdata()
 	{
-		$IDs = $_POST['selected']."0";
-		$Admin = $_POST['user'];
-		if(intval($Admin)>0)
-			$this->execQuery('update',$this->Table,"status='W', delivery_man_id=".$Admin,'order_id IN ('.$IDs.')');
+		$Branch = $_POST['id'];
+		if($Branch>0)
+		{
+			$Customer = $this->fetchAssoc('customer a INNER JOIN customer_branch b ON (b.customer_id=a.customer_id) INNER JOIN customer_type c ON (a.type_id=c.type_id)',"a.balance,c.name AS type","b.branch_id=".$Branch);
+			$Customer = $Customer[0];
+			$Class = $Customer['balance']<0? 'danger':'success';
+			$Customer['balance'] = $Customer['balance']? $Customer['balance']: '0.00';
+			$HTML = '
+			<h4 class="subTitleB"><i class="fa fa-info"></i> Informaci&oacute;n del Cliente</h4>
+			<div class="row">
+				<div class="col-sm-6 col-xs-12">
+					Tipo de Cliente: <span class="label label-info"><i class="fa fa-briefcase"></i> '.$Customer['type'].'</span>
+				</div>
+				<div class="col-sm-6 col-xs-12">
+					Balance: <span class="label label-'.$Class.'"><i class="fa fa-dollar"></i> '.$Customer['balance'].'</span>
+				</div>
+			</div>
+			';
+			echo $HTML;
+		}
+	}
+	
+	public function Associate($OrderID=0,$DeliveryManID=0)
+	{
+		$IDs = $OrderID==0? $_POST['selected']."0": $OrderID;	
+		$DeliveryMan = $DeliveryManID==0? $_POST['user']: $DeliveryManID;
+		if(intval($DeliveryMan)>0)
+		{
+			$Orders = $this->fetchAssoc($this->Table,'*','order_id IN ('.$IDs.')');
+			foreach($Orders as $Order)
+			{
+				
+				$DeliveryDate = explode(" ",$Order['delivery_date']);
+				$DeliveryDate = $DeliveryDate[0];
+				
+				$Position = 1;
+				
+				$Delivery = $this->fetchAssoc('customer_delivery','*',"delivery_man_id = ".$DeliveryMan." AND delivery_date='".$DeliveryDate."' AND status='P'");
+				if(!$Delivery[0]['delivery_id'])
+				{
+					$this->execQuery('insert','customer_delivery','delivery_man_id,delivery_date,company_id,created_by,creation_date',$DeliveryMan.",'".$DeliveryDate."',".$_SESSION['company_id'].",".$_SESSION['admin_id'].",NOW()");
+					$DeliveryID = $this->GetInsertId();
+				}else{
+					$DeliveryID = $Delivery[0]['delivery_id'];
+					$MaxPosition = $this->fetchAssoc($this->Table,'max(position)+1 AS position'," order_id<>".$Order['order_id']." AND delivery_id=".$DeliveryID);
+					if($MaxPosition[0]['position']>1)
+						$Position = $MaxPosition[0]['position'];
+				}
+				
+				if($Order['delivery_id']>0)
+				{
+					//$this->execQuery('DELETE','customer_delivery',"delivery_id NOT IN (SELECT delivery_id FROM customer_order) AND delivery_id <> ".$DeliveryID);
+					$OldDelivery = $this->fetchAssoc($this->Table,'*'," order_id<>".$Order['order_id']." AND delivery_id=".$Order['delivery_id']);
+					if(!count($OldDelivery)>0)
+					{
+						$this->execQuery('DELETE','customer_delivery','delivery_id='.$Order['delivery_id']);
+					}
+				}
+				$this->execQuery('update',$this->Table,"status='A', type='N', updated_by=".$_SESSION['admin_id'].", delivery_id=".$DeliveryID.",position=".$Position,'order_id='.$Order['order_id']);
+				//echo '<br>'.$this->lastQuery();
+			}
+		}	
+	}
+	
+	
+	// LOCAL ORDER PAYMENT
+	
+	public function Payment()
+	{
+		$OrderID = $_POST['id'];
+		$CustomerID = $_POST['cid'];
+		$OrderData = $this->fetchAssoc("customer_order","*","order_id=".$OrderID);
+		$Data = $OrderData[0];
+		$DeliveryID = $OrderData['delivery_id'];
+		$OrderStatus = $OrderData['status'];
 		
+		$TotalAmount = 0;
+		if($OrderData['status'] = 'A')
+		{
+			if(intval($_POST['cash'])>0 || intval($_POST['checks'])>0)
+				$MovementStatus = "F";
+			else
+				$MovementStatus = "A";
+			
+			// DEBIT MOVEMENT
+			$LastMovementID = $DebitMovementID = Movement::InsertMovement($_POST['total_price'],$CustomerID,5,$this->MovementConcept.$OrderID,$OrderID,$MovementStatus);
+			
+			
+			if(intval($_POST['cash'])>0 || intval($_POST['checks'])>0)
+			{
+				$TotalChecks = 0;
+				if(intval($_POST['checks'])>0)
+				{
+					$Checks = array();
+					for($I=1;$I<=intval($_POST['checks']);$I++)
+					{
+						$Checks[$I]['number'] = $_POST['check_number_'.$I];
+						$Checks[$I]['amount'] = $_POST['check_amount_'.$I];
+						$Checks[$I]['bank'] = ucfirst($_POST['check_bank_'.$I]);
+						$Checks[$I]['from'] = ucfirst($_POST['check_from_'.$I]);
+						$Checks[$I]['date'] = ToDBDate($_POST['check_date_'.$I]);
+						$TotalChecks = $TotalChecks + $Checks[$I]['amount'];
+						$InsertCheck = $Checks[$I]['number'].",".$Checks[$I]['amount'].",'".$Checks[$I]['bank']."','".$Checks[$I]['from']."','".$Checks[$I]['date']."',".$OrderID.",'P',NOW(),".$_SESSION['admin_id'];
+						$this->execQuery("INSERT","payment_check","number,amount,bank,sender,due_date,order_id,status,creation_date,created_by",$InsertCheck);
+						$CheckID = $this->GetInsertId();
+						//$InsertChecks = $InsertChecks? '),('.$InsertCheck:$InsertCheck;
+						$LastMovementID = Movement::InsertMovement($Checks[$I]['amount'],$CustomerID,2,"Pago de Orden N°".$OrderID,$OrderID,"F",2,$DebitMovementID,$CheckID);
+					}
+					
+				}
+				$TotalAmount = intval($_POST['cash']);
+				
+				if(intval($_POST['cash'])>0 && intval($_POST['checks'])>0)
+					$PaymentID = 3;
+				elseif(intval($_POST['cash'])>0)
+					$PaymentID = 1;
+				else
+					$PaymentID = 2;
+				$LastMovementID = Movement::InsertMovement($TotalAmount,$CustomerID,2,"Pago de Orden N°".$OrderID,$OrderID,"F",1,$DebitMovementID);
+				$TotalAmount += $TotalChecks;
+			}
+			
+			$Items = $_POST['items'];
+			for($I=1;$I<=$Items;$I++)
+			{
+				if($_POST['selected_'.$I]=='Y')
+				{
+					$QuantityDelivered = $_POST['quantity_'.$I];
+					$this->execQuery("UPDATE","customer_order_item","delivered='Y',status='F',quantity_delivered=".$QuantityDelivered.",payment_status='F'","item_id=".$_POST['item_'.$I]);
+				}
+			}
+			
+			//CUSTOMER BALANACE UNTIL NOW
+			$MovementData = $this->fetchAssoc("movement","*","movement_id=".$LastMovementID);
+			$FinalBalance = $MovementData[0]['balance'];
+				
+			$this->execQuery("UPDATE","customer_order","total_paid=".$TotalAmount.",balance=".$FinalBalance.",status='F',payment_status='F',delivery_status='F',updated_by=".$_SESSION['admin_id'],"order_id=".$OrderID);
+			
+			
+			
+		}else{
+			echo "403";
+		}
 	}
 }
 ?>

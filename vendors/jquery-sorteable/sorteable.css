@@ -1,0 +1,29 @@
+body.dragging, body.dragging * {
+  cursor: move !important;
+}
+
+.dragged {
+  position: absolute;
+  opacity: 0.5;
+  z-index: 2000;
+}
+
+.jquerySorteable li.placeholder {
+  position: relative;
+  /** More li styles **/
+}
+.jquerySorteable li.placeholder:before {
+  position: absolute;
+  /** Define arrowhead **/
+}
+
+.jquerySorteable {
+    cursor:pointer;
+    list-style-type: none;
+}
+
+.jquerySorteable li {
+    border:1px solid #CCC;
+    margin-bottom: 5px;
+    padding: 0px 5px;
+}

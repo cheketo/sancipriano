@@ -39,7 +39,7 @@
             <ul>
               <?php 
                 $Categories = $Category->GetAllCategories();
-                
+                $CategoryName = '';
                 foreach($Categories as $Cat)
                 {
                   if($Parent!=$Cat['parent_id'])
@@ -52,9 +52,16 @@
                       $Class = 'Hidden';
                       echo '</select></li>';
                     }
-                    echo '<li class="'.$Class.'" level="'.$Level.'" category="'.$Parent.'"><select class="category_selector" name="category_'.$Parent.'" id="category_'.$Parent.'" size="20">';
+                    echo '<li class="'.$Class.'" level="'.$Level.'" category="'.$Parent.'"><select class="category_selector" name="category_'.$Parent.'" category="'.$Data['category_id'].'" id="category_'.$Parent.'" size="20">';
                   }
-                  $Selected = $Cat['category_id']==$Data['category_id']? 'selected="selected"' : '';
+                  if($Cat['category_id']==$Data['category_id'])
+                  {
+                    $Selected = 'selected="selected"';
+                    $CategoryName = $Cat['title'];
+                  }else{
+                    $Selected = '';  
+                  }
+                  
                   echo '<option value="'.$Cat['category_id'].'" '.$Selected.'>'.$Cat['title'].'</option>';
                 }
                 echo '</select></li>';
@@ -125,17 +132,18 @@
             </div>
             <!--<div class="form-group">-->
             <!--  <label for="size">Medidas:</label>-->
-            <!--  <?php echo insertElement('text','size',$Data['size'],'form-control','placeholder="Medidas"') ?>-->
+            <!--  <?php //echo insertElement('text','size',$Data['size'],'form-control','placeholder="Medidas"') ?>-->
             <!--</div>-->
             <div class="row form-group inline-form-custom">
               <div class="col-xs-12 col-sm-4">
+                <label for="stock">Stock Actual:</label>
                 <?php echo insertElement('text','stock',$Data['stock'],'form-control','placeholder="Stock Incial"') ?>
               </div>
-              <div class="col-xs-12 col-sm-6">
+              <div class="col-xs-12 col-sm-4">
                 <label for="stock_min">Stock M&iacute;nimo:</label>
                 <?php echo insertElement('text','stock_min',$Data['stock_min'],'form-control','placeholder="Stock M&iacute;nimo"') ?>
               </div>
-              <div class="col-xs-12 col-sm-6">
+              <div class="col-xs-12 col-sm-4">
                 <label for="stock_max">Stock M&aacute;ximo:</label>
                 <?php echo insertElement('text','stock_max',$Data['stock_max'],'form-control','placeholder="Stock M&aacute;ximo"') ?>
               </div>

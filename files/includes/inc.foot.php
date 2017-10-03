@@ -14,7 +14,11 @@
 <script src="../../../files/js/app.min.js"></script>
 <!-- Alertify -->
 <script src="../../../vendors/alertify/script.alertify.js"></script>
+<!-- Chosen JS -->
+<script src="../../../vendors/chosen-js/chosen.jquery.js"></script>
 <!-- Validations -->
 <script src="../../js/script.validate.js"></script>
 <!-- Renovatio Script -->
 <script src="../../js/script.common.js"></script>
+
+

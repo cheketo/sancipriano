@@ -60,9 +60,10 @@ function ShowCategoriesList(id)
 
 $(document).ready(function(){
     ////////////////////////// SET VALUES TO SELECT FIELDS ////////////
-    if($('option[selected="selected"]').length>0)
+    
+    if($('#category').val()>0)
     {
-        var category = $('option[selected="selected"]');
+        var category = $('.category_selector[category="'+$("#category").val()+'"]').children('option[selected="selected"]');
         var categoryID = category.attr("value");
         var html = category.html();
         $("#category_selected").html(html);

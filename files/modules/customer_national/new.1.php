@@ -194,7 +194,7 @@
           <h4 class="subTitleB"><i class="fa fa-briefcase"></i> Corredores</h4>
           <div id="agent_list_1" branch="1" class="row">
             <div class="col-xs-12 col-sm-6">
-              <?php echo insertElement('select','select_broker_1','','form-control select2 selectTags BrokerSelect','',$DB->fetchAssoc('admin_user',"admin_id,CONCAT(first_name,' ',last_name) as name","status='A' AND profile_id = 361",'name'),'0','Seleccione una Opci&oacute;n'); ?>
+              <?php echo insertElement('select','select_broker_1','','form-control select2 selectTags BrokerSelect','',$DB->fetchAssoc('admin_user a INNER JOIN relation_admin_profile b ON (a.admin_id=b.admin_id)',"a.admin_id,CONCAT(a.first_name,' ',a.last_name) as name","a.status='A' AND b.group_id = 1",'name'),'0','Seleccione una Opci&oacute;n'); ?>
               <?php echo insertElement('hidden','brokers_1',''); ?>
             </div>
             <div class="col-xs-12 col-sm-6">

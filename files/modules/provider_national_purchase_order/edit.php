@@ -148,7 +148,7 @@
                   Cantidad Total: <strong id="TotalQuantity" >0</strong>
                 </div>
                 <div class="col-xs-3 txC">
-                  Costo Total: <strong  id="TotalPrice">$ 0.00</strong> <span class="text-danger">(Sin IVA)</span>
+                  Costo Total: <strong  id="TotalPrice">$ 0.00</strong>
                   <?php echo insertElement("hidden","total_price","0"); ?>
                 </div>
               </div>

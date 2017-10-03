@@ -6,19 +6,31 @@
     $Data   = $Edit->GetData();
     ValidateID($Data['order_id']);
     $Status = $Edit->Data['status'];
-    if($Status!='P' && $Status!='W')
+    if($Status=='F' || $Status=='I')
     {
-      header('Location: list.php?error=status');
+      if (isset($_SERVER["HTTP_REFERER"])) {
+        header("Location: " . $_SERVER["HTTP_REFERER"].'&error=status');
+      }else{
+        header('Location: list.php?error=status');
+      }
 			die();
     }
     $Items  = $DB->fetchAssoc('customer_order_item a INNER JOIN product b ON (a.product_id = b.product_id)','b.title AS product,a.*,(a.price * a.quantity) AS total','order_id='.$ID);
     $Branch = $DB->fetchAssoc('customer_branch','address','branch_id='.$Data['branch_id']);
     $Branch = $Branch[0]['address'];
     
+    if($Data['type']=='N' && ($Status=='A' || $Data['delivery_id']))
+    {
+      $DeliveryMan = $Edit->GetDeliveryMan();
+    }else{
+      $DeliveryOption = ' ';
+    }
     
-    $Head->setTitle("Editar Orden de ".$Branch);
-    $Head->setSubTitle($Menu->GetTitle());
-    $Head->setTitle("Editar Orden de ".$Branch);
+    $OrderType = array("Y"=>"En Local","N"=>"Con Entrega");
+    
+    $PageTitle = $Data['status']=='V'? "Reactivar":"Editar";
+    
+    $Head->setTitle($PageTitle." Orden de ".$Branch);
     $Head->setSubTitle($Menu->GetTitle());
     $Head->setStyle('../../../vendors/chosen-js/bootstrap-chosen.css'); // Select Inputs With Tags
     $Head->setStyle('../../../vendors/datepicker/datepicker3.css'); // Date Picker Calendar
@@ -33,21 +45,37 @@
             <!--<form id="new_order">-->
             <?php echo insertElement("hidden","action",'update'); ?>
             <?php echo insertElement("hidden","id",$ID); ?>
-            <?php echo insertElement("hidden","type",'N'); ?>
+            <?php echo insertElement("hidden","status",$Status); ?>
             <?php echo insertElement("hidden","items",count($Items)); ?>
-            <h4 class="subTitleB"><i class="fa fa-building"></i> Proveedor</h4>
+            <h4 class="subTitleB"><i class="fa fa-building"></i> Cliente</h4>
             <div class="row form-group inline-form-custom">
               <div class="col-xs-12">
-                  <?php echo insertElement('select','customer',$Edit->Data['branch_id'],'form-control chosenSelect','data-placeholder="Seleccione un Cliente" validateEmpty="Seleccione un cliente"',$DB->fetchAssoc('customer_branch','branch_id,address',"company_id=".$_SESSION['company_id'],'name'),'',' '); ?>
+                  <?php echo insertElement('select','customer',$Data['branch_id'],'form-control chosenSelect','data-placeholder="Seleccione un Cliente" validateEmpty="Seleccione un cliente"',$DB->fetchAssoc('customer a INNER JOIN customer_branch b ON (a.customer_id=b.customer_id) INNER JOIN customer_type c ON (a.type_id=c.type_id)',"b.branch_id,CONCAT(b.address,' - (Z ',a.zone,')') as address","a.status='A' AND a.company_id=".$_SESSION['company_id'],'b.address'),' ',''); ?>
+              </div>
+            </div>
+            <div id="CustomerData">
+              
+            </div>
+            <br>
+            <h4 class="subTitleB"><i class="fa fa-ticket"></i> Tipo de Orden</h4>
+            <div class="row form-group inline-form-custom">
+              <div class="col-xs-12">
+                  <?php echo insertElement('select','order_type',$Data['type'],'form-control chosenSelect','disabled="disabled"',$OrderType); ?>
               </div>
             </div>
             
-           
-            
-            
+            <?php $Hidden = $Data['type']=='N'?'':'Hidden'; ?>
+            <div id="DeliveryWrapper" class="<?php echo $Hidden; ?>">
+              <h4 class="subTitleB"><i class="fa fa-truck"></i> Repartidor</h4>
+              <div class="row form-group inline-form-custom">
+                <div class="col-xs-12">
+                    <?php echo insertElement('select','delivery_man',$DeliveryMan['admin_id'],'form-control chosenSelect','data-placeholder="Seleccionar un Repartidor"',$DB->fetchAssoc('admin_user a INNER JOIN relation_admin_group b ON (a.admin_id=b.admin_id)',"a.admin_id,CONCAT(a.first_name,' ',a.last_name) AS name","b.group_id=1 AND a.status='A'",'name'),'0','Sin Repartidor'); ?>
+                </div>
+              </div>
+            </div>
            
             <br>
-            <h4 class="subTitleB"><i class="fa fa-cubes"></i> Art&iacute;culos</h4>
+            <h4 class="subTitleB"><i class="fa fa-cubes"></i> Productos</h4>
             
             <div style="margin:0px 10px;">
               <div class="row form-group inline-form-custom bg-light-blue" style="margin-bottom:0px!important;">
@@ -61,10 +89,7 @@
                 <div class="col-xs-1 txC">
                   <strong>Cantidad</strong>
                 </div>
-                <div class="col-xs-2 txC">
-                  <strong>Fecha Entrega</strong>
-                </div>
-                <div class="col-xs-1 txC"><strong>Costo</strong></div>
+                <div class="col-xs-3 txC"><strong>Costo</strong></div>
                 <div class="col-xs-3 txC">
                   <strong>Acciones</strong>
                 </div>
@@ -83,22 +108,18 @@
                   <form id="item_form_<?php echo $I ?>" name="item_form_<?php echo $I ?>">
                   <div class="col-xs-4 txC">
                     <span id="Item<?php echo $I ?>" class="Hidden ItemText<?php echo $I ?>"><?php echo $Item['product'] ?></span>
-                    <?php echo insertElement('select','items_'.$I,$Item['product_id'],'ItemField'.$I.'form-control select2 selectTags itemSelect','item="'.$I.'"',$DB->fetchAssoc('product','product_id,title',"status='A'",'title'),'','Seleccione un Art&iacute;culo'); ?>
-                    <?php echo insertElement("text","item_".$I,$Item['product_id'],'Hidden','validateEmpty="Seleccione un Art&iacute;culo"'); ?>
+                    <?php echo insertElement('select','item_'.$I,$Item['product_id'],'ItemField1'.$I.' form-control chosenSelect itemSelect','item="'.$I.'" ',$DB->fetchAssoc('product a INNER JOIN product_brand b ON (a.brand_id=b.brand_id)',"a.product_id,CONCAT(a.title,' - ',b.name) AS title","a.status='A' AND a.company_id=".$_SESSION['company_id'],'title')); ?>
                   </div>
                   <div class="col-xs-1 txC">
                     <span id="Price<?php echo $I ?>" class="Hidden ItemText<?php echo $I ?>">$ <?php echo $Item['price'] ?></span>
-                    <?php echo insertElement('text','price_'.$I,$Item['price'],'ItemField'.$I.' form-control calcable','data-inputmask="\'mask\': \'9{+}.99\'" placeholder="Precio" validateEmpty="Ingrese un precio"'); ?>
+                    <?php echo insertElement('text','price_'.$I,$Item['price'],'ItemField'.$I.' form-control calcable txC','data-inputmask="\'mask\': \'9{+}.99\'" placeholder="Precio" validateEmpty="Ingrese un precio"'); ?>
                   </div>
                   <div class="col-xs-1 txC">
                     <span id="Quantity<?php echo $I ?>" class="Hidden ItemText<?php echo $I ?>"><?php echo $Item['quantity'] ?></span>
-                    <?php echo insertElement('text','quantity_'.$I,$Item['quantity'],'ItemField'.$I.' form-control calcable QuantityItem','data-inputmask="\'mask\': \'9{+}\'" placeholder="Cantidad" validateEmpty="Ingrese una cantidad"'); ?>
+                    <?php echo insertElement('text','quantity_'.$I,$Item['quantity'],'ItemField'.$I.' form-control calcable QuantityItem txC','data-inputmask="\'mask\': \'9{+}\'" placeholder="Cantidad" validateEmpty="Ingrese una cantidad"'); ?>
                   </div>
-                  <div class="col-xs-2 txC">
-                    <span id="Date<?php echo $I ?>" class="Hidden ItemText<?php echo $I ?> OrderDate"><?php echo $Date ?></span>
-                    <?php echo insertElement('text','date_'.$I,$Date,'ItemField'.$I.' form-control delivery_date','placeholder="Fecha de Entrega" validateEmpty="Ingrese una fecha"'); ?>
-                  </div>
-                  <div id="item_number_<?php echo $I ?>" class="col-xs-1 txC item_number" total="<?php echo $Item['total']; ?>" item="<?php echo $I ?>">$ <?php echo $Item['total']; ?></div>
+                  
+                  <div id="item_number_<?php echo $I ?>" class="col-xs-3 txC item_number" total="<?php echo $Item['total']; ?>" item="<?php echo $I ?>">$ <?php echo $Item['total']; ?></div>
                   <div class="col-xs-3 txC">
   									  <button type="button" id="SaveItem<?php echo $I ?>" class="btn btnGreen SaveItem" style="margin:0px;" item="<?php echo $I ?>"><i class="fa fa-check"></i></button>
   									  <button type="button" id="EditItem<?php echo $I ?>" class="btn btnBlue EditItem Hidden" style="margin:0px;" item="<?php echo $I ?>"><i class="fa fa-pencil"></i></button>
@@ -121,7 +142,7 @@
                   Cantidad Total: <strong id="TotalQuantity" >0</strong>
                 </div>
                 <div class="col-xs-3 txC">
-                  Costo Total: <strong  id="TotalPrice">$ 0.00</strong> <span class="text-danger">(Sin IVA)</span>
+                  Costo Total: <strong  id="TotalPrice">$ 0.00</strong>
                   <?php echo insertElement("hidden","total_price","0"); ?>
                 </div>
               </div>
@@ -134,13 +155,11 @@
                 <button type="button" id="add_order_item" class="btn btn-warning"><i class="fa fa-plus"></i> <strong>Agregar Art&iacute;culo</strong></button>
               </div>
               <div class="col-sm-6 col-xs-12 txC">
-                <div class="input-group">
-                <div class="input-group-btn">
-                  <button type="button" id="ChangeDates" class="btn bg-teal" style="margin:0px;"><i class="fa fa-flash"></i></button>
-                </div>
+                <span class="input-group">
+                  <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
                 <!-- /btn-group -->
-                <?php echo insertElement('text','change_date','','form-control delivery_date',' placeholder="Modificar la fecha de todos los art&iacute;culos"'); ?>
-              </div>
+                <?php $OrderDate = $Data['status']=='V'? '': DBDate($Edit->Data['delivery_date']); echo insertElement('text','delivery_date',$OrderDate,'form-control delivery_date',' placeholder="Fecha de entrega" validateEmpty="Ingrese una fecha de entrega"'); ?>
+                </span>
               </div>
             </div>
             
@@ -152,6 +171,9 @@
           <hr>
           <div class="row txC">
             <button type="button" class="btn btn-success btnGreen" id="BtnCreate"><i class="fa fa-plus"></i> Editar Orden</button>
+            <?php if($Data['type']=='Y'){ ?>
+            <button type="button" class="btn btn-success btnBlue" id="BtnPay"><i class="fa fa-dollar"></i> Editar y Pagar</button>
+            <?php } ?>
             <button type="button" class="btn btn-error btnRed" id="BtnCancel"><i class="fa fa-times"></i> Cancelar</button>
           </div>
           <!--</form>-->
@@ -162,7 +184,7 @@
   </div><!-- box -->
 <?php
 $Foot->setScript('../../../vendors/inputmask3/jquery.inputmask.bundle.min.js');
-$Foot->setScript('../../../vendors/select2/select2.min.js');
+$Foot->setScript('../../../vendors/chosen-js/chosen.jquery.js');
 $Foot->setScript('../../../vendors/datepicker/bootstrap-datepicker.js');
 include('../../includes/inc.bottom.php');
 ?>

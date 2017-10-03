@@ -6,7 +6,8 @@
 <!-- Bootstrap 3.3.6 -->
 <link rel="stylesheet" href="../../../vendors/bootstrap/bootstrap.min.css">
 <!-- Font Awesome -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
+<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">-->
+<script src="https://use.fontawesome.com/e6af76d853.js"></script>
 <link rel="stylesheet" href="../../../vendors/fontawesome/font-awesome-animation.min.css">
 <!-- Ionicons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
@@ -27,3 +28,7 @@
 <link rel="stylesheet" href="../../../vendors/iCheck/square/grey.css">
 <link rel="stylesheet" href="../../../vendors/iCheck/square/pink.css">
 <link rel="stylesheet" href="../../../vendors/iCheck/square/purple.css">
+<!-- Chosen JS -->
+<link rel="stylesheet" href="../../../vendors/chosen-js/bootstrap-chosen.css">
+<!-- Hint CSS -->
+<link rel="stylesheet" href="../../../vendors/hint/hint.min.css">
