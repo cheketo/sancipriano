@@ -5,7 +5,7 @@
     $Edit         = new Customer($ID);
     $Data         = $Edit->GetData();
     ValidateID($Data);
-    $Branches = $DB->fetchAssoc('customer_branch a, geolocation_country b, geolocation_province c, geolocation_region d, geolocation_zone e','a.*,b.name as country, c.name as province, d.name as region, e.name as zone','a.country_id = b.country_id AND a.province_id = c.province_id AND a.region_id = d.region_id AND a.zone_id = e.zone_id AND customer_id='.$ID,'a.branch_id');
+    $Branches = $DB->fetchAssoc('customer_branch a LEFT JOIN geolocation_country b ON (a.country_id = b.country_id) LEFT JOIN geolocation_province c ON (a.province_id = c.province_id) LEFT JOIN geolocation_region d ON (a.region_id = d.region_id) LEFT JOIN geolocation_zone e ON (a.zone_id = e.zone_id)','a.*,b.name as country, c.name as province, d.name as region, e.name as zone','a.customer_id='.$ID,'a.branch_id');
     
     //if($Data['type_id']==4) $Class="Hidden";
     

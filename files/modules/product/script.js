@@ -248,3 +248,40 @@ $(function(){
 });
 
 
+////////////////////////// CONFIGURATION /////////////////////////////////////////
+$(function(){
+	$("#BtnConfig").click(function(){
+		if(validate.validateFields(''))
+		{
+			alertify.confirm(utf8_decode('¿Desea guardar la configuraci&oacute;n actual?'), function(e){
+				if(e)
+				{
+					var process		= '../../library/processes/proc.common.php?object=Product';
+					
+					var haveData	= function(returningData)
+					{
+						
+						if(returningData==401)
+						{
+						  notifyError("No se pudo modificar la configuraci&oacute;n porque hay un error de formato en algún campo. Verifique que no haya ingresado letras o s&iacute;mbolos.");
+						}else{
+  						notifyError("Ha ocurrido un error durante el proceso de modificaci&oacute;n.");
+  						console.log(returningData);
+						}
+					}
+					var noData		= function()
+					{
+						notifySuccess("La configuración de precios ha sido modificada correctamente.");
+					}
+					sumbitFields(process,haveData,noData);
+				}
+			});
+		}
+	});
+
+	$("input").keypress(function(e){
+		if(e.which==13){
+			$("#BtnConfig").click();
+		}
+	});
+});

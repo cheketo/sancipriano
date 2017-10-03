@@ -223,49 +223,46 @@ public function MakeRegs($Mode="List")
 	
 	protected function InsertSearchButtons()
 	{
-		return '<!-- New Button -->
-		    	<a href="new.php" title="Crear nuevo producto"><button type="button" class="NewElementButton btn bg-purple animated fadeIn"><i class="fa fa-plus-square"></i></button></a>
-		    	<!-- /New Button -->
-		    	<!-- Actions -->
-		    	<button title="M&aacute;s acciones" type="button" id="MoreActions" class="btn bg-purple animated fadeIn Hidden NewElementButton"><i class="fa fa-gear"></i></button>
-		    	<!-- /Actions -->
-		    	<div id="MoreActionsBody" class="Hidden">
-		    		<div class="row">
-		    			<div class="col-xs-12 col-sm-6">
-		    				<h4 class="subTitleB"><i class="fa fa-dollar"></i> Modificar Precios Mayorista</h4>
-				    		<div class="row">
-					    		<div class="col-xs-6 col-sm-2 col-md-2">
-					    			'.insertElement('text','mayorist_price','','form-control imput-sm','placeholder="Valor"').'
-				                </div>
-				                <div class="col-xs-6 col-sm-8 col-md-6" style="padding-left:0px!important;">
-						    		<button type="button" class="btn btnGreen animated fadeIn updatePrice" price_type="m" operation="add" mode="%" title="Aumentar en procentaje"><i class="fa fa-plus-square"></i> %</button>
-						    		<button type="button" class="btn btnGreen animated fadeIn updatePrice" price_type="m" operation="add" mode="#" title="Aumentar en monto fijo"><i class="fa fa-plus-square"></i> #</button>
-						    		<button type="button" class="btn btn-warning animated fadeIn updatePrice" price_type="m" operation="sub" mode="%" title="Disminuír en procentaje"><i class="fa fa-minus-square"></i> %</button>
-						    		<button type="button" class="btn btn-warning animated fadeIn updatePrice" price_type="m" operation="sub" mode="#" title="Disminuír en monto fijo"><i class="fa fa-minus-square"></i> #</button>
-						    	</div>
-						    </div>
-		    			</div>
-		    			<div class="col-xs-12 col-sm-6">
-		    				<h4 class="subTitleB"><i class="fa fa-dollar"></i> Modificar Precios Minorista</h4>
-					    	<div class="row">
-					    		<div class="col-xs-6 col-sm-2 col-md-2">
-					    			'.insertElement('text','retail_price','','form-control imput-sm','placeholder="Valor"').'
-				                </div>
-				                <div class="col-xs-6 col-sm-8 col-md-6" style="padding-left:0px!important;">
-						    		<button type="button" class="btn btnGreen animated fadeIn updatePrice" price_type="r" operation="add" mode="%"><i class="fa fa-plus-square"></i> %</button>
-						    		<button type="button" class="btn btnGreen animated fadeIn updatePrice" price_type="r" operation="add" mode="#"><i class="fa fa-plus-square"></i> #</button>
-						    		<button type="button" class="btn btn-warning animated fadeIn updatePrice" price_type="r" operation="sub" mode="%"><i class="fa fa-minus-square"></i> %</button>
-						    		<button type="button" class="btn btn-warning animated fadeIn updatePrice" price_type="r" operation="sub" mode="#"><i class="fa fa-minus-square"></i> #</button>
-						    	</div>
-						    </div>
-		    			</div>
-		    		</div>
-		    		
-		    		
-			    	
-		    	</div>
-		    	
-		    	';
+		// return '<!-- New Button -->
+		//     	<a href="new.php" title="Crear nuevo producto"><button type="button" class="NewElementButton btn bg-purple animated fadeIn"><i class="fa fa-plus-square"></i></button></a>
+		//     	<!-- /New Button -->
+		//     	<!-- Actions -->
+		//     	<button title="M&aacute;s acciones" type="button" id="MoreActions" class="btn bg-purple animated fadeIn Hidden NewElementButton"><i class="fa fa-gear"></i></button>
+		//     	<!-- /Actions -->
+		//     	<div id="MoreActionsBody" class="Hidden">
+		//     		<div class="row">
+		//     			<div class="col-xs-12 col-sm-6">
+		//     				<h4 class="subTitleB"><i class="fa fa-dollar"></i> Modificar Precios Mayorista</h4>
+		// 		    		<div class="row">
+		// 			    		<div class="col-xs-6 col-sm-2 col-md-2">
+		// 			    			'.insertElement('text','mayorist_price','','form-control imput-sm','placeholder="Valor"').'
+		// 		                </div>
+		// 		                <div class="col-xs-6 col-sm-8 col-md-6" style="padding-left:0px!important;">
+		// 				    		<button type="button" class="btn btnGreen animated fadeIn updatePrice" price_type="m" operation="add" mode="%" title="Aumentar en procentaje"><i class="fa fa-plus-square"></i> %</button>
+		// 				    		<button type="button" class="btn btnGreen animated fadeIn updatePrice" price_type="m" operation="add" mode="#" title="Aumentar en monto fijo"><i class="fa fa-plus-square"></i> #</button>
+		// 				    		<button type="button" class="btn btn-warning animated fadeIn updatePrice" price_type="m" operation="sub" mode="%" title="Disminuír en procentaje"><i class="fa fa-minus-square"></i> %</button>
+		// 				    		<button type="button" class="btn btn-warning animated fadeIn updatePrice" price_type="m" operation="sub" mode="#" title="Disminuír en monto fijo"><i class="fa fa-minus-square"></i> #</button>
+		// 				    	</div>
+		// 				    </div>
+		//     			</div>
+		//     			<div class="col-xs-12 col-sm-6">
+		//     				<h4 class="subTitleB"><i class="fa fa-dollar"></i> Modificar Precios Minorista</h4>
+		// 			    	<div class="row">
+		// 			    		<div class="col-xs-6 col-sm-2 col-md-2">
+		// 			    			'.insertElement('text','retail_price','','form-control imput-sm','placeholder="Valor"').'
+		// 		                </div>
+		// 		                <div class="col-xs-6 col-sm-8 col-md-6" style="padding-left:0px!important;">
+		// 				    		<button type="button" class="btn btnGreen animated fadeIn updatePrice" price_type="r" operation="add" mode="%"><i class="fa fa-plus-square"></i> %</button>
+		// 				    		<button type="button" class="btn btnGreen animated fadeIn updatePrice" price_type="r" operation="add" mode="#"><i class="fa fa-plus-square"></i> #</button>
+		// 				    		<button type="button" class="btn btn-warning animated fadeIn updatePrice" price_type="r" operation="sub" mode="%"><i class="fa fa-minus-square"></i> %</button>
+		// 				    		<button type="button" class="btn btn-warning animated fadeIn updatePrice" price_type="r" operation="sub" mode="#"><i class="fa fa-minus-square"></i> #</button>
+		// 				    	</div>
+		// 				    </div>
+		//     			</div>
+		//     		</div>
+		//     	</div>
+		//     	';
+		return '<a href="new.php" title="Crear nuevo producto"><button type="button" class="NewElementButton btn bg-purple animated fadeIn"><i class="fa fa-plus-square"></i></button></a>';
 		    	
 		    	
 	}
@@ -469,25 +466,46 @@ public function MakeRegs($Mode="List")
 		if($TotalRegs>0) echo $TotalRegs;
 	}
 	
-	public function Update_price()
+	// public function Update_price()
+	// {
+	// 	$IDS		= $_POST['ids'].'0';
+	// 	$Operation	= $_POST['operation'];
+	// 	$Value		= $_POST['value'];
+	// 	$Mode		= $_POST['mode'];
+	// 	$Type		= $_POST['type'];
+		
+	// 	$Field = $Type=='r'? 'price_retailer':'price';
+		
+	// 	$Operation = $Operation=="add"? '+':'-';
+		
+	// 	if($Mode=="%")
+	// 	{
+	// 		$Value = '(('.$Value.'*'.$Field.')/100)';
+	// 		//$this->execQuery('UPDATE','product',$Field.'='.$Field.$Operation.$Percentage);
+	// 	}
+	// 	$this->execQuery('UPDATE','product',$Field.'='.$Field.$Operation.$Value,'product_id IN ('.$IDS.')');
+	// 	//echo $this->lastQuery();
+	// }
+	
+	public function Config()
 	{
-		$IDS		= $_POST['ids'].'0';
-		$Operation	= $_POST['operation'];
-		$Value		= $_POST['value'];
-		$Mode		= $_POST['mode'];
-		$Type		= $_POST['type'];
+		$Wpercent		= floatval($_POST['wpercent'])>=0? floatval($_POST['wpercent']):-1;
+		$Wadditional	= floatval($_POST['wadditional'])>=0? floatval($_POST['wadditional']):-1;
+		$Rpercent		= floatval($_POST['rpercent'])>=0? floatval($_POST['rpercent']):-1;
+		$Radditional	= floatval($_POST['radditional'])>=0? floatval($_POST['radditional']):-1;
 		
-		$Field = $Type=='r'? 'price_retailer':'price';
-		
-		$Operation = $Operation=="add"? '+':'-';
-		
-		if($Mode=="%")
+		if($Wpercent>-1 && $Wadditional>-1 && $Rpercent>-1 && $Radditional>-1)
 		{
-			$Value = '(('.$Value.'*'.$Field.')/100)';
-			//$this->execQuery('UPDATE','product',$Field.'='.$Field.$Operation.$Percentage);
+			$this->execQuery('INSERT','product_configuration','additional_percentage_wholesaler,additional_percentage_retailer,additional_price_wholesaler,additional_price_retailer,created_by,status,company_id,creation_date',$Wpercent.",".$Rpercent.",".$Wadditional.",".$Radditional.",".$_SESSION['admin_id'].",'A',1,NOW()");
+			$ID = $this->GetInsertId();
+			if($ID>0)
+			{
+				$this->execQuery('UPDATE','product_configuration',"status='I'","configuration_id<>".$ID);
+			}
+		}else{
+			echo 401;
 		}
-		$this->execQuery('UPDATE','product',$Field.'='.$Field.$Operation.$Value,'product_id IN ('.$IDS.')');
-		//echo $this->lastQuery();
+		
 	}
 }
 ?>
