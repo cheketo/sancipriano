@@ -25,7 +25,7 @@ class CustomerDelivery extends DataBase
 	{
 		if(empty($this->Data['orders']))
 		{
-			$this->Data['orders'] = $this->fetchAssoc("customer_order a LEFT JOIN customer_branch b ON (a.branch_id=b.branch_id) LEFT JOIN currency c ON (a.currency_id=c.currency_id)","a.*,b.address,SUM(a.total) AS total_price,c.prefix AS currency",$this->TableID."=".$this->ID,'a.position','a.order_id');
+			$this->Data['orders'] = $this->fetchAssoc("customer_order a LEFT JOIN customer b ON (a.customer_id=b.customer_id) LEFT JOIN currency c ON (a.currency_id=c.currency_id)","a.*,b.name,SUM(a.total) AS total_price,c.prefix AS currency",$this->TableID."=".$this->ID,'a.position','a.order_id');
 			$this->Data['total'] = count($this->Data['orders']);
 			foreach($this->Data['orders'] as $Order)
 			{
@@ -60,13 +60,13 @@ class CustomerDelivery extends DataBase
 		{
 			$Where .= " AND a.delivery_date = '".$Date."'";
 		}
-		return $this->fetchAssoc("customer_order a LEFT JOIN customer_branch b ON (a.branch_id=b.branch_id) LEFT JOIN currency c ON (a.currency_id=c.currency_id) LEFT JOIN customer_delivery d ON (d.delivery_id=a.delivery_id) LEFT JOIN admin_user e ON (d.delivery_man_id=e.admin_id) LEFT JOIN customer f ON (b.customer_id=f.customer_id)","f.zone,a.*,b.address,c.prefix AS currency,CONCAT(e.first_name,' ',e.last_name) as delivery_man","(a.status='A' OR a.status='P') AND (a.delivery_id=0 OR d.status = 'P') AND a.delivery_id<>".$DeliveryID.$Where,'a.position','a.order_id');
+		return $this->fetchAssoc("customer_order a LEFT JOIN customer_branch b ON (a.branch_id=b.branch_id) LEFT JOIN currency c ON (a.currency_id=c.currency_id) LEFT JOIN customer_delivery d ON (d.delivery_id=a.delivery_id) LEFT JOIN admin_user e ON (d.delivery_man_id=e.admin_id) LEFT JOIN customer f ON (b.customer_id=f.customer_id)","f.zone,a.*,f.name,b.address,c.prefix AS currency,CONCAT(e.first_name,' ',e.last_name) as delivery_man","(a.status='A' OR a.status='P') AND (a.delivery_id=0 OR d.status = 'P') AND a.delivery_id<>".$DeliveryID.$Where,'a.position','a.order_id');
 	}
 	
 	public function GetOrdersByID($ID=0)
 	{
 		if($ID)
-			return $this->fetchAssoc("customer_order a LEFT JOIN customer_branch b ON (a.branch_id=b.branch_id) LEFT JOIN currency c ON (a.currency_id=c.currency_id) LEFT JOIN customer_delivery d ON (d.delivery_id=a.delivery_id) LEFT JOIN admin_user e ON (d.delivery_man_id=e.admin_id) LEFT JOIN customer f ON (b.customer_id=f.customer_id)","f.zone,a.*,b.address,c.prefix AS currency,CONCAT(e.first_name,' ',e.last_name) as delivery_man","(a.status='A' OR a.status='P') AND d.status = 'P' AND a.delivery_id=".$ID,'a.position','a.order_id');
+			return $this->fetchAssoc("customer_order a LEFT JOIN customer_branch b ON (a.branch_id=b.branch_id) LEFT JOIN currency c ON (a.currency_id=c.currency_id) LEFT JOIN customer_delivery d ON (d.delivery_id=a.delivery_id) LEFT JOIN admin_user e ON (d.delivery_man_id=e.admin_id) LEFT JOIN customer f ON (b.customer_id=f.customer_id)","f.name,f.zone,a.*,b.address,c.prefix AS currency,CONCAT(e.first_name,' ',e.last_name) as delivery_man","(a.status='A' OR a.status='P') AND d.status = 'P' AND a.delivery_id=".$ID,'a.position','a.order_id');
 	}
 
 	public function GetDefaultImg()
@@ -169,7 +169,7 @@ public function MakeRegs($Mode="List")
 							<div class="row '.$RowClass.'" style="padding:5px;">
 								<div class="col-md-3 col-sm-4">
 									<div class="listRowInner">
-										<span class="listTextStrong">'.$Order['address'].'</span>
+										<span class="listTextStrong">'.$Order['name'].'</span>
 										<span class="listTextStrong"><span class="label label-'.$OrderLabel.'">'.$OrderStatus.'</span></span>
 									</div>
 								</div>
@@ -321,8 +321,8 @@ public function MakeRegs($Mode="List")
 	public function ConfigureSearchRequest()
 	{
 		//$this->SetTable($this->Table.' a LEFT JOIN customer_order_item b ON (b.order_id=a.order_id) LEFT JOIN product c ON (b.product_id = c.product_id) LEFT JOIN customer_branch d ON (d.customer_id=a.customer_id)');
-		$this->SetTable($this->Table.' a LEFT JOIN customer_order b ON (b.delivery_id=a.delivery_id) LEFT JOIN customer_order_item c ON (c.order_id=b.order_id) LEFT JOIN product d ON (c.product_id = d.product_id) LEFT JOIN customer_branch e ON (e.branch_id=b.branch_id)');
-		$this->SetFields('a.delivery_id,b.order_id,b.type,b.total,b.extra,b.status,b.payment_status,b.delivery_status,e.address as customer');
+		$this->SetTable($this->Table.' a LEFT JOIN customer_order b ON (b.delivery_id=a.delivery_id) LEFT JOIN customer_order_item c ON (c.order_id=b.order_id) LEFT JOIN product d ON (c.product_id = d.product_id) LEFT JOIN customer e ON (e.customer_id=b.customer_id)');
+		$this->SetFields('a.delivery_id,b.order_id,b.type,b.total,b.extra,b.status,b.payment_status,b.delivery_status,e.name as customer');
 		$this->SetWhere("a.company_id=".$_SESSION['company_id']);
 		//$this->AddWhereString(" AND c.company_id = a.company_id");
 		$this->SetGroupBy("a.".$this->TableID);
@@ -332,7 +332,7 @@ public function MakeRegs($Mode="List")
 			$_POST[$Key] = $Value;
 		}
 			
-		if($_POST['name']) $this->SetWhereCondition("e.address","LIKE","%".$_POST['name']."%");
+		if($_POST['name']) $this->SetWhereCondition("e.name","LIKE","%".$_POST['name']."%");
 		//if($_POST['title']) $this->SetWhereCondition("c.title","LIKE","%".$_POST['title']."%");
 		//if($_POST['extra']) $this->SetWhereCondition("a.extra","LIKE","%".$_POST['extra']."%");
 		if($_REQUEST['delivery_date'])
@@ -382,7 +382,7 @@ public function MakeRegs($Mode="List")
 			switch($Order)
 			{
 				case "name": 
-					$Order = 'address';
+					$Order = 'name';
 					$Prefix = "e.";
 				break;
 				// case "title": 

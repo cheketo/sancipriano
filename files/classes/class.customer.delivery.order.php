@@ -18,7 +18,7 @@ class CustomerDeliveryOrder extends DataBase
 		$this->Connect();
 		if($ID!=0)
 		{
-			$Data = $this->fetchAssoc($this->Table.' a LEFT JOIN customer b ON (a.customer_id=b.customer_id) LEFT JOIN customer_branch c ON (a.branch_id=c.branch_id) INNER JOIN customer_delivery d ON (a.delivery_id=d.delivery_id)',"a.*,c.address,d.extra as delivery_extra,d.status as full_delivery_status,d.merluza,d.merluza_delivered,(d.merluza-d.merluza_delivered) as merluza_left",$this->TableID."=".$ID,'');
+			$Data = $this->fetchAssoc($this->Table.' a INNER JOIN customer b ON (a.customer_id=b.customer_id) INNER JOIN customer_branch c ON (c.customer_id=a.customer_id) INNER JOIN customer_delivery d ON (a.delivery_id=d.delivery_id) LEFT JOIN geolocation_zone z ON (z.zone_id=c.zone_id)',"a.*,c.address,d.extra as delivery_extra,d.status as full_delivery_status,b.name,d.merluza,d.merluza_delivered,(d.merluza-d.merluza_delivered) as merluza_left,c.zone_id,z.short_name as zone",$this->TableID."=".$ID,'');
 			$this->Data = $Data[0];
 			$this->ID = $ID;
 			$this->Data['items'] = $this->GetItems();
@@ -157,6 +157,9 @@ public function MakeRegs($Mode="List")
 		    
 		    
 			$Row	=	new CustomerDeliveryOrder($Rows[$i][$this->TableID]);
+			// echo '<pre>';
+			// print_r($Row);
+			// echo '</pre>';
 			$Actions	= 	'<span class="roundItemActionsGroup"><a><button type="button" class="btn btnGreen ExpandButton" title="Ver detalle" id="expand_'.$Row->ID.'"><i class="fa fa-plus"></i></button></a>';
 			//$Actions	.= 	'<a href="../customer_national_order/view.php?id='.$Row->ID.'"><button type="button" class="btn btn-github" title="Ver Entrega"><i class="fa fa-eye"></i></button></a> ';
 			
@@ -315,7 +318,7 @@ public function MakeRegs($Mode="List")
 									</div>
 									<div class="col-lg-3 col-md-5 col-sm-8 col-xs-10">
 										<div class="listRowInner">
-											<span class="listTextStrong"><i class="fa fa-cubes"></i> '.$Row->Data['address'].'</span>
+											<span class="listTextStrong"><i class="fa fa-cubes"></i> '.$Row->Data['name'].' ('.$Row->Data['address'].', '.$Row->Data['zone'].') </span>
 										</div>
 									</div>
 									<div class="col-lg-2 col-md-3 col-sm-2 hideMobile990">
@@ -401,8 +404,8 @@ public function MakeRegs($Mode="List")
 	
 	public function ConfigureSearchRequest()
 	{
-		$this->SetTable($this->Table.' a LEFT JOIN customer_order_item b ON (b.order_id=a.order_id) LEFT JOIN product c ON (b.product_id = c.product_id) LEFT JOIN customer_branch d ON (d.customer_id=a.customer_id) INNER JOIN customer_delivery e ON (a.delivery_id=e.delivery_id)');
-		$this->SetFields('a.order_id,a.delivery_id,a.type,a.total,a.extra,a.status,a.payment_status,a.delivery_status,d.address as customer,SUM(b.quantity) as quantity,e.status as full_delivery_status,e.merluza,e.merluza_delivered');
+		$this->SetTable($this->Table.' a LEFT JOIN customer_order_item b ON (b.order_id=a.order_id) LEFT JOIN product c ON (b.product_id = c.product_id) LEFT JOIN customer d ON (d.customer_id=a.customer_id) INNER JOIN customer_delivery e ON (a.delivery_id=e.delivery_id)');
+		$this->SetFields('a.order_id,a.delivery_id,a.type,a.total,a.extra,a.status,a.payment_status,a.delivery_status,d.name as customer,SUM(b.quantity) as quantity,e.status as full_delivery_status,e.merluza,e.merluza_delivered');
 		$this->SetWhere("e.delivery_man_id = ".$_SESSION['admin_id']." AND a.delivery_date='".date("Y-m-d")."' AND a.company_id=".$_SESSION['company_id']);
 		//$this->AddWhereString(" AND c.company_id = a.company_id");
 		$this->SetGroupBy("a.".$this->TableID);

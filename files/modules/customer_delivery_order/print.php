@@ -6,7 +6,7 @@
     $Data   = $Print->GetData();
     ValidateID($Data['order_id']);
     $Date = DBDate($Data['delivery_date']);
-    $Head->setTitle('Entrega de Orden para '.$Data['address'].' - '.$Date);
+    $Head->setTitle('Entrega de Orden para '.$Data['name'].' - '.$Date);
     $Head->setStyle('../../../skin/css/print.css'); // Select Inputs With Tags
     $Head->setHead();
     
@@ -23,7 +23,7 @@
             <hr>
             <h3>Reparto del d&iacute;a <b><?php echo $Date ?></b> - <b><?php echo $Data['delivery_man'] ?></b></h3>
             <hr>
-            <h4>Cliente: <b><?php echo $Data['address'] ?></b></h4>
+            <h4>Cliente: <b><?php echo $Data['name'] ?></b></h4>
         </div>  
         <div class="PageBody">
             <div class="PageCol ItemTitle MainCol">
@@ -108,6 +108,6 @@
         </div>
     </div>
     <?php } ?>
-    <pre>
-    <?php print_r($Data) ?>
-    </pre>
+    <!--<pre>-->
+    <?php //print_r($Data) ?>
+    <!--</pre>-->

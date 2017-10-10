@@ -36,7 +36,7 @@
         }
     }
     
-    $Head->setTitle($Data['address']);
+    $Head->setTitle($Data['name']);
     $Head->setSubTitle("Entrega");
     $Head->setIcon($Menu->GetHTMLicon());
     // $Head->setStyle('../../../vendors/chosen-js/bootstrap-chosen.css'); // Select Inputs With Tags
@@ -171,7 +171,7 @@
                                         <b><?php echo insertElement('select','check_bank','','form-control txC CheckForm ','placeholder="Seleccionar Banco" validateEmpty="Ingrese un Banco" style="max-width:50%!important;display:inline-block; border:0px; border-bottom:1px solid;padding:0px!important;height:auto;"',$DB->fetchAssoc('payment_bank',"title AS name,title","",'title'),'','Seleccionar Banco'); ?></b>
                                     </div>
                                     <div class="col-xs-12">
-                                        <b><?php echo insertElement('text','check_date','','form-control txC CheckForm delivery_date',' placeholder="Fecha de vencimiento" style="max-width:50%!important;display:inline-block; border:0px; border-bottom:1px solid;padding:0px!important;height:auto;"'); ?></b>
+                                        <b><?php echo insertElement('text','check_date','','form-control txC CheckForm delivery_date',' placeholder="Fecha de vencimiento" style="max-width:50%!important;display:inline-block; border:0px; border-bottom:1px solid;padding:0px!important;height:auto;"'); ?></b>f
                                     </div>
                                 </div>
                             </form>

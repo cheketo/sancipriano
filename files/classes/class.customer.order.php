@@ -18,7 +18,7 @@ class CustomerOrder extends DataBase
 		$this->Connect();
 		if($ID!=0)
 		{
-			$Data = $this->fetchAssoc($this->Table.' a LEFT JOIN customer b ON (a.customer_id=b.customer_id) LEFT JOIN customer_branch c ON (a.branch_id=c.branch_id)',"a.*,c.address",$this->TableID."=".$ID,'');
+			$Data = $this->fetchAssoc($this->Table.' a LEFT JOIN customer b ON (a.customer_id=b.customer_id) LEFT JOIN customer_branch c ON (c.customer_id=b.customer_id)',"a.*,c.address,b.name",$this->TableID."=".$ID,'');
 			$this->Data = $Data[0];
 			$this->ID = $ID;
 			$this->Data['items'] = $this->GetItems();
@@ -187,8 +187,8 @@ public function MakeRegs($Mode="List")
 					$Regs	.= '<div class="row listRow'.$RowBackground.'" id="row_'.$Row->ID.'" title="una orden de compra">
 									<div class="col-lg-3 col-md-5 col-sm-8 col-xs-10">
 										<div class="listRowInner">
-											<img class="img-circle" style="border-radius:0%!important;" src="'.$Row->GetImg().'" alt="'.$Row->Data['address'].'">
-											<span class="listTextStrong">'.$Row->Data['address'].'</span>
+											<img class="img-circle" style="border-radius:0%!important;" src="'.$Row->GetImg().'" alt="'.$Row->Data['name'].'">
+											<span class="listTextStrong">'.$Row->Data['name'].'</span>
 											<span class="listTextStrong">
 												<span class="label label-warning">
 													<i class="fa fa-calendar"></i> '.$OrderDate.'
@@ -289,8 +289,8 @@ public function MakeRegs($Mode="List")
 	
 	public function ConfigureSearchRequest()
 	{
-		$this->SetTable($this->Table.' a LEFT JOIN customer_order_item b ON (b.order_id=a.order_id) LEFT JOIN product c ON (b.product_id = c.product_id) LEFT JOIN customer_branch d ON (d.customer_id=a.customer_id)');
-		$this->SetFields('a.order_id,a.type,a.total,a.extra,a.status,a.payment_status,a.delivery_status,d.address as customer,SUM(b.quantity) as quantity');
+		$this->SetTable($this->Table.' a LEFT JOIN customer_order_item b ON (b.order_id=a.order_id) LEFT JOIN product c ON (b.product_id = c.product_id) LEFT JOIN customer d ON (d.customer_id=a.customer_id)');
+		$this->SetFields('a.order_id,a.type,a.total,a.extra,a.status,a.payment_status,a.delivery_status,d.name as customer,SUM(b.quantity) as quantity');
 		$this->SetWhere("a.company_id=".$_SESSION['company_id']);
 		//$this->AddWhereString(" AND c.company_id = a.company_id");
 		$this->SetGroupBy("a.".$this->TableID);
@@ -300,7 +300,7 @@ public function MakeRegs($Mode="List")
 			$_POST[$Key] = $Value;
 		}
 			
-		if($_POST['name']) $this->SetWhereCondition("d.address","LIKE","%".$_POST['name']."%");
+		if($_POST['name']) $this->SetWhereCondition("d.name","LIKE","%".$_POST['name']."%");
 		if($_POST['title']) $this->SetWhereCondition("c.title","LIKE","%".$_POST['title']."%");
 		if($_POST['extra']) $this->SetWhereCondition("a.extra","LIKE","%".$_POST['extra']."%");
 		if($_REQUEST['delivery_date'])
@@ -339,7 +339,7 @@ public function MakeRegs($Mode="List")
 		switch($Order)
 		{
 			case "name": 
-				$Order = 'address';
+				$Order = 'name';
 				$Prefix = "d.";
 			break;
 			case "title": 

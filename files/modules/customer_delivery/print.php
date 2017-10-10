@@ -22,7 +22,7 @@
         <div class="PageHeader">
             <h3>Reparto del d&iacute;a <b><?php echo DBDate($Data['delivery_date']) ?></b> - <b><?php echo $Data['delivery_man'] ?></b> (Entrega incial)</h3>
             <hr>
-            <h4>Cliente: <b><?php echo $Order['address'] ?></b></h4>
+            <h4>Cliente: <b><?php echo $Order['name'] ?></b></h4>
         </div>
         <div class="PageBody">
             <div class="PageCol ItemTitle MainCol">

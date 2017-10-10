@@ -26,7 +26,7 @@
             <h4 class="subTitleB"><i class="fa fa-building"></i> Cliente</h4>
             <div class="row form-group inline-form-custom">
               <div class="col-xs-12">
-                  <?php echo insertElement('select','customer','','form-control chosenSelect','data-placeholder="Seleccione un Cliente" validateEmpty="Seleccione un cliente"',$DB->fetchAssoc('customer a INNER JOIN customer_branch b ON (a.customer_id=b.customer_id) INNER JOIN customer_type c ON (a.type_id=c.type_id)',"b.branch_id,CONCAT(b.address,' - (Z ',a.zone,')') as address","a.status='A' AND a.company_id=".$_SESSION['company_id'],'b.address'),' ',''); ?>
+                  <?php echo insertElement('select','customer','','form-control chosenSelect','data-placeholder="Seleccione un Cliente" validateEmpty="Seleccione un cliente"',$DB->fetchAssoc('customer a INNER JOIN customer_branch b ON (a.customer_id=b.customer_id) INNER JOIN customer_type c ON (a.type_id=c.type_id)',"b.branch_id,CONCAT(a.name,' - (Z ',a.zone,')') as address","a.status='A' AND a.company_id=".$_SESSION['company_id'],'b.address'),' ',''); ?>
               </div>
             </div>
             
