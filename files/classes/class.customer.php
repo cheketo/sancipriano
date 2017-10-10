@@ -387,10 +387,17 @@ public function MakeRegs($Mode="List")
 		$Type 			= $_POST['type'];
 		$Name			= $_POST['name'];
 		$CUIT			= str_replace('-','',$_POST['cuit']);
-		$IVA			= $_POST['iva'];
+		$IVA			= $_POST['iva']?$_POST['iva']:0;
 		$GrossIncome	= $_POST['gross_income_number'];
 		$AdditionalPer	= $_POST['additional_percentage'];
 		$AdditionalPri	= $_POST['additional_price'];
+		
+		//VALIDATIONS
+		if(!$Name) echo 'Falta Nombre';
+		if(!$Type) echo 'Tipo incompleto';
+		if(!$CUIT) $CUIT=0;
+		if(!$IVA) $IVA =0;
+		if(!$GrossIncome) $GrossIncome = 0;
 
 		// CREATE NEW IMAGE IF EXISTS
 		if($Image!=$Edit->Data['logo'])
@@ -407,7 +414,7 @@ public function MakeRegs($Mode="List")
 		}
 
 		$Update		= $this->execQuery('update',$this->Table,"name='".$Name."',type_id='".$Type."',cuit=".$CUIT.",iva='".$IVA."',additional_price='".$AdditionalPri."',additional_percentage='".$AdditionalPer."',iibb='".$GrossIncome."',updated_by=".$_SESSION['admin_id'],$this->TableID."=".$ID);
-		//echo $this->lastQuery();
+		// echo $this->lastQuery();
 		$Edit->InsertBranchInfo(1);
 
 	}
