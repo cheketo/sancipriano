@@ -3,6 +3,7 @@
     
     $ID     = $_GET['id'];
     $Edit   = new CustomerOrder($ID);
+    // print_r($Edit); die;
     $Data   = $Edit->GetData();
     ValidateID($Data['order_id']);
     $Status = $Edit->Data['status'];
@@ -16,8 +17,8 @@
 			die();
     }
     $Items  = $DB->fetchAssoc('customer_order_item a INNER JOIN product b ON (a.product_id = b.product_id)','b.title AS product,a.*,(a.price * a.quantity) AS total','order_id='.$ID);
-    $Branch = $DB->fetchAssoc('customer_branch','address','branch_id='.$Data['branch_id']);
-    $Branch = $Branch[0]['address'];
+    // $Branch = $DB->fetchAssoc('customer_branch','address','branch_id='.$Data['branch_id']);
+    // $Branch = $Branch[0]['address'];
     
     if($Data['type']=='N' && ($Status=='A' || $Data['delivery_id']))
     {
@@ -30,7 +31,7 @@
     
     $PageTitle = $Data['status']=='V'? "Reactivar":"Editar";
     
-    $Head->setTitle($PageTitle." Orden de ".$Branch);
+    $Head->setTitle($PageTitle." Orden de ".$Data['name']);
     $Head->setSubTitle($Menu->GetTitle());
     $Head->setStyle('../../../vendors/chosen-js/bootstrap-chosen.css'); // Select Inputs With Tags
     $Head->setStyle('../../../vendors/datepicker/datepicker3.css'); // Date Picker Calendar
@@ -46,6 +47,7 @@
             <?php echo insertElement("hidden","action",'update'); ?>
             <?php echo insertElement("hidden","id",$ID); ?>
             <?php echo insertElement("hidden","status",$Status); ?>
+            <?php echo insertElement("hidden","customer_name",$Data['name']); ?>
             <?php echo insertElement("hidden","items",count($Items)); ?>
             <h4 class="subTitleB"><i class="fa fa-building"></i> Cliente</h4>
             <div class="row form-group inline-form-custom">
@@ -170,7 +172,7 @@
           </div>
           <hr>
           <div class="row txC">
-            <button type="button" class="btn btn-success btnGreen" id="BtnCreate"><i class="fa fa-plus"></i> Editar Orden</button>
+            <button type="button" class="btn btn-success btnGreen" id="BtnCreate"><i class="fa fa-pencil"></i> Editar Orden</button>
             <?php if($Data['type']=='Y'){ ?>
             <button type="button" class="btn btn-success btnBlue" id="BtnPay"><i class="fa fa-dollar"></i> Editar y Pagar</button>
             <?php } ?>

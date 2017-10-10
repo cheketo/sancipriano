@@ -18,7 +18,7 @@ class CustomerOrder extends DataBase
 		$this->Connect();
 		if($ID!=0)
 		{
-			$Data = $this->fetchAssoc($this->Table.' a LEFT JOIN customer b ON (a.customer_id=b.customer_id) LEFT JOIN customer_branch c ON (c.customer_id=b.customer_id)',"a.*,c.address,b.name",$this->TableID."=".$ID,'');
+			$Data = $this->fetchAssoc($this->Table.' a LEFT JOIN customer b ON (a.customer_id=b.customer_id) LEFT JOIN customer_branch c ON (c.customer_id=b.customer_id)',"a.*,c.branch_id,c.address,b.name",$this->TableID."=".$ID,'');
 			$this->Data = $Data[0];
 			$this->ID = $ID;
 			$this->Data['items'] = $this->GetItems();
@@ -101,7 +101,7 @@ public function MakeRegs($Mode="List")
 			if($Row->Data['status']=="P" || $Row->Data['status']=="A")
 			{
 				if($Row->Data['delivery_status']=="P")
-					$Actions	.= 	'<a href="edit.php?id='.$Row->ID.'"><button type="button" class="btn btnBlue" title="Editar orden"><i class="fa fa-pencil"></i></button></a>';
+					$Actions	.= 	'<a href="edit.php?id='.$Row->ID.'&type='.$_GET['type'].'"><button type="button" class="btn btnBlue" title="Editar orden"><i class="fa fa-pencil"></i></button></a>';
 				
 				if($Row->Data['status']=="A" && $Row->Data['type']=="Y")
 					$Actions	.= 	'<a href="payment.php?id='.$Row->ID.'"><button type="button" class="btn btnGreen" title="Pagar Orden"><i class="fa fa-dollar"></i></button></a>';
@@ -109,7 +109,7 @@ public function MakeRegs($Mode="List")
 					$Actions	.= '<a class="deleteElement" process="../../library/processes/proc.common.php" title="Eliminar orden" id="delete_'.$Row->ID.'"><button type="button" class="btn btnRed"><i class="fa fa-trash"></i></button></a>';
 				
 			}elseif($Row->Data['status']=="V"){
-				$Actions	.= 	'<a href="edit.php?id='.$Row->ID.'"><button type="button" class="btn btn-bitbucket" title="Reactivar orden"><i class="fa fa-refresh"></i></button></a>';
+				$Actions	.= 	'<a href="edit.php?id='.$Row->ID.'&type='.$_GET['type'].'"><button type="button" class="btn btn-bitbucket" title="Reactivar orden"><i class="fa fa-refresh"></i></button></a>';
 				$Actions	.= '<a class="deleteElement" process="../../library/processes/proc.common.php" title="Eliminar orden" id="delete_'.$Row->ID.'"><button type="button" class="btn btnRed"><i class="fa fa-trash"></i></button></a>';
 			}elseif($Row->Data['status']=="F"){
 				$Actions	.= 	'<a href="print.php?id='.$Row->ID.'" target="_blank"><button type="button" class="btn btn-info" title="Imprimir Recibo"><i class="fa fa-print"></i></button></a>';	
@@ -452,7 +452,7 @@ public function MakeRegs($Mode="List")
 		$CurrencyID		= $_POST['currency']?$_POST['currency']:2;
 		$Extra			= $_POST['extra'];
 		$Total			= $_POST['total_price'];
-		$Status			= "P";
+		$Status			= $Type=="Y"? "A":"P";
 		$Date			= implode("-",array_reverse(explode("/",$_POST['delivery_date'])));
 		$Customer 		= $this->fetchAssoc('customer_branch','customer_id',"branch_id=".$BranchID);
 		$CustomerID		= $Customer[0]['customer_id'];
@@ -464,14 +464,6 @@ public function MakeRegs($Mode="List")
 		
 		if($_POST['delivery_man'] && $Type=='N')
 			$this->Associate($ID,$_POST['delivery_man']);
-		
-		// PROCESS AGENTS
-		$Agents = array();
-		for($i=1;$i<=$_POST['total_agents'];$i++)
-		{
-			if($_POST['agent_name_'.$i])
-				$Agents[] = array('name'=>ucfirst($_POST['agent_name_'.$i]),'charge'=>ucfirst($_POST['agent_charge_'.$i]),'email'=>$_POST['agent_email_'.$i],'phone'=>$_POST['agent_phone_'.$i],'extra'=>$_POST['agent_extra_'.$i]);
-		}
 		
 		// DELETE OLD ITEMS
 		$this->execQuery('delete','customer_order_item',"order_id = ".$ID);

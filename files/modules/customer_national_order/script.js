@@ -110,6 +110,7 @@ function getProductsPrices(values,ids)
 			            	}
 			            	$("#price_"+items[index]).val(price);
 			            	$("#Price"+items[index]).html("$ "+price);
+			            	calculateTotalOrderPrice();
 		            	});
 		            }else{
 		            	notifyError('Hubo un error al calcular el precio del producto');
@@ -225,6 +226,7 @@ function addOrderItem()
 	                priceImputMask(id);
 	                updateRowBackground();
 	                recalculateItemPrice();
+	                calculateTotalOrderPrice();
 	                $('.chosenSelect').chosen();
 	            }else{
 	                console.log('Sin información devuelta. Item='+id);
@@ -264,6 +266,7 @@ function editItem()
 		$("#SaveItem"+id+",.ItemField"+id).removeClass('Hidden');
 		$("#EditItem"+id+",.ItemText"+id).addClass('Hidden');
 		$("#item_"+id).next().removeClass('Hidden');
+		calculateTotalOrderPrice();
 	});
 }
 
@@ -369,6 +372,7 @@ $(function(){
 		e.preventDefault();
 		if(validate.validateFields('*'))
 		{
+			calculateTotalOrderPrice();
 			var confirmText,procText;
 			var BtnID = $(this).attr("id")
 			if(get['id']>0)
@@ -380,28 +384,32 @@ $(function(){
 				procText = "creaci&oacute;n"
 			}
 			if(BtnID=="BtnPay") confirmText += " y pagar";
-			confirmText += " la orden de compra";
+			if($("#customer_name").val())var customer = $("#customer_name").val();
+			else var customer = $("#customer option:selected").text();
+			confirmText += " la orden de compra de <b>"+customer+'</b>';
 			
-			if($("#type").val()=='N' && !$("#delivery_man").val())
+			if($("#order_type").val()=='N' && !$("#delivery_man").val())
+			{
 				var status = 'P';
-			else
+			}else{
 				var status = 'A';
+			}
 
-			alertify.confirm(utf8_decode('¿Desea '+confirmText+' ?'), function(e){
+			alertify.confirm(utf8_decode('¿Desea '+confirmText+'?'), function(e){
 				if(e)
 				{
 					var process		= '../../library/processes/proc.common.php?object=CustomerOrder';
 					if(BtnID=="BtnCreate")
 					{
 						if($("#status").val())
-							var target		= 'list.php?type='+get['type']+'&status='+$("#status").val()+'&msg='+ $("#action").val();
+							var target		= 'list.php?type='+$("#order_type").val()+'&status='+$("#status").val()+'&msg='+ $("#action").val();
 						else
-							var target		= 'list.php?type='+get['type']+'&status='+status+'&msg='+ $("#action").val();
+							var target		= 'list.php?type='+$("#order_type").val()+'&status='+status+'&msg='+ $("#action").val();
 					}else{
 						if(BtnID=="BtnCreateNext")
-							var target		= 'new.php?type='+get['type']+'&msg='+ $("#action").val();
+							var target		= 'new.php?type='+$("#order_type").val()+'&msg='+ $("#action").val();
 						else
-							var target		= 'payment.php?msg='+ $("#action").val();
+							var target		= 'payment.php?id='+get['id']+'&msg='+ $("#action").val();
 					}
 					var haveData	= function(returningData)
 					{
@@ -693,7 +701,7 @@ $(function(){
 				if(e)
 				{
 					var process		= '../../library/processes/proc.common.php?object=CustomerOrder';
-					var target		= '../customer_national_order/list.php?status=A&type=Y&msg='+ $("#action").val();
+					var target		= '../customer_national_order/list.php?status=F&type=Y&msg='+ $("#action").val();
 					
 					var haveData	= function(returningData)
 					{

@@ -15,7 +15,7 @@
     
     ValidateID($Data['order_id']);
     $TitleText = $Data['type']=='N'? 'Entrega de Orden para ':'Compra de Mercader&iacute;a de ';
-    $Head->setTitle($TitleText.$Data['address'].' - '.$Date);
+    $Head->setTitle($TitleText.$Data['name'].' - '.$Date);
     $Head->setStyle('../../../skin/css/print.css'); // Select Inputs With Tags
     $Head->setHead();
     
@@ -32,7 +32,7 @@
             <h3>Compra del d&iacute;a <b><?php echo $Date ?></b></h3>
             <?php } ?>
             <hr>
-            <h4>Cliente: <b><?php echo $Data['address'] ?></b></h4>
+            <h4>Cliente: <b><?php echo $Data['name'] ?></b></h4>
         </div>  
         <div class="PageBody">
             <div class="PageCol ItemTitle MainCol">
