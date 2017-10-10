@@ -16,7 +16,7 @@
 	    die();
     }
     
-    $Head->setTitle($Data['address']);
+    $Head->setTitle($Data['name']);
     $Head->setSubTitle("Pagar Orden");
     $Head->setIcon($Menu->GetHTMLicon());
     // $Head->setStyle('../../../vendors/chosen-js/bootstrap-chosen.css'); // Select Inputs With Tags
