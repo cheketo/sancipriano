@@ -10,7 +10,7 @@ class CustomerOrder extends DataBase
 	var $Table			= "customer_order";
 	var $TableID		= "order_id";
 	var $MovementConcept = 'Orden de Compra Nº';
-	
+
 	const DEFAULTIMG	= "../../../skin/images/providers/default/order.png";
 
 	public function __construct($ID=0)
@@ -24,7 +24,7 @@ class CustomerOrder extends DataBase
 			$this->Data['items'] = $this->GetItems();
 		}
 	}
-	
+
 	public function GetItems()
 	{
 		if(empty($this->Items))
@@ -34,7 +34,7 @@ class CustomerOrder extends DataBase
 		}
 		return $this->Items;
 	}
-	
+
 	public function GetDelivery()
 	{
 		if(!$this->Delivery)
@@ -44,7 +44,7 @@ class CustomerOrder extends DataBase
 		}
 		return $this->Delivery;
 	}
-	
+
 	public function GetDeliveryMan()
 	{
 		if($this->Data['delivery_id'])
@@ -59,7 +59,7 @@ class CustomerOrder extends DataBase
 		}
 		return $this->DeliveryMan;
 	}
-	
+
 	public function GetTotalFinal($OrderID)
 	{
 		if($OrderID>0)
@@ -75,7 +75,7 @@ class CustomerOrder extends DataBase
 	{
 		return self::DEFAULTIMG;
 	}
-	
+
 	public function GetImg()
 	{
 		return $this->GetDefaultImg();
@@ -90,50 +90,50 @@ public function MakeRegs($Mode="List")
 		//echo $this->lastQuery();
 		for($i=0;$i<count($Rows);$i++)
 		{
-			
+
 			$Row	=	new CustomerOrder($Rows[$i][$this->TableID]);
 			$Actions	= 	'<span class="roundItemActionsGroup"><a><button type="button" class="btn btnGreen ExpandButton" title="Ver detalle" id="expand_'.$Row->ID.'"><i class="fa fa-plus"></i></button></a>';
-			
+
 			// if($Row->Data['status']=="P" || $Row->Data['status']=="I"){
 			// 	$Actions	.= '<a class="associateElement" order="'.$Row->ID.'" id="activate_'.$Row->ID.'"><button type="button" class="btn btn-dropbox" title="Asociar a reparto"><i class="fa fa-sign-out"></i></button></a>';
 			// }
-			
+
 			if($Row->Data['status']=="P" || $Row->Data['status']=="A")
 			{
 				if($Row->Data['delivery_status']=="P")
 					$Actions	.= 	'<a href="edit.php?id='.$Row->ID.'&type='.$_GET['type'].'"><button type="button" class="btn btnBlue" title="Editar orden"><i class="fa fa-pencil"></i></button></a>';
-				
+
 				if($Row->Data['status']=="A" && $Row->Data['type']=="Y")
 					$Actions	.= 	'<a href="payment.php?id='.$Row->ID.'"><button type="button" class="btn btnGreen" title="Pagar Orden"><i class="fa fa-dollar"></i></button></a>';
 				if($Row->Data['delivery_id']==0)
 					$Actions	.= '<a class="deleteElement" process="../../library/processes/proc.common.php" title="Eliminar orden" id="delete_'.$Row->ID.'"><button type="button" class="btn btnRed"><i class="fa fa-trash"></i></button></a>';
-				
+
 			}elseif($Row->Data['status']=="V"){
 				$Actions	.= 	'<a href="edit.php?id='.$Row->ID.'&type='.$_GET['type'].'"><button type="button" class="btn btn-bitbucket" title="Reactivar orden"><i class="fa fa-refresh"></i></button></a>';
 				$Actions	.= '<a class="deleteElement" process="../../library/processes/proc.common.php" title="Eliminar orden" id="delete_'.$Row->ID.'"><button type="button" class="btn btnRed"><i class="fa fa-trash"></i></button></a>';
 			}elseif($Row->Data['status']=="F"){
-				$Actions	.= 	'<a href="print.php?id='.$Row->ID.'" target="_blank"><button type="button" class="btn btn-info" title="Imprimir Recibo"><i class="fa fa-print"></i></button></a>';	
+				$Actions	.= 	'<a href="print.php?id='.$Row->ID.'" target="_blank"><button type="button" class="btn btn-info" title="Imprimir Recibo"><i class="fa fa-print"></i></button></a>';
 			}
-			
+
 			$Actions	.= '</span>';
 			// echo '<pre>';
 			// print_r($Row->Data['items']);
 			// echo '</pre>';
 			$Date = explode(" ",$Row->Data['delivery_date']);
 			$OrderDate = implode("/",array_reverse(explode("-",$Date[0])));
-			
+
 			$Items = '<div style="margin-top:10px;">';
 			$I=0;
 			foreach($Row->Data['items'] as $Item)
 			{
 				$I++;
 				$RowClass = $I % 2 != 0? 'bg-gray':'bg-gray-active';
-				
+
 				$Date = explode(" ",$Item['delivery_date']);
 				$DeliveryDate = implode("/",array_reverse(explode("-",$Date[0])));
 				$ItemTotal = $Item['currency']." ".$Item['total'];
 				$ItemPrice = $Item['currency']." ".$Item['price'];
-				
+
 				$Items .= '
 							<div class="row '.$RowClass.'" style="padding:5px;">
 								<div class="col-md-3 col-sm-6">
@@ -159,7 +159,7 @@ public function MakeRegs($Mode="List")
 										<span class="listTextStrong"><span class="label label-success">'.$ItemTotal.'</span></span>
 									</div>
 								</div>
-									
+
 							</div>';
 			}
 			$Items .= '</div>';
@@ -171,7 +171,7 @@ public function MakeRegs($Mode="List")
 											<span class="emailTextResp">'.$Row->Data['extra'].'</span>
 										</div>
 									</div>';
-						
+
 						if($Row->Data['delivery_id'])
 						{
 							$DeliveryMan	= $Row->GetDeliveryMan();
@@ -181,9 +181,9 @@ public function MakeRegs($Mode="List")
 							$Col3Title = 'Cant. Total';
 							$Col3Value = $Rows[$i]['quantity'];
 						}
-									
+
 					$RowBackground = $i % 2 == 0? '':' listRow2 ';
-					
+
 					$Regs	.= '<div class="row listRow'.$RowBackground.'" id="row_'.$Row->ID.'" title="una orden de compra">
 									<div class="col-lg-3 col-md-5 col-sm-8 col-xs-10">
 										<div class="listRowInner">
@@ -215,7 +215,7 @@ public function MakeRegs($Mode="List")
 									<div class="listActions flex-justify-center Hidden">
 										<div>'.$Actions.'</div>
 									</div>
-									
+
 								</div>';
 				break;
 				case "grid":
@@ -243,14 +243,14 @@ public function MakeRegs($Mode="List")
         if(!$Regs) $Regs.= '<div class="callout callout-info"><h4><i class="icon fa fa-info-circle"></i> No se encontraron ordenes de compras.</h4><p>Puede crear una orden haciendo click <a href="new.php?type='.$_GET['type'].'">aqui</a>.</p></div>';
 		return $Regs;
 	}
-	
+
 	protected function InsertSearchField()
 	{
 		if($_GET['delivery_date']=="today")
 		{
 			$Date = date("d/m/Y");
 		}
-		
+
 		return '<!-- Provider -->
           <div class="input-group">
             <span class="input-group-addon order-arrows" order="name" mode="asc"><i class="fa fa-sort-alpha-asc"></i></span>
@@ -273,7 +273,7 @@ public function MakeRegs($Mode="List")
           </div>
           ';
 	}
-	
+
 	protected function InsertSearchButtons()
 	{
 		if($_REQUEST['status'])
@@ -286,7 +286,7 @@ public function MakeRegs($Mode="List")
 		if(($Status=='P' || $Status=='A') && $_GET['type']=='N') $HTML .= '<button type="button" title="Asociar a un repartidor" class="btn btnBlue animated fadeIn Hidden" id="Associate"><i class="fa fa-sign-out"></i></button>';
 		return $HTML;
 	}
-	
+
 	public function ConfigureSearchRequest()
 	{
 		$this->SetTable($this->Table.' a LEFT JOIN customer_order_item b ON (b.order_id=a.order_id) LEFT JOIN product c ON (b.product_id = c.product_id) LEFT JOIN customer d ON (d.customer_id=a.customer_id)');
@@ -294,12 +294,12 @@ public function MakeRegs($Mode="List")
 		$this->SetWhere("a.company_id=".$_SESSION['company_id']);
 		//$this->AddWhereString(" AND c.company_id = a.company_id");
 		$this->SetGroupBy("a.".$this->TableID);
-		
+
 		foreach($_POST as $Key => $Value)
 		{
 			$_POST[$Key] = $Value;
 		}
-			
+
 		if($_POST['name']) $this->SetWhereCondition("d.name","LIKE","%".$_POST['name']."%");
 		if($_POST['title']) $this->SetWhereCondition("c.title","LIKE","%".$_POST['title']."%");
 		if($_POST['extra']) $this->SetWhereCondition("a.extra","LIKE","%".$_POST['extra']."%");
@@ -314,41 +314,41 @@ public function MakeRegs($Mode="List")
 				$this->SetWhereCondition("a.delivery_date","=",$Date);
 			}
 		}
-		
-		
+
+
 		if($_REQUEST['status'])
 		{
 			if($_POST['status']) $this->SetWhereCondition("a.status","=", $_POST['status']);
-			if($_GET['status']) $this->SetWhereCondition("a.status","=", $_GET['status']);	
+			if($_GET['status']) $this->SetWhereCondition("a.status","=", $_GET['status']);
 		}else{
 			$this->SetWhereCondition("a.status","=","P");
 		}
-		
+
 		if($_REQUEST['type'])
 		{
 			if($_POST['type']) $this->SetWhereCondition("a.type","=", $_POST['type']);
-			if($_GET['type']) $this->SetWhereCondition("a.type","=", $_GET['type']);	
+			if($_GET['type']) $this->SetWhereCondition("a.type","=", $_GET['type']);
 		}
-		
+
 		if(strtolower($_POST['view_order_mode'])=="desc")
 			$Mode = "DESC";
 		else
 			$Mode = $_POST['view_order_mode'];
-		
+
 		$Order = strtolower($_POST['view_order_field']);
 		switch($Order)
 		{
-			case "name": 
+			case "name":
 				$Order = 'name';
 				$Prefix = "d.";
 			break;
-			case "title": 
+			case "title":
 				$Order = 'title';
 				$Prefix = "c.";
 			break;
 			default:
 				$Order = 'delivery_date';
-				$Prefix = "a.";	
+				$Prefix = "a.";
 			break;
 		}
 		$this->SetOrder($Prefix.$Order." ".$Mode);
@@ -379,7 +379,7 @@ public function MakeRegs($Mode="List")
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////// PROCESS METHODS ///////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
+
 	public function Insert()
 	{
 		// ITEMS DATA
@@ -391,7 +391,7 @@ public function MakeRegs($Mode="List")
 				$Items[] = array('id'=>$_POST['item_'.$I],'price'=>$_POST['price_'.$I],'quantity'=>$_POST['quantity_'.$I]);
 			}
 		}
-		
+
 		// Basic Data
 		$Type			= $_POST['order_type'];
 		$BranchID		= $_POST['customer'];
@@ -402,12 +402,12 @@ public function MakeRegs($Mode="List")
 		$Date			= implode("-",array_reverse(explode("/",$_POST['delivery_date'])));
 		$Customer 		= $this->fetchAssoc('customer_branch','customer_id',"branch_id=".$BranchID);
 		$CustomerID		= $Customer[0]['customer_id'];
-		
+
 		$Insert			= $this->execQuery('insert',$this->Table,'type,branch_id,customer_id,currency_id,extra,total,delivery_date,status,creation_date,created_by,company_id',"'".$Type."',".$BranchID.",".$CustomerID.",".$CurrencyID.",'".$Extra."',".$Total.",'".$Date."','".$Status."',NOW(),".$_SESSION['admin_id'].",".$_SESSION['company_id']);
 		//echo $this->lastQuery();
 		$NewID 		= $this->GetInsertId();
 		$New 	= new CustomerOrder($NewID);
-		
+
 		// INSERT ITEMS
 		foreach($Items as $Item)
 		{
@@ -415,14 +415,14 @@ public function MakeRegs($Mode="List")
 				$Fields .= "),(";
 			$Fields .= $NewID.",".$CustomerID.",".$Item['id'].",".$Item['price'].",".$Item['quantity'].",'".$Date."',".$CurrencyID.",NOW(),".$_SESSION['admin_id'].",".$_SESSION['company_id'];
 		}
-		
+
 		$this->execQuery('insert','customer_order_item','order_id,customer_id,product_id,price,quantity,delivery_date,currency_id,creation_date,created_by,company_id',$Fields);
 		//echo $this->lastQuery();
 		if($Type=="N")
 		{
 			if($_POST['delivery_man'])
 				$this->Associate($NewID,$_POST['delivery_man']);
-			
+
 			// INSERT MOVEMENT
 			// Movement::InsertMovement($Total,$CustomerID,1,$this->MovementConcept.$NewID,$NewID);
 		}else{
@@ -430,12 +430,12 @@ public function MakeRegs($Mode="List")
 			// Movement::InsertMovement($Total,$CustomerID,1,'Compra en Local Nº'.$NewID,$NewID);
 		}
 	}
-	
+
 	public function Update()
 	{
 		$ID 	= $_POST['id'];
 		$Edit	= new CustomerOrder($ID);
-		
+
 		// ITEMS DATA
 		$Items = array();
 		for($I=1;$I<=$_POST['items'];$I++)
@@ -445,7 +445,7 @@ public function MakeRegs($Mode="List")
 				$Items[] = array('id'=>$_POST['item_'.$I],'price'=>$_POST['price_'.$I],'quantity'=>$_POST['quantity_'.$I]);
 			}
 		}
-		
+
 		// Basic Data
 		$Type			= $_POST['order_type'];
 		$BranchID		= $_POST['customer'];
@@ -456,18 +456,18 @@ public function MakeRegs($Mode="List")
 		$Date			= implode("-",array_reverse(explode("/",$_POST['delivery_date'])));
 		$Customer 		= $this->fetchAssoc('customer_branch','customer_id',"branch_id=".$BranchID);
 		$CustomerID		= $Customer[0]['customer_id'];
-		
-		
-		
+
+
+
 		$Update		= $this->execQuery('update','customer_order',"type='".$Type."',branch_id=".$BranchID.",customer_id='".$CustomerID."',currency_id=".$CurrencyID.",extra='".$Extra."',total=".$Total.",delivery_date='".$Date."',status='".$Status."',updated_by=".$_SESSION['admin_id'],"order_id=".$ID);
 		//echo $this->lastQuery();
-		
+
 		if($_POST['delivery_man'] && $Type=='N')
 			$this->Associate($ID,$_POST['delivery_man']);
-		
+
 		// DELETE OLD ITEMS
 		$this->execQuery('delete','customer_order_item',"order_id = ".$ID);
-		
+
 		// INSERT ITEMS
 		foreach($Items as $Item)
 		{
@@ -486,7 +486,7 @@ public function MakeRegs($Mode="List")
 			Movement::UpdateMovementByOrderID($Total,$CustomerID,1,'Compra en Local Nº'.$ID,$ID);
 		}
 	}
-	
+
 	public function Activate()
 	{
 		$ID	= $_POST['id'];
@@ -495,7 +495,7 @@ public function MakeRegs($Mode="List")
 		Movement::ActivateOrdersMovements($ID);
 		$this->execQuery('update',$this->Table,"status = '".$Status."'",$this->TableID."=".$ID);
 	}
-	
+
 	public function Delete()
 	{
 		// INSERT MOVEMENT??
@@ -513,13 +513,13 @@ public function MakeRegs($Mode="List")
 			}
 		}
 	}
-	
+
 	public function Search()
 	{
 		$this->ConfigureSearchRequest();
 		echo $this->InsertSearchResults();
 	}
-	
+
 	public function Newimage()
 	{
 		if(count($_FILES['image'])>0)
@@ -534,7 +534,7 @@ public function MakeRegs($Mode="List")
 				$Name	= "provider".intval(rand()*rand()/rand());
 				$Img	= new FileData($_FILES['image'],$TempDir,$Name);
 				echo $Img	-> BuildImage(100,100);
-			}else{	
+			}else{
 				if($_POST['newimage']!=$this->GetDefaultImg() && file_exists($_POST['newimage']))
 					unlink($_POST['newimage']);
 				$TempDir= $this->ImgGalDir;
@@ -544,7 +544,7 @@ public function MakeRegs($Mode="List")
 			}
 		}
 	}
-	
+
 	public function Validate()
 	{
 		$User 			= strtolower($_POST['name']);
@@ -556,7 +556,7 @@ public function MakeRegs($Mode="List")
 		    $TotalRegs  = $this->numRows($this->Table,'*',"name = '".$User."'");
 		if($TotalRegs>0) echo $TotalRegs;
 	}
-	
+
 	public function Fillagents()
 	{
 		$Provider = $_POST['provider'];
@@ -569,37 +569,48 @@ public function MakeRegs($Mode="List")
 		}
 		echo $HTML;
 	}
-	
+
 	public function Getitemprices()
 	{
 		if(intval($_POST['customer'])>0 && $_POST['items'])
 		{
-			$Config		= $this->fetchAssoc('product_configuration','*',"status='A' AND company_id=".$_SESSION['company_id'],'creation_date DESC');
+			$Products = $this->fetchAssoc('product','*',"status='A' AND product_id IN (".$_POST['items'].") ");
 			$Branch 	= $this->fetchAssoc('customer_branch','customer_id',"branch_id=".$_POST['customer']);
-			
 			$Customer	= new Customer($Branch[0]['customer_id']);
-			//echo $Customer->Data['type_id'];die;
 			$Prices = array();
-			$Items = explode(",",$_POST['items']);
-			foreach($Items as $Item)
+
+			foreach($Products as $Item)
 			{
-				$Product	= new Product($Item);
-				$Cost		= $Product->Data['cost'];
-				$Variation  = $Product->Data['variation_id']==1? "percentage":"price";
-				
-				switch(intval($Customer->Data['type_id']))
+				$Cost		= $Item['cost'];
+				$Variation  = $Item['variation_id']==1? "percentage":"price";
+
+				if(intval($Customer->Data['type_id'])>2)
 				{
-					case 1:
-						$Field = $Config[0]["additional_".$Variation."_retailer"];
-					break;
-					case 2:
-						$Field = $Config[0]["additional_".$Variation."_wholesaler"];
-					break;
-					default:
-						$Field	= $Customer->Data['additional_'.$Variation];
-					break;
+					$Config		= $this->fetchAssoc('product_configuration','*',"status='A' AND company_id=".$_SESSION['company_id'],'creation_date DESC');
+					if(!$Item['additional_price_wholesaler'])
+					{
+						$Category = $this->fetchAssoc('product_category',"*","status='A' AND (additional_price_wholesaler<>0 OR additional_percentage_wholesaler<>0) AND category_id=".$Item['category_id']);
+						$Item['additional_price_wholesaler'] = $Category[0]['additional_price_wholesaler'];
+						$Item['additional_percentage_wholesaler'] = $Category[0]['additional_percentage_wholesaler'];
+						$Item['additional_price_retailer'] = $Category[0]['additional_price_retailer'];
+						$Item['additional_percentage_retailer'] = $Category[0]['additional_percentage_retailer'];
+					}
+
+					if(!$Item['additional_price_wholesaler'])
+					{
+						$Item['additional_price_wholesaler'] = $Config[0]['additional_price_wholesaler'];
+						$Item['additional_percentage_wholesaler'] = $Config[0]['additional_percentage_wholesaler'];
+						$Item['additional_price_retailer'] = $Config[0]['additional_price_retailer'];
+						$Item['additional_percentage_retailer'] = $Config[0]['additional_percentage_retailer'];
+					}
+					if(intval($Customer->Data['type_id'])==1)
+						$Field = $Item["additional_".$Variation."_retailer"];
+					else
+						$Field = $Item["additional_".$Variation."_wholesaler"];
+				}else{
+					$Field	= $Customer->Data['additional_'.$Variation];
 				}
-				
+
 				$AdditionalPrice = $Variation=="percentage"? ($Cost*$Field)/100 : $Field ;
 				$Price = $Cost + $AdditionalPrice;
 				$Prices[] = round($Price);
@@ -607,9 +618,9 @@ public function MakeRegs($Mode="List")
 		}
 		echo implode(",",$Prices);
 		die;
-		
+
 	}
-	
+
 	public function Addorderitem()
 	{
 		$ID = $_POST['item'];
@@ -633,7 +644,7 @@ public function MakeRegs($Mode="List")
                 	<span id="Quantity'.$ID.'" class="Hidden ItemText'.$ID.'"></span>
                   '.insertElement('text','quantity_'.$ID,'','ItemField'.$ID.' txC form-control calcable QuantityItem','data-inputmask="\'mask\': \'9{+}\'" placeholder="Cantidad" validateEmpty="Ingrese una cantidad"').'
                 </div>
-                
+
                 <div  id="item_number_'.$ID.'" class="col-xs-3 txC item_number txC" total="0" item="'.$ID.'">'.$TotalPrice.'</div>
                 <div class="col-xs-3 txC">
 				  <button type="button" id="SaveItem'.$ID.'" class="btn btnGreen SaveItem" style="margin:0px;" item="'.$ID.'"><i class="fa fa-check"></i></button>
@@ -644,7 +655,7 @@ public function MakeRegs($Mode="List")
             </div>';
             echo $HTML;
 	}
-	
+
 	public function Customerdata()
 	{
 		$Branch = $_POST['id'];
@@ -668,22 +679,22 @@ public function MakeRegs($Mode="List")
 			echo $HTML;
 		}
 	}
-	
+
 	public function Associate($OrderID=0,$DeliveryManID=0)
 	{
-		$IDs = $OrderID==0? $_POST['selected']."0": $OrderID;	
+		$IDs = $OrderID==0? $_POST['selected']."0": $OrderID;
 		$DeliveryMan = $DeliveryManID==0? $_POST['user']: $DeliveryManID;
 		if(intval($DeliveryMan)>0)
 		{
 			$Orders = $this->fetchAssoc($this->Table,'*','order_id IN ('.$IDs.')');
 			foreach($Orders as $Order)
 			{
-				
+
 				$DeliveryDate = explode(" ",$Order['delivery_date']);
 				$DeliveryDate = $DeliveryDate[0];
-				
+
 				$Position = 1;
-				
+
 				$Delivery = $this->fetchAssoc('customer_delivery','*',"delivery_man_id = ".$DeliveryMan." AND delivery_date='".$DeliveryDate."' AND status='P'");
 				if(!$Delivery[0]['delivery_id'])
 				{
@@ -695,7 +706,7 @@ public function MakeRegs($Mode="List")
 					if($MaxPosition[0]['position']>1)
 						$Position = $MaxPosition[0]['position'];
 				}
-				
+
 				if($Order['delivery_id']>0)
 				{
 					//$this->execQuery('DELETE','customer_delivery',"delivery_id NOT IN (SELECT delivery_id FROM customer_order) AND delivery_id <> ".$DeliveryID);
@@ -708,12 +719,12 @@ public function MakeRegs($Mode="List")
 				$this->execQuery('update',$this->Table,"status='A', type='N', updated_by=".$_SESSION['admin_id'].", delivery_id=".$DeliveryID.",position=".$Position,'order_id='.$Order['order_id']);
 				//echo '<br>'.$this->lastQuery();
 			}
-		}	
+		}
 	}
-	
-	
+
+
 	// LOCAL ORDER PAYMENT
-	
+
 	public function Payment()
 	{
 		$OrderID = $_POST['id'];
@@ -722,7 +733,7 @@ public function MakeRegs($Mode="List")
 		$Data = $OrderData[0];
 		$DeliveryID = $OrderData['delivery_id'];
 		$OrderStatus = $OrderData['status'];
-		
+
 		$TotalAmount = 0;
 		if($OrderData['status'] = 'A')
 		{
@@ -730,11 +741,11 @@ public function MakeRegs($Mode="List")
 				$MovementStatus = "F";
 			else
 				$MovementStatus = "A";
-			
+
 			// DEBIT MOVEMENT
 			$LastMovementID = $DebitMovementID = Movement::InsertMovement($_POST['total_price'],$CustomerID,5,$this->MovementConcept.$OrderID,$OrderID,$MovementStatus);
-			
-			
+
+
 			if(intval($_POST['cash'])>0 || intval($_POST['checks'])>0)
 			{
 				$TotalChecks = 0;
@@ -755,10 +766,10 @@ public function MakeRegs($Mode="List")
 						//$InsertChecks = $InsertChecks? '),('.$InsertCheck:$InsertCheck;
 						$LastMovementID = Movement::InsertMovement($Checks[$I]['amount'],$CustomerID,2,"Pago de Orden N°".$OrderID,$OrderID,"F",2,$DebitMovementID,$CheckID);
 					}
-					
+
 				}
 				$TotalAmount = intval($_POST['cash']);
-				
+
 				if(intval($_POST['cash'])>0 && intval($_POST['checks'])>0)
 					$PaymentID = 3;
 				elseif(intval($_POST['cash'])>0)
@@ -768,7 +779,7 @@ public function MakeRegs($Mode="List")
 				$LastMovementID = Movement::InsertMovement($TotalAmount,$CustomerID,2,"Pago de Orden N°".$OrderID,$OrderID,"F",1,$DebitMovementID);
 				$TotalAmount += $TotalChecks;
 			}
-			
+
 			$Items = $_POST['items'];
 			for($I=1;$I<=$Items;$I++)
 			{
@@ -778,15 +789,15 @@ public function MakeRegs($Mode="List")
 					$this->execQuery("UPDATE","customer_order_item","delivered='Y',status='F',quantity_delivered=".$QuantityDelivered.",payment_status='F'","item_id=".$_POST['item_'.$I]);
 				}
 			}
-			
+
 			//CUSTOMER BALANACE UNTIL NOW
 			$MovementData = $this->fetchAssoc("movement","*","movement_id=".$LastMovementID);
 			$FinalBalance = $MovementData[0]['balance'];
-				
+
 			$this->execQuery("UPDATE","customer_order","total_paid=".$TotalAmount.",balance=".$FinalBalance.",status='F',payment_status='F',delivery_status='F',updated_by=".$_SESSION['admin_id'],"order_id=".$OrderID);
-			
-			
-			
+
+
+
 		}else{
 			echo "403";
 		}
