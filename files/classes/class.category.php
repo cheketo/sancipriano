@@ -297,8 +297,13 @@ public function MakeRegs($Mode="List")
 		$Title		= $_POST['title'];
 		$ShortTitle	= $_POST['short_title'];
 		$Parent		= $_POST['parent'];
+		$PRetailer	= $_POST['percentage_retailer']?$_POST['percentage_retailer']:0;
+		$PWholesaler= $_POST['percentage_wholesaler']?$_POST['percentage_wholesaler']:0;
+		$ARetailer	= $_POST['amount_retailer']?$_POST['amount_retailer']:0;
+		$AWholesaler= $_POST['amount_wholesaler']?$_POST['amount_wholesaler']:0;
+		
 		if(!$Parent) $Parent = 0;
-		$Insert			= $this->execQuery('insert',$this->Table,'title,short_title,parent_id,creation_date,company_id,created_by',"'".$Title."','".$ShortTitle."',".$Parent.",NOW(),".$_SESSION['company_id'].",".$_SESSION['admin_id']);
+		$Insert			= $this->execQuery('insert',$this->Table,'title,short_title,parent_id,additional_price_retailer,additional_price_wholesaler,additional_percentage_retailer,additional_percentage_wholesaler,creation_date,company_id,created_by',"'".$Title."','".$ShortTitle."',".$Parent.",".$ARetailer.",".$AWholesaler.",".$PRetailer.",".$PWholesaler.",NOW(),".$_SESSION['company_id'].",".$_SESSION['admin_id']);
 		//echo $this->lastQuery();
 	}	
 	
@@ -309,9 +314,14 @@ public function MakeRegs($Mode="List")
 		$Title		= $_POST['title'];
 		$ShortTitle	= $_POST['short_title'];
 		$Parent		= $_POST['parent'];
+		$PRetailer	= $_POST['percentage_retailer']?$_POST['percentage_retailer']:0;
+		$PWholesaler= $_POST['percentage_wholesaler']?$_POST['percentage_wholesaler']:0;
+		$ARetailer	= $_POST['amount_retailer']?$_POST['amount_retailer']:0;
+		$AWholesaler= $_POST['amount_wholesaler']?$_POST['amount_wholesaler']:0;
+		
 		if(!$Parent) $Parent = 0;
 		
-		$Update		= $this->execQuery('update',$this->Table,"title='".$Title."',short_title='".$ShortTitle."',parent_id=".$Parent.",updated_by=".$_SESSION['admin_id'],$this->TableID."=".$ID);
+		$Update		= $this->execQuery('update',$this->Table,"title='".$Title."',short_title='".$ShortTitle."',parent_id=".$Parent.",additional_price_retailer=".$ARetailer.",additional_price_wholesaler=".$AWholesaler.",additional_percentage_retailer=".$PRetailer.",additional_percentage_wholesaler=".$PWholesaler.",updated_by=".$_SESSION['admin_id'],$this->TableID."=".$ID);
 		//echo $this->lastQuery();
 	}
 	
@@ -350,7 +360,7 @@ public function MakeRegs($Mode="List")
 	public function Validate()
 	{
 		$Name 			= $_POST['title'];
-		$ActualName 	= $_POST['titlename'];
+		$ActualName 	= $_POST['actualtitle'];
 
 	    if($ActualName)
 	    	$TotalRegs  = $this->numRows($this->Table,'*',"title = '".$Name."' AND title<> '".$ActualName."'");

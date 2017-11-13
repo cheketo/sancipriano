@@ -94,7 +94,7 @@ function getProductsPrices(values,ids)
 		        success: function(data){
 		            if(data)
 		            {
-		            	console.log(data);
+		            	//console.log(data);
 		            	var prices = data.split(",");
 		            	var items = ids.split(",");
 		            	var decimal;
@@ -114,7 +114,7 @@ function getProductsPrices(values,ids)
 		            	});
 		            }else{
 		            	notifyError('Hubo un error al calcular el precio del producto');
-		                console.log('Sin información devuelta. Item='+id);
+		                console.log('Sin información devuelta. Item='+ids);
 		            }
 		        }
 		    });
@@ -394,7 +394,7 @@ $(function(){
 			}else{
 				var status = 'A';
 			}
-
+			
 			alertify.confirm(utf8_decode('¿Desea '+confirmText+'?'), function(e){
 				if(e)
 				{
@@ -418,7 +418,16 @@ $(function(){
 						{
 							notifyError("No es posible editar esta orden. No se encuentra en el estado correcto.");
 						}else{
-							notifyError("Ha ocurrido un error durante el proceso de "+procText+".");
+							if(isNaN(returningData))
+								notifyError("Ha ocurrido un error durante el proceso de "+procText+".");
+							else{
+								var stateObj = { url: "list.php?status=A&type=Y" };
+								window.history.pushState(stateObj, "Ordenes en Local",stateObj.url);
+								//console.log(window.history.state);
+								document.location = 'payment.php?id='+returningData+'&msg='+ $("#action").val();
+								//console.log('payment.php?id='+returningData+'&msg='+ $("#action").val());
+								
+							}
 						}
 						console.log(returningData);
 					}
@@ -455,7 +464,7 @@ function getCustomerData()
 			if(data)
 			{
 				$("#CustomerData").html(data);
-				console.log(data);
+				//console.log(data);
 			}
         }
     });
@@ -663,7 +672,7 @@ function editItemPayment()
 		$("#item_row_"+id).removeClass('SelectedItem');
 		$("#selected_"+id).val('');
 		updateRowBackground();
-		calculateTotalOrderPrice();
+		calculateTotalOrderPricePayment();
 	});
 }
 

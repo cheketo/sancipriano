@@ -70,6 +70,20 @@ $(document).ready(function(){
         ShowCategoriesList(categoryID);
     }
     
+    $("#variation").change(function(){
+      $("#PricePercentage").addClass('Hidden');
+      $("#PriceAmount").addClass('Hidden');
+      $(".ProductVariation").val('');
+      if($(this).val()==1)
+      {
+        $("#PricePercentage").removeClass('Hidden');
+      }
+      if($(this).val()==2)
+      {
+        $("#PriceAmount").removeClass('Hidden'); 
+      }
+    });
+    
     ///////////////////////// SELECT2 /////////////////////////////////
 	if($('.selectTags').length>0)
 	{

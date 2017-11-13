@@ -137,9 +137,12 @@ class DataBase
 			case "Mysql":
 				$Query = mysqli_query($this->StreamConnection,$Query) or mysqli_error($this->StreamConnection);
 				$Data	= array();
-				while($Data[]=mysqli_fetch_assoc($Query)){}
-				array_pop($Data);
-				$Data = Utf8EncodeArray($Data);
+				if($Query)
+				{
+					while($Data[]=mysqli_fetch_assoc($Query)){}
+					array_pop($Data);
+					$Data = Utf8EncodeArray($Data);
+				}
 				return $Data;
 			break;
 		}

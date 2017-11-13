@@ -4,12 +4,18 @@
     $Head->setTitle($Menu->GetTitle());
     $Head->setStyle('../../../vendors/chosen-js/bootstrap-chosen.css'); // Select Inputs With Tags
     $Head->setStyle('../../../vendors/datepicker/datepicker3.css'); // Date Picker Calendar
+    $Head->setIcon($Menu->GetHTMLicon());
     $Head->setHead();
     
     $OrderType = array("Y"=>"En Local","N"=>"Con Entrega");
     
     if($_GET['type']=='Y')
+    {
       $TypeClass = 'Hidden';
+      $DBName = "name";
+    }else{
+      $DBName = "CONCAT(name,' - (Z ',zone,')') as name";
+    }
     
     include('../../includes/inc.top.php');
 ?>
@@ -23,10 +29,11 @@
             <?php echo insertElement("hidden","type",'N'); ?>
             <?php //echo insertElement("hidden","total_items","1"); ?>
             <?php echo insertElement("hidden","items","1"); ?>
+            <?php echo insertElement("hidden","order"); ?>
             <h4 class="subTitleB"><i class="fa fa-building"></i> Cliente</h4>
             <div class="row form-group inline-form-custom">
               <div class="col-xs-12">
-                  <?php echo insertElement('select','customer','','form-control chosenSelect','data-placeholder="Seleccione un Cliente" validateEmpty="Seleccione un cliente"',$DB->fetchAssoc('customer a INNER JOIN customer_branch b ON (a.customer_id=b.customer_id) INNER JOIN customer_type c ON (a.type_id=c.type_id)',"b.branch_id,CONCAT(a.name,' - (Z ',a.zone,')') as address","a.status='A' AND a.company_id=".$_SESSION['company_id'],'b.address'),' ',''); ?>
+                  <?php echo insertElement('select','customer','','form-control chosenSelect','data-placeholder="Seleccione un Cliente" validateEmpty="Seleccione un cliente"',$DB->fetchAssoc('customer',"customer_id,".$DBName,"status='A' AND company_id=".$_SESSION['company_id'],'name'),' ',''); ?>
               </div>
             </div>
             
@@ -141,7 +148,7 @@
           <div class="row txC">
             <button type="button" class="btn btn-success btnGreen" id="BtnCreate"><i class="fa fa-plus"></i> Crear Orden</button>
             <?php if($_GET['type']=='Y'){ ?>
-            <!--<button type="button" class="btn btn-success btnBlue" id="BtnPay"><i class="fa fa-dollar"></i> Crear y Pagar</button>-->
+            <button type="button" class="btn btn-success btnBlue" id="BtnPay"><i class="fa fa-dollar"></i> Crear y Pagar</button>
             <?php }else{ ?>
             <button type="button" class="btn btn-success btnBlue" id="BtnCreateNext"><i class="fa fa-plus"></i> Crear y Agregar Otra</button>
             <?php } ?>

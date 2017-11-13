@@ -12,6 +12,11 @@
     
     $Variation = $DB->fetchAssoc('product_variation','variation_id,title');
     
+    $AmountClass = $PercentClass = 'Hidden';
+    
+    if($Data['variation_id']==1) $PercentClass = '';
+    if($Data['variation_id']==2) $AmountClass = '';
+    
     $Category = new Category();
     include('../../includes/inc.top.php');
     
@@ -121,6 +126,40 @@
                 <?php echo insertElement('select','size',$Data['size_id'],'form-control','validateEmpty="Seleccione una medida."',$DB->fetchAssoc("product_size","size_id,title")); ?>
               </div>
             </div>
+            
+      
+            <div id="PricePercentage" class="row form-group inline-form-custom <?php echo $PercentClass; ?>">
+              <div class="col-xs-12 col-sm-4 txR">
+                Porcentaje Minorista:
+              </div>
+              <div class="col-xs-12 col-sm-2">
+                <?php echo insertElement('text','percentage_retailer',$Data['additional_percentage_retailer'],'form-control priceInput ProductVariation PercentageField','placeholder="Sin Especificar" data-inputmask="\'alias\': \'numeric\', \'groupSeparator\': \'\', \'autoGroup\': true, \'digits\': 2, \'digitsOptional\': false, \'placeholder\': \'0\'"') ?>
+              </div>
+              <div class="col-xs-12 col-sm-4 txR">
+                Porcentaje Mayorista:
+              </div>
+              <div class="col-xs-12 col-sm-2">
+                <?php echo insertElement('text','percentage_wholesaler',$Data['additional_percentage_wholesaler'],'form-control priceInput ProductVariation PercentageField','placeholder="Sin Especificar" data-inputmask="\'alias\': \'numeric\', \'groupSeparator\': \'\', \'autoGroup\': true, \'digits\': 2, \'digitsOptional\': false, \'placeholder\': \'0\'"') ?>
+              </div>
+            </div>
+            
+            <div id="PriceAmount" class="row form-group inline-form-custom <?php echo $AmountClass; ?>">
+              <div class="col-xs-12 col-sm-4 txR">
+                Adicional Minorista:
+              </div>
+              <div class="col-xs-12 col-sm-2">
+                <?php echo insertElement('text','amount_retailer',$Data['additional_price_retailer'],'form-control priceInput ProductVariation AmountField' ,'placeholder="Sin Especificar" data-inputmask="\'alias\': \'numeric\', \'groupSeparator\': \'\', \'autoGroup\': true, \'digits\': 2, \'digitsOptional\': false, \'placeholder\': \'0\'"') ?>
+              </div>
+              <div class="col-xs-12 col-sm-4 txR">
+                Adicional Mayorista:
+              </div>
+              <div class="col-xs-12 col-sm-2">
+                <?php echo insertElement('text','amount_wholesaler',$Data['additional_price_wholesaler'],'form-control priceInput ProductVariation AmountField','placeholder="Sin Especificar" data-inputmask="\'alias\': \'numeric\', \'groupSeparator\': \'\', \'autoGroup\': true, \'digits\': 2, \'digitsOptional\': false, \'placeholder\': \'0\'"') ?>
+              </div>
+            </div>
+            
+            
+            
             <div class="row form-group inline-form-custom">
               <!--<div class="col-xs-12 col-sm-4">-->
               <!--  <?php //echo insertElement('text','rack','','form-control','placeholder="Estanter&iacute;a"') ?>-->

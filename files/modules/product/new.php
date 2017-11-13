@@ -106,6 +106,37 @@
                 <?php echo insertElement('select','size','','form-control','data-placeholder="Seleccionar Medida" validateEmpty="Seleccione una medida."',$DB->fetchAssoc("product_size","size_id,title"),'',' ') ?>
               </div>
             </div>
+            
+            <div id="PricePercentage" class="row form-group inline-form-custom Hidden">
+              <div class="col-xs-12 col-sm-4 txR">
+                Porcentaje Minorista:
+              </div>
+              <div class="col-xs-12 col-sm-2">
+                <?php echo insertElement('text','percentage_retailer','','form-control priceInput ProductVariation PercentageField','placeholder="Sin Especificar" data-inputmask="\'alias\': \'numeric\', \'groupSeparator\': \'\', \'autoGroup\': true, \'digits\': 2, \'digitsOptional\': false, \'placeholder\': \'0\'"') ?>
+              </div>
+              <div class="col-xs-12 col-sm-4 txR">
+                Porcentaje Mayorista:
+              </div>
+              <div class="col-xs-12 col-sm-2">
+                <?php echo insertElement('text','percentage_wholesaler','','form-control priceInput ProductVariation PercentageField','placeholder="Sin Especificar" data-inputmask="\'alias\': \'numeric\', \'groupSeparator\': \'\', \'autoGroup\': true, \'digits\': 2, \'digitsOptional\': false, \'placeholder\': \'0\'"') ?>
+              </div>
+            </div>
+            
+            <div id="PriceAmount" class="row form-group inline-form-custom Hidden">
+              <div class="col-xs-12 col-sm-4 txR">
+                Adicional Minorista:
+              </div>
+              <div class="col-xs-12 col-sm-2">
+                <?php echo insertElement('text','amount_retailer','','form-control priceInput ProductVariation AmountField' ,'placeholder="Sin Especificar" data-inputmask="\'alias\': \'numeric\', \'groupSeparator\': \'\', \'autoGroup\': true, \'digits\': 2, \'digitsOptional\': false, \'placeholder\': \'0\'"') ?>
+              </div>
+              <div class="col-xs-12 col-sm-4 txR">
+                Adicional Mayorista:
+              </div>
+              <div class="col-xs-12 col-sm-2">
+                <?php echo insertElement('text','amount_wholesaler','','form-control priceInput ProductVariation AmountField','placeholder="Sin Especificar" data-inputmask="\'alias\': \'numeric\', \'groupSeparator\': \'\', \'autoGroup\': true, \'digits\': 2, \'digitsOptional\': false, \'placeholder\': \'0\'"') ?>
+              </div>
+            </div>
+            
             <div class="row form-group inline-form-custom">
               <!--<div class="col-xs-12 col-sm-4">-->
               <!--  <?php //echo insertElement('text','rack','','form-control','placeholder="Estanter&iacute;a"') ?>-->

@@ -394,14 +394,14 @@ public function MakeRegs($Mode="List")
 
 		// Basic Data
 		$Type			= $_POST['order_type'];
-		$BranchID		= $_POST['customer'];
+		$CustomerID		= $_POST['customer'];
 		$CurrencyID		= $_POST['currency'];
 		$Extra			= $_POST['extra'];
 		$Total			= $_POST['total_price'];
 		$Status			= $Type=="Y"? "A":"P";
 		$Date			= implode("-",array_reverse(explode("/",$_POST['delivery_date'])));
-		$Customer 		= $this->fetchAssoc('customer_branch','customer_id',"branch_id=".$BranchID);
-		$CustomerID		= $Customer[0]['customer_id'];
+		$Branch 		= $this->fetchAssoc('customer_branch','branch_id',"customer_id=".$CustomerID);
+		$BranchID		= $Branch[0]['branch_id'];
 
 		$Insert			= $this->execQuery('insert',$this->Table,'type,branch_id,customer_id,currency_id,extra,total,delivery_date,status,creation_date,created_by,company_id',"'".$Type."',".$BranchID.",".$CustomerID.",".$CurrencyID.",'".$Extra."',".$Total.",'".$Date."','".$Status."',NOW(),".$_SESSION['admin_id'].",".$_SESSION['company_id']);
 		//echo $this->lastQuery();
@@ -426,6 +426,7 @@ public function MakeRegs($Mode="List")
 			// INSERT MOVEMENT
 			// Movement::InsertMovement($Total,$CustomerID,1,$this->MovementConcept.$NewID,$NewID);
 		}else{
+			echo $NewID;
 			// INSERT MOVEMENT
 			// Movement::InsertMovement($Total,$CustomerID,1,'Compra en Local Nº'.$NewID,$NewID);
 		}
@@ -448,14 +449,14 @@ public function MakeRegs($Mode="List")
 
 		// Basic Data
 		$Type			= $_POST['order_type'];
-		$BranchID		= $_POST['customer'];
+		$CustomerID		= $_POST['customer'];
 		$CurrencyID		= $_POST['currency']?$_POST['currency']:2;
 		$Extra			= $_POST['extra'];
 		$Total			= $_POST['total_price'];
 		$Status			= $Type=="Y"? "A":"P";
 		$Date			= implode("-",array_reverse(explode("/",$_POST['delivery_date'])));
-		$Customer 		= $this->fetchAssoc('customer_branch','customer_id',"branch_id=".$BranchID);
-		$CustomerID		= $Customer[0]['customer_id'];
+		$Branch 		= $this->fetchAssoc('customer_branch','branch_id',"customer_id=".$CustomerID);
+		$BranchID		= $Branch[0]['branch_id'];
 
 
 
@@ -483,7 +484,7 @@ public function MakeRegs($Mode="List")
 			// Movement::UpdateMovementByOrderID($Total,$CustomerID,1,$this->MovementConcept.$ID,$ID);
 		}else{
 			// UPDATE MOVEMENT
-			Movement::UpdateMovementByOrderID($Total,$CustomerID,1,'Compra en Local Nº'.$ID,$ID);
+			//Movement::UpdateMovementByOrderID($Total,$CustomerID,1,'Compra en Local Nº'.$ID,$ID);
 		}
 	}
 
@@ -492,7 +493,7 @@ public function MakeRegs($Mode="List")
 		$ID	= $_POST['id'];
 		$Order = new CustomerOrder($ID);
 		$Status = $Order->Data['status'] == 'I'? 'P' : 'A';
-		Movement::ActivateOrdersMovements($ID);
+		//Movement::ActivateOrdersMovements($ID);
 		$this->execQuery('update',$this->Table,"status = '".$Status."'",$this->TableID."=".$ID);
 	}
 
@@ -500,7 +501,7 @@ public function MakeRegs($Mode="List")
 	{
 		// INSERT MOVEMENT??
 		$ID	= $_POST['id'];
-		Movement::DeleteOrdersMovements($ID);
+		//Movement::DeleteOrdersMovements($ID);
 		$this->execQuery('update',$this->Table,"status = 'I'",$this->TableID."=".$ID);
 		$Order = $this->fetchAssoc($this->Table,'*','order_id = '.$ID);
 		$Order = $Order[0];
@@ -575,18 +576,16 @@ public function MakeRegs($Mode="List")
 		if(intval($_POST['customer'])>0 && $_POST['items'])
 		{
 			$Products = $this->fetchAssoc('product','*',"status='A' AND product_id IN (".$_POST['items'].") ");
-			$Branch 	= $this->fetchAssoc('customer_branch','customer_id',"branch_id=".$_POST['customer']);
-			$Customer	= new Customer($Branch[0]['customer_id']);
+			// $Branch 	= $this->fetchAssoc('customer_branch','customer_id',"branch_id=".$_POST['customer']);
+			$Customer	= new Customer($_POST['customer']);
 			$Prices = array();
 
 			foreach($Products as $Item)
 			{
 				$Cost		= $Item['cost'];
 				$Variation  = $Item['variation_id']==1? "percentage":"price";
-
-				if(intval($Customer->Data['type_id'])>2)
+				if(intval($Customer->Data['type_id'])<4)
 				{
-					$Config		= $this->fetchAssoc('product_configuration','*',"status='A' AND company_id=".$_SESSION['company_id'],'creation_date DESC');
 					if(!$Item['additional_price_wholesaler'])
 					{
 						$Category = $this->fetchAssoc('product_category',"*","status='A' AND (additional_price_wholesaler<>0 OR additional_percentage_wholesaler<>0) AND category_id=".$Item['category_id']);
@@ -598,6 +597,7 @@ public function MakeRegs($Mode="List")
 
 					if(!$Item['additional_price_wholesaler'])
 					{
+						$Config	= $this->fetchAssoc('product_configuration','*',"status='A' AND company_id=".$_SESSION['company_id'],'creation_date DESC');
 						$Item['additional_price_wholesaler'] = $Config[0]['additional_price_wholesaler'];
 						$Item['additional_percentage_wholesaler'] = $Config[0]['additional_percentage_wholesaler'];
 						$Item['additional_price_retailer'] = $Config[0]['additional_price_retailer'];
@@ -608,7 +608,14 @@ public function MakeRegs($Mode="List")
 					else
 						$Field = $Item["additional_".$Variation."_wholesaler"];
 				}else{
-					$Field	= $Customer->Data['additional_'.$Variation];
+					$Price = $this->fetchAssoc("customer_order_item","price","customer_id=".intval($_POST['customer'])." AND product_id=".$Item['product_id']);
+					// echo $this->lastQuery()." - ";
+					// print_r($Price);
+					$Field = $Price[0]['price']-$Cost;
+					if($Field<1)
+						$Field	= $Customer->Data['additional_'.$Variation];
+					else
+						$Variation = "price";
 				}
 
 				$AdditionalPrice = $Variation=="percentage"? ($Cost*$Field)/100 : $Field ;
@@ -658,10 +665,10 @@ public function MakeRegs($Mode="List")
 
 	public function Customerdata()
 	{
-		$Branch = $_POST['id'];
-		if($Branch>0)
+		$ID = $_POST['id'];
+		if($ID>0)
 		{
-			$Customer = $this->fetchAssoc('customer a INNER JOIN customer_branch b ON (b.customer_id=a.customer_id) INNER JOIN customer_type c ON (a.type_id=c.type_id)',"a.balance,c.name AS type","b.branch_id=".$Branch);
+			$Customer = $this->fetchAssoc('customer a INNER JOIN customer_type c ON (a.type_id=c.type_id)',"a.balance,c.name AS type","a.customer_id=".$ID);
 			$Customer = $Customer[0];
 			$Class = $Customer['balance']<0? 'danger':'success';
 			$Customer['balance'] = $Customer['balance']? $Customer['balance']: '0.00';

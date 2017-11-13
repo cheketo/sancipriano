@@ -28,11 +28,18 @@
     }
     
     $OrderType = array("Y"=>"En Local","N"=>"Con Entrega");
+    if($_GET['type']=='Y')
+    {
+      $DBName = "name";
+    }else{
+      $DBName = "CONCAT(name,' - (Z ',zone,')') as name";
+    }
     
     $PageTitle = $Data['status']=='V'? "Reactivar":"Editar";
     
     $Head->setTitle($PageTitle." Orden de ".$Data['name']);
     $Head->setSubTitle($Menu->GetTitle());
+    $Head->setIcon($Menu->GetHTMLicon());
     $Head->setStyle('../../../vendors/chosen-js/bootstrap-chosen.css'); // Select Inputs With Tags
     $Head->setStyle('../../../vendors/datepicker/datepicker3.css'); // Date Picker Calendar
     $Head->setHead();
@@ -52,7 +59,8 @@
             <h4 class="subTitleB"><i class="fa fa-building"></i> Cliente</h4>
             <div class="row form-group inline-form-custom">
               <div class="col-xs-12">
-                  <?php echo insertElement('select','customer',$Data['branch_id'],'form-control chosenSelect','data-placeholder="Seleccione un Cliente" validateEmpty="Seleccione un cliente"',$DB->fetchAssoc('customer a INNER JOIN customer_branch b ON (a.customer_id=b.customer_id) INNER JOIN customer_type c ON (a.type_id=c.type_id)',"b.branch_id,CONCAT(a.name,' - (Z ',a.zone,')') as address","a.status='A' AND a.company_id=".$_SESSION['company_id'],'b.address'),' ',''); ?>
+                  <?php //echo insertElement('select','customer',$Data['branch_id'],'form-control chosenSelect','data-placeholder="Seleccione un Cliente" validateEmpty="Seleccione un cliente"',$DB->fetchAssoc('customer a INNER JOIN customer_branch b ON (a.customer_id=b.customer_id) INNER JOIN customer_type c ON (a.type_id=c.type_id)',"b.branch_id,CONCAT(a.name,' - (Z ',a.zone,')') as address","a.status='A' AND a.company_id=".$_SESSION['company_id'],'b.address'),' ',''); ?>
+                  <?php echo insertElement('select','customer',$Data['customer_id'],'form-control chosenSelect','data-placeholder="Seleccione un Cliente" validateEmpty="Seleccione un cliente"',$DB->fetchAssoc('customer',"customer_id,".$DBName,"status='A' AND company_id=".$_SESSION['company_id'],'name'),' ',''); ?>
               </div>
             </div>
             <div id="CustomerData">

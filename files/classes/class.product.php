@@ -378,6 +378,11 @@ public function MakeRegs($Mode="List")
 		$Rack		= $_POST['rack'];
 		$Size		= $_POST['size'];
 		$Variation	= $_POST['variation'];
+		$PRetailer	= $_POST['percentage_retailer']?$_POST['percentage_retailer']:0;
+		$PWholesaler= $_POST['percentage_wholesaler']?$_POST['percentage_wholesaler']:0;
+		$ARetailer	= $_POST['amount_retailer']?$_POST['amount_retailer']:0;
+		$AWholesaler= $_POST['amount_wholesaler']?$_POST['amount_wholesaler']:0;
+		
 		$Stock		= $_POST['stock'];
 		$StockMin	= $_POST['stock_min'];
 		$StockMax	= $_POST['stock_max'];
@@ -390,7 +395,7 @@ public function MakeRegs($Mode="List")
 		if(!$StockMax) $StockMax = 0;
 		// if(!$PriceFob) $PriceFob = 0;
 		// if(!$PriceDispatch) $PriceDispatch = 0;
-		$Insert		= $this->execQuery('insert',$this->Table,'title,category_id,cost,variation_id,brand_id,rack,size_id,stock,stock_min,stock_max,description,creation_date,company_id,created_by',"'".$Title."',".$Category.",".$Cost.",".$Variation.",".$Brand.",'".$Rack."',".$Size.",".$Stock.",".$StockMin.",".$StockMax.",'".$Description."',NOW(),".$_SESSION['company_id'].",".$_SESSION['admin_id']);
+		$Insert		= $this->execQuery('insert',$this->Table,'title,category_id,cost,variation_id,additional_price_retailer,additional_price_wholesaler,additional_percentage_retailer,additional_percentage_wholesaler,brand_id,rack,size_id,stock,stock_min,stock_max,description,creation_date,company_id,created_by',"'".$Title."',".$Category.",".$Cost.",".$Variation.",".$ARetailer.",".$AWholesaler.",".$PRetailer.",".$PWholesaler.",".$Brand.",'".$Rack."',".$Size.",".$Stock.",".$StockMin.",".$StockMax.",'".$Description."',NOW(),".$_SESSION['company_id'].",".$_SESSION['admin_id']);
 		$ID = $this->GetInsertId();
 		$this->ChangeCost($Cost,'NOW()',$ID);
 		//echo $this->lastQuery();
@@ -410,6 +415,10 @@ public function MakeRegs($Mode="List")
 		$Rack		= $_POST['rack'];
 		$Size		= $_POST['size'];
 		$Variation	= $_POST['variation'];
+		$PRetailer	= $_POST['percentage_retailer']?$_POST['percentage_retailer']:0;
+		$PWholesaler= $_POST['percentage_wholesaler']?$_POST['percentage_wholesaler']:0;
+		$ARetailer	= $_POST['amount_retailer']?$_POST['amount_retailer']:0;
+		$AWholesaler= $_POST['amount_wholesaler']?$_POST['amount_wholesaler']:0;
 		$StockMin	= $_POST['stock_min'];
 		$StockMax	= $_POST['stock_max'];
 		$Description= $_POST['description'];
@@ -417,7 +426,7 @@ public function MakeRegs($Mode="List")
 		if(!$StockMin) $StockMin = 0;
 		if(!$StockMax) $StockMax = 0;
 		
-		$Update		= $this->execQuery('update',$this->Table,"title='".$Title."',category_id=".$Category.",brand_id=".$Brand.",cost=".$Cost.",variation_id=".$Variation.",rack='".$Rack."',size_id='".$Size."',stock_min='".$StockMin."',stock_max='".$StockMax."',description='".$Description."',updated_by=".$_SESSION['admin_id'],$this->TableID."=".$ID);
+		$Update		= $this->execQuery('update',$this->Table,"title='".$Title."',category_id=".$Category.",brand_id=".$Brand.",cost=".$Cost.",variation_id=".$Variation.",additional_price_retailer=".$ARetailer.",additional_price_wholesaler=".$AWholesaler.",additional_percentage_retailer=".$PRetailer.",additional_percentage_wholesaler=".$PWholesaler.",rack='".$Rack."',size_id='".$Size."',stock_min='".$StockMin."',stock_max='".$StockMax."',description='".$Description."',updated_by=".$_SESSION['admin_id'],$this->TableID."=".$ID);
 		//echo $this->lastQuery();
 		$this->ChangeCost($Cost,'NOW()',$ID);
 	}
