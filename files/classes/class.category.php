@@ -321,7 +321,7 @@ public function MakeRegs($Mode="List")
 		
 		if(!$Parent) $Parent = 0;
 		
-		$Update		= $this->execQuery('update',$this->Table,"title='".$Title."',short_title='".$ShortTitle."',parent_id=".$Parent.",additional_price_retailer=".$ARetailer.",additional_price_wholesaler=".$AWholesaler.",additional_percentage_retailer=".$PRetailer.",additional_percentage_wholesaler=".$PWholesaler.",updated_by=".$_SESSION['admin_id'],$this->TableID."=".$ID);
+		$Update		= $this->execQuery('update',$this->Table,"title='".$Title."',short_title='".$ShortTitle."',parent_id=".$Parent.",additional_price_retailer=".$ARetailer.", =".$AWholesaler.",additional_percentage_retailer=".$PRetailer.",additional_percentage_wholesaler=".$PWholesaler.",updated_by=".$_SESSION['admin_id'],$this->TableID."=".$ID);
 		//echo $this->lastQuery();
 	}
 	
