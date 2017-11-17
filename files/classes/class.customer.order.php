@@ -649,7 +649,7 @@ public function MakeRegs($Mode="List")
                 </div>
                 <div class="col-xs-1 txC">
                 	<span id="Quantity'.$ID.'" class="Hidden ItemText'.$ID.'"></span>
-                  '.insertElement('text','quantity_'.$ID,'','ItemField'.$ID.' txC form-control calcable QuantityItem','data-inputmask="\'mask\': \'9{+}.99\'" placeholder="Cantidad" validateEmpty="Ingrese una cantidad"').'
+                  '.insertElement('text','quantity_'.$ID,'','ItemField'.$ID.' txC form-control calcable QuantityItem','validateOnlyNumbers="Solo se permiten n&uacute;meros" placeholder="Cantidad" validateEmpty="Ingrese una cantidad"').'
                 </div>
 
                 <div  id="item_number_'.$ID.'" class="col-xs-3 txC item_number txC" total="0" item="'.$ID.'">'.$TotalPrice.'</div>

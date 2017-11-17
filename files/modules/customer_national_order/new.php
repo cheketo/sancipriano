@@ -96,7 +96,7 @@
                   </div>
                   <div class="col-sm-1 col-xs-3 txC">
                     <span id="Quantity1" class="Hidden ItemText1"></span>
-                    <?php echo insertElement('text','quantity_1','','ItemField1 form-control calcable QuantityItem txC','data-inputmask="\'mask\': \'9{+}\'" placeholder="Cantidad" validateEmpty="Ingrese una cantidad"'); ?>
+                    <?php echo insertElement('text','quantity_1','','ItemField1 form-control calcable QuantityItem txC','validateOnlyNumbers="Solo se permiten n&uacute;meros" placeholder="Cantidad" validateEmpty="Ingrese una cantidad"'); ?>
                   </div>
                   <div id="item_number_1" class="col-xs-3 txC item_number" total="0" item="1">$ 0.00</div>
                   <div class="col-sm-3 col-xs-3 txC">
