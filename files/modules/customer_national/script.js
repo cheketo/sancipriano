@@ -22,6 +22,20 @@ $(document).ready(function(){
 	}else{
 		$("#additonal_configuration").addClass("Hidden");
 	}
+	
+	// Atocomplete Main Branch Address
+	$("#autocomplete_address").click(function(){
+		$("#map1_lat").val('-34.6442360000000000');
+		$("#map1_lng").val('-58.4943069999999900');
+		$("#map1_address").val('Av. Juan Bautista Alberdi 4843');
+		$("#map1_address_short").val('Av. Juan Bautista Alberdi 4843');
+		$("#map1_province").val('Buenos Aires');
+		$("#map1_country").val('Argentina');
+		$("#map1_postal_code").val('C1407HAC');
+		$("#address_1").val('Av. Juan Bautista Alberdi 4843');
+		$("#postal_code_1").val('C1407HAC');
+	});
+	
 });
 
 $(function(){

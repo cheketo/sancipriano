@@ -106,8 +106,11 @@
             </div>
 
       </div>
+      
           <div class="row txC" id="add_branch_button_container">
             <button id="add_branch" type="button" class="btn btn-primary Info-Card-Form-Btn"><i class="fa fa-plus"></i> Agregar una sucursal</button>
+            <hr>
+            <button id="autocomplete_address" type="button" class="btn btn-warning Info-Card-Form-Btn"><i class="fa fa-light"></i> Completar Sucursal Central con datos de la pescader&iacute;a</button>
           </div>
           <hr>
           <div class="row txC">
