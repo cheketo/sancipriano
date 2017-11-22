@@ -243,6 +243,20 @@ public function MakeRegs($Mode="List")
         if(!$Regs) $Regs.= '<div class="callout callout-info"><h4><i class="icon fa fa-info-circle"></i> No se encontraron ordenes de compras.</h4><p>Puede crear una orden haciendo click <a href="new.php?type='.$_GET['type'].'">aqui</a>.</p></div>';
 		return $Regs;
 	}
+	
+	public function InsertDefaultSearchButtons()
+	{
+		$Delete = ($_GET['type']=='Y' && $_GET['status']!='F') || ($_GET['type']=='N' && $_GET['status']=='P')? '<button type="button" title="Borrar registros seleccionados" class="btn bg-red animated fadeIn NewElementButton Hidden DeleteSelectedElements"><i class="fa fa-trash-o"></i></button>':'';
+		return '<!-- Select All -->
+		    	<button type="button" title="Seleccionar todos" id="SelectAll" class="btn animated fadeIn NewElementButton"><i class="fa fa-square-o"></i></button>
+		    	<button type="button" title="Deseleccionar todos" id="UnselectAll" class="btn animated fadeIn NewElementButton Hidden"><i class="fa fa-square"></i></button>
+		    	<!--/Select All -->
+		    	'.$Delete.'
+		    	<!-- Activate All -->
+		    	<button type="button" title="Activar registros seleccionados" class="btn btnGreen animated fadeIn NewElementButton Hidden ActivateSelectedElements"><i class="fa fa-check-circle"></i></button>
+		    	<!-- /Activate All -->
+		    	';
+	}
 
 	protected function InsertSearchField()
 	{
@@ -458,12 +472,10 @@ public function MakeRegs($Mode="List")
 		$Branch 		= $this->fetchAssoc('customer_branch','branch_id',"customer_id=".$CustomerID);
 		$BranchID		= $Branch[0]['branch_id'];
 
-
-
 		$Update		= $this->execQuery('update','customer_order',"type='".$Type."',branch_id=".$BranchID.",customer_id='".$CustomerID."',currency_id=".$CurrencyID.",extra='".$Extra."',total=".$Total.",delivery_date='".$Date."',status='".$Status."',updated_by=".$_SESSION['admin_id'],"order_id=".$ID);
 		//echo $this->lastQuery();
 
-		if($_POST['delivery_man'] && $Type=='N')
+		if($Type=='N')
 			$this->Associate($ID,$_POST['delivery_man']);
 
 		// DELETE OLD ITEMS
@@ -486,6 +498,67 @@ public function MakeRegs($Mode="List")
 			// UPDATE MOVEMENT
 			//Movement::UpdateMovementByOrderID($Total,$CustomerID,1,'Compra en Local Nº'.$ID,$ID);
 		}
+	}
+	
+	public function Associate($OrderID=0,$DeliveryManID=0)
+	{
+		$IDs = $OrderID==0? $_POST['selected']."0": $OrderID;
+		if($_POST['user'])
+			$DeliveryMan = $DeliveryManID==0? $_POST['user']: $DeliveryManID;
+		else
+			$DeliveryMan = $DeliveryManID;
+		$Orders = $this->fetchAssoc($this->Table,'*','order_id IN ('.$IDs.')');
+		$DeliveryID = 0;
+		if(intval($DeliveryMan)>0)
+		{
+			$Status='A';
+			foreach($Orders as $Order)
+			{
+
+				$DeliveryDate = explode(" ",$Order['delivery_date']);
+				$DeliveryDate = $DeliveryDate[0];
+
+				$Position = 1;
+
+				$Delivery = $this->fetchAssoc('customer_delivery','*',"delivery_man_id = ".$DeliveryMan." AND delivery_date='".$DeliveryDate."' AND status='P'");
+				if(!$Delivery[0]['delivery_id'])
+				{
+					$this->execQuery('insert','customer_delivery','delivery_man_id,delivery_date,company_id,created_by,creation_date',$DeliveryMan.",'".$DeliveryDate."',".$_SESSION['company_id'].",".$_SESSION['admin_id'].",NOW()");
+					$DeliveryID = $this->GetInsertId();
+				}else{
+					$DeliveryID = $Delivery[0]['delivery_id'];
+					$MaxPosition = $this->fetchAssoc($this->Table,'max(position)+1 AS position'," order_id<>".$Order['order_id']." AND delivery_id=".$DeliveryID);
+					if($MaxPosition[0]['position']>1)
+						$Position = $MaxPosition[0]['position'];
+				}
+				
+				if($Order['delivery_id']>0)
+				{
+					//$this->execQuery('DELETE','customer_delivery',"delivery_id NOT IN (SELECT delivery_id FROM customer_order) AND delivery_id <> ".$DeliveryID);
+					$OldDelivery = $this->fetchAssoc($this->Table,'*'," order_id<>".$Order['order_id']." AND delivery_id=".$Order['delivery_id']);
+					if(!count($OldDelivery)>0)
+					{
+						$this->execQuery('DELETE','customer_delivery','delivery_id='.$Order['delivery_id']);
+					}
+				}
+				$this->execQuery('update',$this->Table,"status='".$Status."', type='N', updated_by=".$_SESSION['admin_id'].", delivery_id=".$DeliveryID.",position=".$Position,'order_id='.$Order['order_id']);
+			}
+		}else{
+			$Status='P';
+			$Position = 0;
+			$Order = $Orders[0];
+			if($Order['delivery_id']>0)
+			{
+				//$this->execQuery('DELETE','customer_delivery',"delivery_id NOT IN (SELECT delivery_id FROM customer_order) AND delivery_id <> ".$DeliveryID);
+				$OldDelivery = $this->fetchAssoc($this->Table,'*'," order_id<>".$Order['order_id']." AND delivery_id=".$Order['delivery_id']);
+				if(!count($OldDelivery)>0)
+				{
+					$this->execQuery('DELETE','customer_delivery','delivery_id='.$Order['delivery_id']);
+				}
+			}
+			$this->execQuery('update',$this->Table,"status='".$Status."', type='N', updated_by=".$_SESSION['admin_id'].", delivery_id=".$DeliveryID.",position=".$Position,'order_id='.$Order['order_id']);
+		}
+		//echo '<br>'.$this->lastQuery();
 	}
 
 	public function Activate()
@@ -684,48 +757,6 @@ public function MakeRegs($Mode="List")
 			</div>
 			';
 			echo $HTML;
-		}
-	}
-
-	public function Associate($OrderID=0,$DeliveryManID=0)
-	{
-		$IDs = $OrderID==0? $_POST['selected']."0": $OrderID;
-		$DeliveryMan = $DeliveryManID==0? $_POST['user']: $DeliveryManID;
-		if(intval($DeliveryMan)>0)
-		{
-			$Orders = $this->fetchAssoc($this->Table,'*','order_id IN ('.$IDs.')');
-			foreach($Orders as $Order)
-			{
-
-				$DeliveryDate = explode(" ",$Order['delivery_date']);
-				$DeliveryDate = $DeliveryDate[0];
-
-				$Position = 1;
-
-				$Delivery = $this->fetchAssoc('customer_delivery','*',"delivery_man_id = ".$DeliveryMan." AND delivery_date='".$DeliveryDate."' AND status='P'");
-				if(!$Delivery[0]['delivery_id'])
-				{
-					$this->execQuery('insert','customer_delivery','delivery_man_id,delivery_date,company_id,created_by,creation_date',$DeliveryMan.",'".$DeliveryDate."',".$_SESSION['company_id'].",".$_SESSION['admin_id'].",NOW()");
-					$DeliveryID = $this->GetInsertId();
-				}else{
-					$DeliveryID = $Delivery[0]['delivery_id'];
-					$MaxPosition = $this->fetchAssoc($this->Table,'max(position)+1 AS position'," order_id<>".$Order['order_id']." AND delivery_id=".$DeliveryID);
-					if($MaxPosition[0]['position']>1)
-						$Position = $MaxPosition[0]['position'];
-				}
-
-				if($Order['delivery_id']>0)
-				{
-					//$this->execQuery('DELETE','customer_delivery',"delivery_id NOT IN (SELECT delivery_id FROM customer_order) AND delivery_id <> ".$DeliveryID);
-					$OldDelivery = $this->fetchAssoc($this->Table,'*'," order_id<>".$Order['order_id']." AND delivery_id=".$Order['delivery_id']);
-					if(!count($OldDelivery)>0)
-					{
-						$this->execQuery('DELETE','customer_delivery','delivery_id='.$Order['delivery_id']);
-					}
-				}
-				$this->execQuery('update',$this->Table,"status='A', type='N', updated_by=".$_SESSION['admin_id'].", delivery_id=".$DeliveryID.",position=".$Position,'order_id='.$Order['order_id']);
-				//echo '<br>'.$this->lastQuery();
-			}
 		}
 	}
 

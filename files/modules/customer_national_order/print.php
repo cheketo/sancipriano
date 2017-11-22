@@ -20,6 +20,9 @@
     $Head->setHead();
     
     $Data['initial_balance'] = $Data['balance']  + $Data['total'] - $Data['total_paid'];
+    $InitialBalance = floatval($Data['initial_balance'])<floatval(0.00)? "(".number_format($Data['initial_balance']*-1, 2, ',', '.').")":number_format($Data['initial_balance']*-1, 2, ',', '.');
+    $Balance = floatval($Data['balance'])<floatval(0.00)? "(".number_format($Data['balance']*-1, 2, ',', '.').")":number_format($Data['balance']*-1, 2, ',', '.');
+    
     $TotalOrder=0;
 ?>
     <div class="PrintPage">
@@ -88,13 +91,13 @@
             
             
             <hr>
-            <h4>Saldo Inicial: <b>$<?php echo number_format($Data['initial_balance'], 2, ',', '.'); ?></b></h4>
+            <h4>Saldo Inicial: <b>$<?php echo $InitialBalance; ?></b></h4>
             <hr>
             <h4>Total a Pagar: <b>$<?php echo number_format($TotalOrder, 2, ',', '.') ?></b></h4>
             <hr>
             <h4>Total Pagado: <b>$<?php echo number_format($Data['total_paid'], 2, ',', '.') ?></b></h4>
             <hr>
-            <h4>Saldo Final: <b>$<?php echo number_format($Data['balance'], 2, ',', '.'); ?></b></h4>
+            <h4>Saldo Final: <b>$<?php echo $Balance; ?></b></h4>
             
         </div>
         <div class="PageFooter txC">

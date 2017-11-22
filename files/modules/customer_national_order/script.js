@@ -154,13 +154,23 @@ function setDatePicker()
 {
 	if($(".delivery_date").length>0)
 	{
-		$(".delivery_date").datepicker({
-			autoclose:true,
-			todayHighlight: true,
-			language: 'es',
-			startDate: '-0d',
-			endDate: '+4m'
-		});
+		if($("#type").val()=="N")
+		{
+			$(".delivery_date").datepicker({
+				autoclose:true,
+				todayHighlight: true,
+				language: 'es',
+				startDate: '-0d',
+				endDate: '+4m'
+			});
+		}else{
+			$(".delivery_date").datepicker({
+				autoclose:true,
+				todayHighlight: true,
+				language: 'es',
+				endDate: '+4m'
+			});
+		}
 	}
 }
 
@@ -168,13 +178,23 @@ function setADatePicker(element)
 {
 	if($(".delivery_date").length>0)
 	{
-		$(element).datepicker({
-			autoclose:true,
-			todayHighlight: true,
-			language: 'es',
-			startDate: '-0d',
-			endDate: '+4m'
-		});
+		if($("#type").val()=="N")
+		{
+			$(".delivery_date").datepicker({
+				autoclose:true,
+				todayHighlight: true,
+				language: 'es',
+				startDate: '-0d',
+				endDate: '+4m'
+			});
+		}else{
+			$(".delivery_date").datepicker({
+				autoclose:true,
+				todayHighlight: true,
+				language: 'es',
+				endDate: '+4m'
+			});
+		}
 	}
 }
 
@@ -374,7 +394,7 @@ $(function(){
 		{
 			calculateTotalOrderPrice();
 			var confirmText,procText;
-			var BtnID = $(this).attr("id")
+			var BtnID = $(this).attr("id");
 			if(get['id']>0)
 			{
 				confirmText = "modificar";
@@ -395,7 +415,7 @@ $(function(){
 				var status = 'A';
 			}
 			
-			alertify.confirm(utf8_decode('¿Desea '+confirmText+'?'), function(e){
+			alertify.confirm('¿Desea '+confirmText+'?', function(e){
 				if(e)
 				{
 					var process		= '../../library/processes/proc.common.php?object=CustomerOrder';
@@ -408,8 +428,11 @@ $(function(){
 					}else{
 						if(BtnID=="BtnCreateNext")
 							var target		= 'new.php?type='+$("#order_type").val()+'&msg='+ $("#action").val();
-						else
+						else{
+							var stateObj = { url: "list.php?status=A&type=Y" };
+							window.history.pushState(stateObj, "Ordenes en Local",stateObj.url);
 							var target		= 'payment.php?id='+get['id']+'&msg='+ $("#action").val();
+						}
 					}
 					var haveData	= function(returningData)
 					{
@@ -421,11 +444,18 @@ $(function(){
 							if(isNaN(returningData))
 								notifyError("Ha ocurrido un error durante el proceso de "+procText+".");
 							else{
-								var stateObj = { url: "list.php?status=A&type=Y" };
-								window.history.pushState(stateObj, "Ordenes en Local",stateObj.url);
-								//console.log(window.history.state);
-								document.location = 'payment.php?id='+returningData+'&msg='+ $("#action").val();
-								//console.log('payment.php?id='+returningData+'&msg='+ $("#action").val());
+								if(BtnID=="BtnPay")
+								{
+									// Change browser to emulate cancel button in payment page
+									//var stateObj = { url: "list.php?status=A&type=Y" };
+									//window.history.pushState(stateObj, "Ordenes en Local",stateObj.url);
+									//console.log(window.history.state);
+									document.location = 'payment.php?id='+returningData+'&msg='+ $("#action").val();
+									//console.log('payment.php?id='+returningData+'&msg='+ $("#action").val());
+								}else{
+									document.location = target;
+								}
+								
 								
 							}
 						}

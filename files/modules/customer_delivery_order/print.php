@@ -12,6 +12,9 @@
     
     $Data['initial_balance'] = $Data['balance'] - $Data['total_paid'] + $Data['total'];
     
+    $InitialBalance = floatval($Data['initial_balance'])<floatval(0.00)? "(".number_format($Data['initial_balance']*-1, 2, ',', '.').")":number_format($Data['initial_balance']*-1, 2, ',', '.');
+    $Balance = floatval($Data['balance'])<floatval(0.00)? "(".number_format($Data['balance']*-1, 2, ',', '.').")":number_format($Data['balance']*-1, 2, ',', '.');
+    
     for($I=0;$I<2;$I++)
     {
     $TotalOrder=0;
@@ -79,13 +82,13 @@
             
             
             <hr>
-            <h4>Saldo Inicial: <b>$<?php echo number_format($Data['initial_balance'], 2, ',', '.'); ?></b></h4>
+            <h4>Saldo Inicial: <b>$<?php echo $InitialBalance; ?></b></h4>
             <hr>
             <h4>Total a Pagar: <b>$<?php echo number_format($TotalOrder, 2, ',', '.') ?></b></h4>
             <hr>
             <h4>Total Pagado: <b>$<?php echo number_format($Data['total_paid'], 2, ',', '.') ?></b></h4>
             <hr>
-            <h4>Saldo Final: <b>$<?php echo number_format($Data['balance'], 2, ',', '.'); ?></b></h4>
+            <h4>Saldo Final: <b>$<?php echo $Balance; ?></b></h4>
             
             <!--<div class="PageCol ItemTitle">-->
                 

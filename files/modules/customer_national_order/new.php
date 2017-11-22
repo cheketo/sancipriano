@@ -11,9 +11,11 @@
     
     if($_GET['type']=='Y')
     {
+      $Type = 'Y';
       $TypeClass = 'Hidden';
       $DBName = "name";
     }else{
+      $Type = 'N';
       $DBName = "CONCAT(name,' - (Z ',zone,')') as name";
     }
     
@@ -26,7 +28,7 @@
           <div class="innerContainer main_form">
             <!--<form id="new_order">-->
             <?php echo insertElement("hidden","action",'insert'); ?>
-            <?php echo insertElement("hidden","type",'N'); ?>
+            <?php echo insertElement("hidden","type",$Type); ?>
             <?php //echo insertElement("hidden","total_items","1"); ?>
             <?php echo insertElement("hidden","items","1"); ?>
             <?php echo insertElement("hidden","order"); ?>
@@ -129,6 +131,7 @@
             <div class="row">
               <div class="col-sm-6 col-xs-12 txC">
                 <button type="button" id="add_order_item" class="btn btn-warning"><i class="fa fa-plus"></i> <strong>Agregar Art&iacute;culo</strong></button>
+                <a href="../product/new.php" type="button" id="add_new_product" target="_blank" class="btn btn-primary bg-aqua"><i class="fa fa-cube"></i> <strong>Crear Art&iacute;culo</strong></a>
               </div>
               <div class="col-sm-6 col-xs-12 txC">
                 <span class="input-group">

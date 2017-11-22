@@ -28,7 +28,7 @@
     }
     
     $OrderType = array("Y"=>"En Local","N"=>"Con Entrega");
-    if($_GET['type']=='Y')
+    if($Data['type']=='Y')
     {
       $DBName = "name";
     }else{
@@ -53,6 +53,7 @@
             <!--<form id="new_order">-->
             <?php echo insertElement("hidden","action",'update'); ?>
             <?php echo insertElement("hidden","id",$ID); ?>
+            <?php echo insertElement("hidden","type",$Data['type']); ?>
             <?php echo insertElement("hidden","status",$Status); ?>
             <?php echo insertElement("hidden","customer_name",$Data['name']); ?>
             <?php echo insertElement("hidden","items",count($Items)); ?>
@@ -163,6 +164,7 @@
             <div class="row">
               <div class="col-sm-6 col-xs-12 txC">
                 <button type="button" id="add_order_item" class="btn btn-warning"><i class="fa fa-plus"></i> <strong>Agregar Art&iacute;culo</strong></button>
+                <a href="../product/new.php" type="button" id="add_new_product" target="_blank" class="btn btn-primary bg-aqua"><i class="fa fa-cube"></i> <strong>Crear Art&iacute;culo</strong></a>
               </div>
               <div class="col-sm-6 col-xs-12 txC">
                 <span class="input-group">

@@ -91,18 +91,19 @@
             <hr>
             <?php 
                 $Total = 0;
-                foreach($Data['products'] as $Product){ 
-                $Total += $Product['total'];
+                foreach($Data['products'] as $Product)
+                { 
+                    $Total += $Product['total'];
             ?>
-            <div class="PageCol TotalTitle">
-                <?php echo $Product['title'] ?>
-            </div>
-            <div class="PageCol TotalQuantity">
-                <?php echo $Product['quantity'].' '.$Product['unit'] ?>
-            </div>
-            <div class="PageCol TotalTotal">
-                <?php echo $Items[0]['currency'].$Product['total'] ?>
-            </div>
+                    <div class="PageCol TotalTitle">
+                        <?php echo $Product['title'] ?>
+                    </div>
+                    <div class="PageCol TotalQuantity">
+                        <?php echo $Product['quantity'].' '.$Product['unit'] ?>
+                    </div>
+                    <div class="PageCol TotalTotal">
+                        <?php echo $Items[0]['currency'].$Product['total'] ?>
+                    </div>
             <?php } ?>
             <hr>
             <div class="PageCol TotalTitle">
