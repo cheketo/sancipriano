@@ -1,5 +1,16 @@
 $(document).ready(function(){
 	
+	
+	if($('.chosenSelect').length>0)
+	{
+		// $(".itemSelect").each(function(){
+		// 	var item = $(this).attr('item');
+		// 	setItemChosen(item);
+		// });
+		
+		$('.chosenSelect').chosen();
+	}
+	
 	if($("#cuit").length>0)
 		$("#cuit").inputmask();  //static mask
 
@@ -397,3 +408,66 @@ $(document).ready(function(){
 		
 	});
 })
+
+
+
+////////////////////////////////////// PRODUCTS RELATION ///////////////////////////////////
+$(function(){
+	$("#asoc").click(function(){
+		var product = $("#product");
+		var id = product.val();
+		if(id>0)
+		{
+			if(CheckProductId(id))
+			{
+				$("#relations").removeClass("Hidden");
+				if(isNaN(parseInt($("#total").val())))
+					var row = 1;
+				else
+					var row = parseInt($("#total").val())+1;
+				var newrow = '<div class="row txC" row="'+row+'">' +
+				                '<div class="col-xs-12 col-sm-3 col-md-2 col-md-offset-3">'+
+				                    $("#product option:selected").text()+
+				                    '<input type="hidden" class="HiddenIDVal" name="id'+row+'" id="id'+row+'" value="'+id+'" />'+
+				                '</div>'+
+				                '<div class="col-xs-12 col-sm-3 col-md-2">'+
+				                    '<select name="variation'+row+'" id="variation'+row+'" class="form-control">'+
+				                        '<option value="1">Fijo</option>'+
+				                        '<option value="2">Porcentual</option>'+
+				                    '</select>'+
+				                '</div>'+
+				                '<div class="col-xs-12 col-sm-3 col-md-2">'+
+				                    '<input type="text" name="value'+row+'" id="value'+row+'" class="form-control" placeholder="Valor" validateOnlyNumbers="Solo se pueden ingresar n&uacute;meros." />'+
+				                '</div>'+
+				                '<div class="col-xs-12 col-sm-3 col-md-1">'+
+				                    '<span class="btn btn-danger DeleteProductRow" aria-label="Borrar" row="'+row+'" class="hint--bottom hint--bounce hint--error"><i class="fa fa-trash"></i></span>'+
+				                '</div>'+
+				            '</div>';
+				$("#relations").append(newrow);
+				$("#total").val(row)
+				DeleteProductRow();
+				
+			}else{
+				notifyWarning("El producto ya se encuentra relacionado");
+			}
+		}
+	})
+});
+
+function DeleteProductRow()
+{
+	$(".DeleteProductRow").click(function(){
+		var row = $(this).attr("row");
+		$('div[row="'+row+'"]').remove();
+	})
+}
+
+function CheckProductId(id)
+{
+	var exists = false;
+	$(".HiddenIDVal").each(function(){
+		if($(this).val()==id)
+			exists = true;
+	})
+	return !exists;
+}

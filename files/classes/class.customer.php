@@ -81,6 +81,10 @@ public function MakeRegs($Mode="List")
 			// if(!$Groups) $Groups = 'Ninguno';
 			$Actions	= 	'<span class="roundItemActionsGroup"><a><button type="button" class="btn bg-navy ExpandButton" id="expand_'.$Row->ID.'"><i class="fa fa-plus"></i></button></a> ';
 			$Actions	.= 	'<a aria-label="Cuenta Corriente" class="hint--bottom hint--bounce hint--success" href="view.php?id='.$Row->ID.'"><button type="button" class="btn btn-success"><i class="fa fa-dollar"></i></button></a>';
+			if($Row->Data['type_id']==4)
+			{
+				$Actions	.= 	' <a aria-label="Administrar Precios" class="hint--bottom hint--bounce hint--info" href="products.php?id='.$Row->ID.'"><button type="button" class="btn btn-info"><i class="fa fa-exchange"></i></button></a>';
+			}
 			$Actions	.= 	'<a aria-label="Editar" class="hint--bottom hint--bounce hint--info" href="edit.php?id='.$Row->ID.'"><button type="button" class="btn btnBlue"><i class="fa fa-pencil"></i></button></a>';
 			if($Row->Data['status']=="A")
 			{
@@ -346,6 +350,7 @@ public function MakeRegs($Mode="List")
 		$Image 			= $_POST['newimage'];
 		$Type 			= $_POST['type'];
 		$Name			= $_POST['name'];
+		$Balance		= $_POST['balance']? $_POST['balance']:0;
 		$CUIT			= str_replace('-','',$_POST['cuit']);
 		$IVA			= $_POST['iva'];
 		$GrossIncome	= $_POST['gross_income_number'];
@@ -361,7 +366,7 @@ public function MakeRegs($Mode="List")
 		if(!$GrossIncome) $GrossIncome = 0;
 		// echo 'IIBB incompleto';
 
-		$Insert			= $this->execQuery('INSERT',$this->Table,'type_id,name,cuit,iva,additional_price,additional_percentage,iibb,international,creation_date,created_by,company_id',"'".$Type."','".$Name."',".$CUIT.",".$IVA.",".$AdditionalPri.",".$AdditionalPer.",".$GrossIncome.",'".$International."',NOW(),".$_SESSION['admin_id'].",".$_SESSION['company_id']);
+		$Insert			= $this->execQuery('INSERT',$this->Table,'type_id,name,cuit,iva,additional_price,additional_percentage,iibb,international,balance,creation_date,created_by,company_id',"'".$Type."','".$Name."',".$CUIT.",".$IVA.",".$AdditionalPri.",".$AdditionalPer.",".$GrossIncome.",'".$International."',".$Balance.",NOW(),".$_SESSION['admin_id'].",".$_SESSION['company_id']);
 		//echo $this->lastQuery();
 		$NewID 		= $this->GetInsertId();
 		$New 	= new Customer($NewID);
@@ -386,6 +391,7 @@ public function MakeRegs($Mode="List")
 		$Image 			= $_POST['newimage'];
 		$Type 			= $_POST['type'];
 		$Name			= $_POST['name'];
+		$Balance		= $_POST['balance']? $_POST['balance']:0;
 		$CUIT			= str_replace('-','',$_POST['cuit']);
 		$IVA			= $_POST['iva']?$_POST['iva']:0;
 		$GrossIncome	= $_POST['gross_income_number'];
@@ -413,7 +419,7 @@ public function MakeRegs($Mode="List")
 			}
 		}
 
-		$Update		= $this->execQuery('update',$this->Table,"name='".$Name."',type_id='".$Type."',cuit=".$CUIT.",iva='".$IVA."',additional_price='".$AdditionalPri."',additional_percentage='".$AdditionalPer."',iibb='".$GrossIncome."',updated_by=".$_SESSION['admin_id'],$this->TableID."=".$ID);
+		$Update		= $this->execQuery('update',$this->Table,"name='".$Name."',type_id='".$Type."',cuit=".$CUIT.",iva='".$IVA."',additional_price='".$AdditionalPri."',additional_percentage='".$AdditionalPer."',iibb='".$GrossIncome."',balance=".$Balance.",updated_by=".$_SESSION['admin_id'],$this->TableID."=".$ID);
 		// echo $this->lastQuery();
 		$Edit->InsertBranchInfo(1);
 

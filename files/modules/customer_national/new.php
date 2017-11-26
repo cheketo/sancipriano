@@ -72,6 +72,16 @@
                 </span>
               </div>
             </div>
+            
+            <div class="row form-group inline-form-custom">
+              <div class="col-xs-12 col-sm-6">
+                <span class="input-group">
+                  <span class="input-group-addon"><i class="fa fa-dollar"></i></span>
+                  <?php echo insertElement('text','balance','','form-control','validateOnlyNumbers="Ingrese n&uacute;meros &uacute;nicamente." placeholder="Balance"'); ?>
+                </span>
+              </div>
+            </div>
+            
             </form>
             <br>
             <div class="row">
