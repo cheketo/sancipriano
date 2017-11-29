@@ -111,7 +111,8 @@ public function MakeRegs($Mode="List")
 			}elseif($Row->Data['status']=="V"){
 				$Actions	.= 	'<a href="edit.php?id='.$Row->ID.'&type='.$_GET['type'].'"><button type="button" class="btn btn-bitbucket" title="Reactivar orden"><i class="fa fa-refresh"></i></button></a>';
 				$Actions	.= '<a class="deleteElement" process="../../library/processes/proc.common.php" title="Eliminar orden" id="delete_'.$Row->ID.'"><button type="button" class="btn btnRed"><i class="fa fa-trash"></i></button></a>';
-			}elseif($Row->Data['status']=="F"){
+			}
+			if($Row->Data['status']=="F" || ($Row->Data['status']=="A" && $Row->Data['type']=="Y")){
 				$Actions	.= 	'<a href="print.php?id='.$Row->ID.'" target="_blank"><button type="button" class="btn btn-info" title="Imprimir Recibo"><i class="fa fa-print"></i></button></a>';
 			}
 

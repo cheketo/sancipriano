@@ -12,14 +12,16 @@
         $Date = DBDate($Data['modification_date']);    
     }
     
-    
     ValidateID($Data['order_id']);
     $TitleText = $Data['type']=='N'? 'Entrega de Orden para ':'Compra de Mercader&iacute;a de ';
     $Head->setTitle($TitleText.$Data['name'].' - '.$Date);
     $Head->setStyle('../../../skin/css/print.css'); // Select Inputs With Tags
     $Head->setHead();
     
-    $Data['initial_balance'] = $Data['balance']  + $Data['total'] - $Data['total_paid'];
+    if($Data['status']=='A' && $Data['type']=='Y')
+        $Data['initial_balance'] = $Data['balance'];
+    else
+        $Data['initial_balance'] = $Data['balance']  + $Data['total'] - $Data['total_paid'];
     $InitialBalance = floatval($Data['initial_balance'])<floatval(0.00)? "(".number_format($Data['initial_balance']*-1, 2, ',', '.').")":number_format($Data['initial_balance']*-1, 2, ',', '.');
     $Balance = floatval($Data['balance'])<floatval(0.00)? "(".number_format($Data['balance']*-1, 2, ',', '.').")":number_format($Data['balance']*-1, 2, ',', '.');
     
@@ -54,9 +56,12 @@
             <?php 
                 foreach($Data['items'] as $Item)
                 {
-                    if($Item['delivered']=='Y')
+                    if($Item['delivered']=='Y' || ($Data['status']=='A' && $Data['type']=='Y'))
                     {
-                        $TotalItem = $Item['price'] * $Item['quantity_delivered'];
+                        if($Data['status']=='A' && $Data['type']=='Y')
+                            $TotalItem = $Item['price'] * $Item['quantity'];
+                        else
+                            $TotalItem = $Item['price'] * $Item['quantity_delivered'];
                         $TotalOrder += $TotalItem;
             ?>
             <div class="PageCol ItemTitle">
@@ -66,7 +71,7 @@
                 $<?php echo number_format($Item['price'], 2, ',', '.') ?>
             </div>
             <div class="PageCol ItemQuantity">
-                <?php $ItemQuantity = $Item['decimal']=='Y'? number_format($Item['quantity'], 2, ',', '.'):$Item['quantity']; ?>
+                <?php $ItemQuantity = $Item['decimal']=='Y'? number_format($Item['quantity'], 2, ',', '.'):number_format($Item['quantity'], 0, ',', '.'); ?>
                 <?php echo $ItemQuantity. " ".$Item['size'] ?>
             </div>
             <div class="PageCol ItemTotal">
@@ -89,16 +94,16 @@
             </div>
             <?php $TotalOrder += $Data['merluza_price']*$Data['merluza_delivered'];} ?>
             
-            
             <hr>
             <h4>Saldo Inicial: <b>$<?php echo $InitialBalance; ?></b></h4>
             <hr>
             <h4>Total a Pagar: <b>$<?php echo number_format($TotalOrder, 2, ',', '.') ?></b></h4>
+            <?php if($Data['status']=='F'){ ?>
             <hr>
             <h4>Total Pagado: <b>$<?php echo number_format($Data['total_paid'], 2, ',', '.') ?></b></h4>
             <hr>
             <h4>Saldo Final: <b>$<?php echo $Balance; ?></b></h4>
-            
+            <?php } ?>
         </div>
         <div class="PageFooter txC">
             
