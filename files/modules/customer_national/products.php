@@ -34,16 +34,13 @@
         <div id="relations" class="Hidden">
             <hr>
             <div class="row txC">
-                <div class="col-xs-12 col-sm-3 col-md-2 col-md-offset-3">
+                <div class="col-xs-12 col-sm-3 col-sm-offset-1">
                     <strong>Producto</strong>
                 </div>
-                <div class="col-xs-12 col-sm-3 col-md-2">
-                    <strong>Adicional</strong>
+                <div class="col-xs-12 col-sm-3">
+                    <strong>Precio</strong>
                 </div>
-                <div class="col-xs-12 col-sm-3 col-md-2">
-                    <strong>Valor</strong>
-                </div>
-                <div class="col-xs-12 col-sm-3 col-md-1">
+                <div class="col-xs-12 col-sm-3">
                 </div>
             </div>
             <!--<div class="row txC" row="0">-->

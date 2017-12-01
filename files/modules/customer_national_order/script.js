@@ -34,6 +34,10 @@ $(document).ready(function(){
 		});
 	}
 	
+	if(!isNaN(get['print']))
+	{
+		window.open('print.php?id='+get['print'],'_blank');
+	}
 	if(get['error']=="status")
 	{
 		notifyError('La orden no puede ser editada ya que no se encuentra en estado pendiente.');
@@ -388,7 +392,7 @@ function changeDates()
 
 ///////////////////////// CREATE/EDIT ////////////////////////////////////
 $(function(){
-	$("#BtnCreate,#BtnCreateNext,#BtnPay").on("click",function(e){
+	$("#BtnCreate,#BtnCreateNext,#BtnPay,#BtnPrint").on("click",function(e){
 		e.preventDefault();
 		if(validate.validateFields('*'))
 		{
@@ -404,6 +408,7 @@ $(function(){
 				procText = "creaci&oacute;n"
 			}
 			if(BtnID=="BtnPay") confirmText += " y pagar";
+			if(BtnID=="BtnPrint") confirmText += " e imprimir";
 			if($("#customer_name").val())var customer = $("#customer_name").val();
 			else var customer = $("#customer option:selected").text();
 			confirmText += " la orden de compra de <b>"+customer+'</b>';
@@ -418,8 +423,9 @@ $(function(){
 			alertify.confirm('¿Desea '+confirmText+'?', function(e){
 				if(e)
 				{
+					var print="";
 					var process		= '../../library/processes/proc.common.php?object=CustomerOrder';
-					if(BtnID=="BtnCreate")
+					if(BtnID=="BtnCreate" || BtnID=="BtnPrint")
 					{
 						if($("#status").val())
 							var target		= 'list.php?type='+$("#order_type").val()+'&status='+$("#status").val()+'&msg='+ $("#action").val();
@@ -429,9 +435,12 @@ $(function(){
 						if(BtnID=="BtnCreateNext")
 							var target		= 'new.php?type='+$("#order_type").val()+'&msg='+ $("#action").val();
 						else{
-							var stateObj = { url: "list.php?status=A&type=Y" };
-							window.history.pushState(stateObj, "Ordenes en Local",stateObj.url);
-							var target		= 'payment.php?id='+get['id']+'&msg='+ $("#action").val();
+							if(BtnID=="BtnPay")
+							{
+								var stateObj = { url: "list.php?status=A&type=Y" };
+								window.history.pushState(stateObj, "Ordenes en Local",stateObj.url);
+								var target		= 'payment.php?id='+get['id']+'&msg='+ $("#action").val();
+							}
 						}
 					}
 					var haveData	= function(returningData)
@@ -444,6 +453,10 @@ $(function(){
 							if(isNaN(returningData))
 								notifyError("Ha ocurrido un error durante el proceso de "+procText+".");
 							else{
+								// if(BtnID=="BtnPrint")
+								// {
+								// 	window.open('print.php?id='+returningData+'&msg='+ $("#action").val(),'_blank');
+								// }
 								if(BtnID=="BtnPay")
 								{
 									// Change browser to emulate cancel button in payment page
@@ -453,7 +466,9 @@ $(function(){
 									document.location = 'payment.php?id='+returningData+'&msg='+ $("#action").val();
 									//console.log('payment.php?id='+returningData+'&msg='+ $("#action").val());
 								}else{
-									document.location = target;
+									if(BtnID=="BtnPrint")
+										print = "&print="+returningData;
+									document.location = target+print;
 								}
 								
 								
@@ -463,7 +478,11 @@ $(function(){
 					}
 					var noData		= function()
 					{
-						document.location = target;
+						if(BtnID=="BtnPrint")
+							print = "&print="+get['id'];
+						// 	$('<a href="print.php?id='+get['id']+'&msg='+ $("#action").val()+'" target="_blank"></a>')[0].click();
+							//window.open('print.php?id='+get['id']+'&msg='+ $("#action").val(),'_blank');
+						document.location = target+print;
 					}
 					sumbitFields(process,haveData,noData);
 				}

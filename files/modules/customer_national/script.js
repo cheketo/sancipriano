@@ -425,27 +425,22 @@ $(function(){
 					var row = 1;
 				else
 					var row = parseInt($("#total").val())+1;
-				var newrow = '<div class="row txC" row="'+row+'">' +
-				                '<div class="col-xs-12 col-sm-3 col-md-2 col-md-offset-3">'+
+				var newrow = '<div class="row txC RelationRow" row="'+row+'">' +
+				                '<div class="col-xs-12 col-sm-3 col-sm-offset-1">'+
 				                    $("#product option:selected").text()+
 				                    '<input type="hidden" class="HiddenIDVal" name="id'+row+'" id="id'+row+'" value="'+id+'" />'+
 				                '</div>'+
-				                '<div class="col-xs-12 col-sm-3 col-md-2">'+
-				                    '<select name="variation'+row+'" id="variation'+row+'" class="form-control">'+
-				                        '<option value="1">Fijo</option>'+
-				                        '<option value="2">Porcentual</option>'+
-				                    '</select>'+
+				                '<div class="col-xs-12 col-sm-3">'+
+				                    '<input type="text" name="value'+row+'" id="value'+row+'" class="form-control txC" placeholder="Valor" validateOnlyNumbers="Solo se pueden ingresar n&uacute;meros." />'+
 				                '</div>'+
-				                '<div class="col-xs-12 col-sm-3 col-md-2">'+
-				                    '<input type="text" name="value'+row+'" id="value'+row+'" class="form-control" placeholder="Valor" validateOnlyNumbers="Solo se pueden ingresar n&uacute;meros." />'+
-				                '</div>'+
-				                '<div class="col-xs-12 col-sm-3 col-md-1">'+
+				                '<div class="col-xs-12 col-sm-3">'+
 				                    '<span class="btn btn-danger DeleteProductRow" aria-label="Borrar" row="'+row+'" class="hint--bottom hint--bounce hint--error"><i class="fa fa-trash"></i></span>'+
 				                '</div>'+
 				            '</div>';
 				$("#relations").append(newrow);
 				$("#total").val(row)
 				DeleteProductRow();
+				validateDivChange();
 				
 			}else{
 				notifyWarning("El producto ya se encuentra relacionado");
@@ -459,7 +454,11 @@ function DeleteProductRow()
 	$(".DeleteProductRow").click(function(){
 		var row = $(this).attr("row");
 		$('div[row="'+row+'"]').remove();
-	})
+		if($('.RelationRow').length<1)
+		{
+			$("#relations").addClass("Hidden");
+		}
+	});
 }
 
 function CheckProductId(id)

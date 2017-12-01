@@ -184,6 +184,7 @@
           <div class="row txC">
             <button type="button" class="btn btn-success btnGreen" id="BtnCreate"><i class="fa fa-pencil"></i> Editar Orden</button>
             <?php if($Data['type']=='Y'){ ?>
+            <button type="button" class="btn btn-dropbox" id="BtnPrint"><i class="fa fa-print"></i> Editar e Imprimir</button>
             <button type="button" class="btn btn-success btnBlue" id="BtnPay"><i class="fa fa-dollar"></i> Editar y Pagar</button>
             <?php } ?>
             <button type="button" class="btn btn-error btnRed" id="BtnCancel"><i class="fa fa-times"></i> Cancelar</button>

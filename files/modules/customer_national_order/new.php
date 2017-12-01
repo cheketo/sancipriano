@@ -151,6 +151,7 @@
           <div class="row txC">
             <button type="button" class="btn btn-success btnGreen" id="BtnCreate"><i class="fa fa-plus"></i> Crear Orden</button>
             <?php if($_GET['type']=='Y'){ ?>
+            <button type="button" class="btn btn-dropbox" id="BtnPrint"><i class="fa fa-print"></i> Crear e Imprimir</button>
             <button type="button" class="btn btn-success btnBlue" id="BtnPay"><i class="fa fa-dollar"></i> Crear y Pagar</button>
             <?php }else{ ?>
             <button type="button" class="btn btn-success btnBlue" id="BtnCreateNext"><i class="fa fa-plus"></i> Crear y Agregar Otra</button>
