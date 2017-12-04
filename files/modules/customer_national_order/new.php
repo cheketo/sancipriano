@@ -67,17 +67,17 @@
             <div style="margin:0px 10px;">
               <div class="row form-group inline-form-custom bg-light-blue" style="margin-bottom:0px!important;">
                 
-                <div class="col-xs-4 txC">
+                <div class="col-sm-4 col-xs-12 txC">
                   <strong>Art&iacute;culo</strong>
                 </div>
-                <div class="col-xs-1 txC">
+                <div class="col-sm-2 col-xs-6 txC">
                   <strong>Precio</strong>
                 </div>
-                <div class="col-xs-1 txC">
+                <div class="col-sm-2 col-xs-6 txC">
                   <strong>Cantidad</strong>
                 </div>
-                <div class="col-xs-3 txC"><strong>Costo</strong></div>
-                <div class="col-xs-3 txC">
+                <div class="col-sm-1 col-xs-6 txC"><strong>Costo</strong></div>
+                <div class="col-sm-2 col-xs-6 txC">
                   <strong>Acciones</strong>
                 </div>
               </div>
@@ -88,20 +88,20 @@
                 <!--- NEW ITEM --->
                 <div id="item_row_1" item="1" class="row form-group inline-form-custom ItemRow bg-gray" style="margin-bottom:0px!important;padding:10px 0px!important;">
                   <form id="item_form_1" name="item_form_1">
-                  <div class="col-sm-4 col-xs-5 txC">
+                  <div class="col-sm-4 col-xs-12 txC">
                     <span id="Item1" class="Hidden ItemText1"></span>
                     <?php echo insertElement('select','item_1','','ItemField1 form-control chosenSelect itemSelect','item="1" data-placeholder="Seleccione un Art&iacute;culo"',$DB->fetchAssoc('product a INNER JOIN product_brand b ON (a.brand_id=b.brand_id)',"a.product_id,CONCAT(a.title,' - ',b.name) AS title","a.status='A' AND a.company_id=".$_SESSION['company_id'],'title'),' ',''); ?>
                   </div>
-                  <div class="col-sm-1 col-xs-3 txC">
+                  <div class="col-sm-2 col-xs-6 txC">
                     <span id="Price1" class="Hidden ItemText1"></span>
                     <?php echo insertElement('text','price_1','','ItemField1 form-control calcable txC','data-inputmask="\'mask\': \'9{+}.99\'" placeholder="Precio" validateEmpty="Ingrese un precio"'); ?>
                   </div>
-                  <div class="col-sm-1 col-xs-3 txC">
+                  <div class="col-sm-2 col-xs-6 txC">
                     <span id="Quantity1" class="Hidden ItemText1"></span>
                     <?php echo insertElement('text','quantity_1','','ItemField1 form-control calcable QuantityItem txC','validateOnlyNumbers="Solo se permiten n&uacute;meros" placeholder="Cantidad" validateEmpty="Ingrese una cantidad"'); ?>
                   </div>
-                  <div id="item_number_1" class="col-xs-3 txC item_number" total="0" item="1">$ 0.00</div>
-                  <div class="col-sm-3 col-xs-3 txC">
+                  <div id="item_number_1" class="col-sm-1 col-xs-6 txC item_number" total="0" item="1">$ 0.00</div>
+                  <div class="col-sm-2 col-xs-6 txC">
   									  <button type="button" id="SaveItem1" class="btn btnGreen SaveItem" style="margin:0px;" item="1"><i class="fa fa-check"></i></button>
   									  <button type="button" id="EditItem1" class="btn btnBlue EditItem Hidden" style="margin:0px;" item="1"><i class="fa fa-pencil"></i></button>
   									  <!--<button type="button" id="DeleteItem1" class="btn btnRed DeleteItem" style="margin:0px;" item="1"><i class="fa fa-trash"></i></button>-->

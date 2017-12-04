@@ -333,7 +333,7 @@ function calculateRowPrice()
 		var id = element[1];
 		
 		var price = parseFloat($("#price_"+id).val());
-		var quantity = parseInt($("#quantity_"+id).val())
+		var quantity = parseFloat($("#quantity_"+id).val())
 		if(price>0 && quantity>0)
 			var total = price*quantity;
 		else

@@ -713,21 +713,21 @@ public function MakeRegs($Mode="List")
 		$HTML = '
 			<div id="item_row_'.$ID.'" item="'.$ID.'" class="row form-group inline-form-custom ItemRow '.$BgClass.'" style="margin-bottom:0px!important;padding:10px 0px!important;">
                 <form id="item_form_'.$ID.'">
-                <div class="col-xs-4 txC">
+                <div class="col-sm-4 col-xs-12 txC">
                 	<span id="Item'.$ID.'" class="Hidden ItemText'.$ID.'"></span>
                   '.insertElement('select','item_'.$ID,'','ItemField'.$ID.' form-control selectChosen chosenSelect itemSelect','data-placeholder="Seleccione un Art&iacute;culo" validateEmpty="Seleccione un Art&iacute;culo" item="'.$ID.'"',$this->fetchAssoc('product a INNER JOIN product_brand b ON (a.brand_id=b.brand_id)',"a.product_id,CONCAT(a.title,' - ',b.name) AS title","a.status='A' AND a.company_id=".$_SESSION['company_id'],'title'),'',' ').'
                 </div>
-                <div class="col-xs-1 txC">
+                <div class="col-sm-2 col-xs-6 txC">
                 	<span id="Price'.$ID.'" class="Hidden ItemText'.$ID.'"></span>
                   '.insertElement('text','price_'.$ID,'','ItemField'.$ID.' txC form-control calcable','data-inputmask="\'mask\': \'9{+}.99\'" placeholder="Precio" validateEmpty="Ingrese un precio"').'
                 </div>
-                <div class="col-xs-1 txC">
+                <div class="col-sm-2 col-xs-6 txC">
                 	<span id="Quantity'.$ID.'" class="Hidden ItemText'.$ID.'"></span>
                   '.insertElement('text','quantity_'.$ID,'','ItemField'.$ID.' txC form-control calcable QuantityItem','validateOnlyNumbers="Solo se permiten n&uacute;meros" placeholder="Cantidad" validateEmpty="Ingrese una cantidad"').'
                 </div>
 
-                <div  id="item_number_'.$ID.'" class="col-xs-3 txC item_number txC" total="0" item="'.$ID.'">'.$TotalPrice.'</div>
-                <div class="col-xs-3 txC">
+                <div  id="item_number_'.$ID.'" class="col-sm-1 col-xs-6 txC item_number txC" total="0" item="'.$ID.'">'.$TotalPrice.'</div>
+                <div class="col-sm-2 col-xs-6 txC">
 				  <button type="button" id="SaveItem'.$ID.'" class="btn btnGreen SaveItem" style="margin:0px;" item="'.$ID.'"><i class="fa fa-check"></i></button>
 				  <button type="button" id="EditItem'.$ID.'" class="btn btnBlue EditItem Hidden" style="margin:0px;" item="'.$ID.'"><i class="fa fa-pencil"></i></button>
 				  <button type="button" id="DeleteItem'.$ID.'" class="btn btnRed DeleteItem" style="margin:0px;" item="'.$ID.'"><i class="fa fa-trash"></i></button>
