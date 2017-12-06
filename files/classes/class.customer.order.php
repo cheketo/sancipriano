@@ -682,7 +682,7 @@ public function MakeRegs($Mode="List")
 					else
 						$Field = $Item["additional_".$Variation."_wholesaler"];
 				}else{
-					$Price = $this->fetchAssoc("customer_order_item","price","customer_id=".intval($_POST['customer'])." AND product_id=".$Item['product_id']);
+					$Price = $this->fetchAssoc("customer_order_item","price","customer_id=".intval($_POST['customer'])." AND product_id=".$Item['product_id'],"creation_date DESC");
 					// echo $this->lastQuery()." - ";
 					// print_r($Price);
 					$Field = $Price[0]['price']-$Cost;
