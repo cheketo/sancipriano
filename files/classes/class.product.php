@@ -29,13 +29,15 @@ class Product extends DataBase
 		// print_r($Coeficients); die;
 		if($this->Data['variation_id']=="1")
 		{
+			
 			$Type ="percentage";
-			$this->Data['price']			= $this->Data['cost'] + (($this->Data['cost']*$Coeficients[0]['additional_'.$Type.'_wholesaler'])/100);
-			$this->Data['price_retailer']	= $this->Data['cost'] + (($this->Data['cost']*$Coeficients[0]['additional_'.$Type.'_retailer'])/100);
+			
+			$this->Data['price']			= $this->Data['additional_percentage_wholesaler']? $this->Data['cost'] + (($this->Data['cost']*$this->Data['additional_'.$Type.'_wholesaler'])/100) :$this->Data['cost'] + (($this->Data['cost']*$Coeficients[0]['additional_'.$Type.'_wholesaler'])/100);
+			$this->Data['price_retailer']	= $this->Data['additional_percentage_retailer']? $this->Data['cost'] + (($this->Data['cost']*$this->Data['additional_'.$Type.'_retailer'])/100):$this->Data['cost'] + (($this->Data['cost']*$Coeficients[0]['additional_'.$Type.'_retailer'])/100);
 		}else{
 			$Type ="price";
-			$this->Data['price']			= $this->Data['cost']+$Coeficients[0]['additional_'.$Type.'_wholesaler'];
-			$this->Data['price_retailer']	= $this->Data['cost']+$Coeficients[0]['additional_'.$Type.'_retailer'];
+			$this->Data['price']			= $this->Data['additional_price_wholesaler']? $this->Data['cost']+$this->Data['additional_'.$Type.'_wholesaler']:$this->Data['cost']+$Coeficients[0]['additional_'.$Type.'_wholesaler'];
+			$this->Data['price_retailer']	= $this->Data['additional_price_retailer']? $this->Data['cost']+$this->Data['additional_'.$Type.'_retailer']:$this->Data['cost']+$Coeficients[0]['additional_'.$Type.'_retailer'];
 		}
 		$this->Data['price'] = round($this->Data['price']);
 		$this->Data['price_retailer'] = round($this->Data['price_retailer']);
