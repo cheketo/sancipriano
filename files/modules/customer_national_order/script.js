@@ -759,7 +759,7 @@ $(function(){
 				if(e)
 				{
 					var process		= '../../library/processes/proc.common.php?object=CustomerOrder';
-					var target		= '../customer_national_order/list.php?status=F&type=Y&msg='+ $("#action").val();
+					var target		= '../customer_national_order/list.php?status=F&type=Y&msg='+ $("#action").val()+'&print='+get['id'];
 					
 					var haveData	= function(returningData)
 					{
