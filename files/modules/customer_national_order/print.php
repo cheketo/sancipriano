@@ -20,7 +20,7 @@
     
     if($Data['status']=='A' && $Data['type']=='Y')
     {
-        $Customer = $this->fetchAssoc("customer","balance","customer_id=".$Data['customer_id']);
+        $Customer = $DB->fetchAssoc("customer","balance","customer_id=".$Data['customer_id']);
         $Data['initial_balance'] = $Customer[0]['balance'];
     }else
         $Data['initial_balance'] = $Data['balance']  + $Data['total'] - $Data['total_paid'];
