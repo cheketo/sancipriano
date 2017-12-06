@@ -345,7 +345,7 @@ public function MakeRegs($Mode="List")
 			if($_GET['type']) $this->SetWhereCondition("a.type","=", $_GET['type']);
 		}
 
-		if(strtolower($_POST['view_order_mode'])=="desc")
+		if(!$_POST['view_order_mode'])
 			$Mode = "DESC";
 		else
 			$Mode = $_POST['view_order_mode'];
@@ -362,7 +362,7 @@ public function MakeRegs($Mode="List")
 				$Prefix = "c.";
 			break;
 			default:
-				$Order = 'delivery_date DESC';
+				$Order = 'delivery_date';
 				$Prefix = "a.";
 			break;
 		}
