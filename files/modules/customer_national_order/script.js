@@ -339,7 +339,7 @@ function calculateRowPrice()
 		else
 			var total = 0.00;
 		$("#item_number_"+id).attr("total",total);
-		$("#item_number_"+id).html("$ "+total.formatMoney(2));	
+		$("#item_number_"+id).html("$ "+total.toFixed(2));	
 		
 		calculateTotalOrderPrice();
 		calculateTotalOrderQuantity();
@@ -367,7 +367,7 @@ function calculateTotalOrderPrice()
 			total = total + val;
 	});
 	$("#total_price").val(total);
-	$("#TotalPrice").html("$ "+total.formatMoney(2));
+	$("#TotalPrice").html("$ "+total.toFixed(2));
 }
 
 function changeDates()
@@ -643,7 +643,7 @@ function calculateRowPricePayment()
 		else
 			var total = 0.00;
 		$("#item_number_"+id).attr("total",total);
-		$("#item_number_"+id).html("$ "+total.formatMoney(2));	
+		$("#item_number_"+id).html("$ "+total.toFixed(2));	
 		
 		calculateTotalOrderQuantityPayment();
 	});
@@ -673,7 +673,7 @@ function calculateTotalOrderPricePayment()
 		}
 	});
 	$("#total_price").val(total);
-	$("#TotalPricePayment").html("$ "+total.formatMoney(2));
+	$("#TotalPricePayment").html("$ "+total.toFixed(2));
 }
 
 function countItemsPayment()
