@@ -308,7 +308,7 @@ public function MakeRegs($Mode="List")
 		$this->SetFields('a.order_id,a.type,a.total,a.extra,a.status,a.payment_status,a.delivery_status,d.name as customer,SUM(b.quantity) as quantity');
 		$this->SetWhere("a.company_id=".$_SESSION['company_id']);
 		//$this->AddWhereString(" AND c.company_id = a.company_id");
-		$this->SetGroupBy("a.".$this->TableID);
+		$this->SetGroupBy("a.delivery_date DESC");
 
 		foreach($_POST as $Key => $Value)
 		{
@@ -362,7 +362,7 @@ public function MakeRegs($Mode="List")
 				$Prefix = "c.";
 			break;
 			default:
-				$Order = 'delivery_date';
+				$Order = 'delivery_date DESC';
 				$Prefix = "a.";
 			break;
 		}

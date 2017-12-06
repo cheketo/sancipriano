@@ -107,13 +107,13 @@
                     
                     <h4 class="subTitleB"><i class="fa fa-cubes"></i> Pago</h4>
                     <div class="row">
-                        <div class="col-sm-3 col-xs-12">Pago con efectivo: <b>$<?php echo insertElement('text','cash','0.00','form-control txC InputMask','data-inputmask="\'mask\': \'9{+}.99\'" placeholder="0.00"  style="max-width:50px!important;display:inline-block; border:0px; border-bottom:1px solid;padding:0px!important;height:auto;"'); ?></b></div>
+                        <div class="col-sm-3 col-xs-12">Pago con efectivo: <b>$<?php echo insertElement('text','cash','0','form-control txC InputMask','data-inputmask="\'mask\': \'9{+}[.99]\'" placeholder="0"  style="max-width:75px!important;display:inline-block; border:0px; border-bottom:1px solid;padding:0px!important;height:auto;"'); ?></b></div>
                         <div class="col-sm-9 col-xs-12 txC">
                             <!--Pago con Cheque: $9,889.00-->
                             <form id="check_form" name="check_form">
                                 <div id="check_row" class="row form-group inline-form-custom Hidden" style="margin-bottom:0px!important;padding:10px 0px!important;">
                                     <div class="col-xs-12">
-                                        <b><?php echo insertElement('text','check_amount','','form-control txC InputMask CheckForm','data-inputmask="\'mask\': \'$9{+}.99\'" placeholder="$" validateEmpty="Ingrese un Monto" style="max-width:50%!important;display:inline-block; border:0px; border-bottom:1px solid;padding:0px!important;height:auto;"'); ?></b>
+                                        <b><?php echo insertElement('text','check_amount','','form-control txC InputMask CheckForm','data-inputmask="\'mask\': \'$9{+}[.99]\'" placeholder="$" validateEmpty="Ingrese un Monto" style="max-width:50%!important;display:inline-block; border:0px; border-bottom:1px solid;padding:0px!important;height:auto;"'); ?></b>
                                     </div>
                                     <div class="col-xs-12">
                                         <b><?php echo insertElement('text','check_number','','form-control txC InputMask CheckForm','data-inputmask="\'mask\': \'9999999{+}\'" placeholder="N&deg; Cheque" validateEmpty="Ingrese un N&uacute;mero" style="max-width:50%!important;display:inline-block; border:0px; border-bottom:1px solid;padding:0px!important;height:auto;"'); ?></b>
