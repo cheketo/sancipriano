@@ -362,7 +362,7 @@ public function MakeRegs($Mode="List")
 				$Prefix = "c.";
 			break;
 			default:
-				$Order = 'delivery_date';
+				$Order = 'delivery_date DESC, a.modification_date';
 				$Prefix = "a.";
 			break;
 		}
