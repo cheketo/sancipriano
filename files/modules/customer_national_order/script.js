@@ -58,7 +58,7 @@ $(document).ready(function(){
 	countItems();
 	calculateTotalOrderPrice();
 	calculateTotalOrderQuantity();
-	
+	deleteItem();
 	setDatePicker();
 	priceImputMask(1);
 	
