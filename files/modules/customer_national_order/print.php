@@ -19,8 +19,10 @@
     $Head->setHead();
     
     if($Data['status']=='A' && $Data['type']=='Y')
-        $Data['initial_balance'] = $Data['balance'];
-    else
+    {
+        $Customer = $this->fetchAssoc("customer","balance","customer_id=".$Data['customer_id']);
+        $Data['initial_balance'] = $Customer[0]['balance'];
+    }else
         $Data['initial_balance'] = $Data['balance']  + $Data['total'] - $Data['total_paid'];
     $InitialBalance = floatval($Data['initial_balance'])<floatval(0.00)? "(".number_format($Data['initial_balance']*-1, 2, ',', '.').")":number_format($Data['initial_balance']*-1, 2, ',', '.');
     $Balance = floatval($Data['balance'])<floatval(0.00)? "(".number_format($Data['balance']*-1, 2, ',', '.').")":number_format($Data['balance']*-1, 2, ',', '.');
