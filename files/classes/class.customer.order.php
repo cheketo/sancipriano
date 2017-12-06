@@ -87,7 +87,7 @@ class CustomerOrder extends DataBase
 public function MakeRegs($Mode="List")
 	{
 		$Rows	= $this->GetRegs();
-		//echo $this->lastQuery();
+		echo $this->lastQuery()."<br><br>";
 		for($i=0;$i<count($Rows);$i++)
 		{
 
