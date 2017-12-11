@@ -29,7 +29,7 @@ class CustomerOrder extends DataBase
 	{
 		if(empty($this->Items))
 		{
-			$this->Items = $this->fetchAssoc($this->Table."_item a LEFT JOIN product b ON (a.product_id = b.product_id) LEFT JOIN currency c ON (a.currency_id=c.currency_id) INNER JOIN product_size d ON (d.size_id=b.size_id)","a.*,(a.price * a.quantity) AS total,b.title,d.prefix AS size,d.decimal,c.prefix as currency",$this->TableID."=".$this->ID,'a.item_id');
+			$this->Items = $this->fetchAssoc($this->Table."_item a LEFT JOIN product b ON (a.product_id = b.product_id) LEFT JOIN currency c ON (a.currency_id=c.currency_id) INNER JOIN product_size d ON (d.size_id=b.size_id)","a.*,(a.price * a.quantity) AS total,b.title,d.prefix AS size,d.decimal,c.prefix as currency,(a.quantity_delivered-a.quantity_returned) AS return_restriction",$this->TableID."=".$this->ID,'a.item_id');
 				//echo $this->lastQuery();
 		}
 		return $this->Items;
@@ -112,8 +112,23 @@ public function MakeRegs($Mode="List")
 				$Actions	.= 	'<a href="edit.php?id='.$Row->ID.'&type='.$_GET['type'].'"><button type="button" class="btn btn-bitbucket" title="Reactivar orden"><i class="fa fa-refresh"></i></button></a>';
 				$Actions	.= '<a class="deleteElement" process="../../library/processes/proc.common.php" title="Eliminar orden" id="delete_'.$Row->ID.'"><button type="button" class="btn btnRed"><i class="fa fa-trash"></i></button></a>';
 			}
-			if($Row->Data['status']=="F" || ($Row->Data['status']=="A" && $Row->Data['type']=="Y")){
+			if($Row->Data['status']=="F" || ($Row->Data['status']=="A" && $Row->Data['type']=="Y"))
+			{
 				$Actions	.= 	'<a href="print.php?id='.$Row->ID.'" target="_blank"><button type="button" class="btn btn-info" title="Imprimir Recibo"><i class="fa fa-print"></i></button></a>';
+			}
+			
+			$ItemsReturned=0;
+			$ItemsDelivered=0;
+			foreach($Row->Data['items'] as $Item)
+			{
+				$ItemsReturned += $Item['quantity_returned'];
+				$ItemsDelivered += $Item['quantity_delivered'];
+			}
+			
+			if($Row->Data['status']=="F" && $ItemsReturned<$ItemsDelivered)
+			{
+				
+				$Actions	.= 	'<a href="return.php?id='.$Row->ID.'&type='.$_GET['type'].'"><button type="button" class="btn btn-warning" title="Devoluci&oacute;n de Mercader&iacute;a"><i class="fa fa-retweet"></i></button></a>';
 			}
 
 			$Actions	.= '</span>';
@@ -125,6 +140,9 @@ public function MakeRegs($Mode="List")
 
 			$Items = '<div style="margin-top:10px;">';
 			$I=0;
+			$RealOrderAmount=0;
+			$OrderItemsReturned = 0;
+			$OrderItemsDelivered = 0;
 			foreach($Row->Data['items'] as $Item)
 			{
 				$I++;
@@ -132,31 +150,33 @@ public function MakeRegs($Mode="List")
 
 				$Date = explode(" ",$Item['delivery_date']);
 				$DeliveryDate = implode("/",array_reverse(explode("-",$Date[0])));
-				$ItemTotal = $Item['currency']." ".$Item['total'];
+				$ItemTotal = $Item['currency']." ".number_format($Item['total'],2).' / '.$Item['currency']." ".number_format(($Item['price']*$Item['quantity_delivered'])-($Item['price']*$Item['quantity_returned']),2);
 				$ItemPrice = $Item['currency']." ".$Item['price'];
-
+				$RealOrderAmount += ($Item['price']*$Item['quantity_delivered'])-($Item['price']*$Item['quantity_returned']);
+				$OrderItemsReturned += $Item['quantity_returned'];
+				$OrderItemsDelivered += $Item['quantity_delivered'];
 				$Items .= '
 							<div class="row '.$RowClass.'" style="padding:5px;">
-								<div class="col-md-3 col-sm-6">
+								<div class="col-md-3 col-sm-6 col-xs-12">
 									<div class="listRowInner">
 										<span class="listTextStrong">'.$Item['title'].'</span>
 									</div>
 								</div>
-								<div class="col-md-3 hideMobile990">
+								<div class="col-md-3 col-xs-6">
 									<div class="listRowInner">
 										<span class="listTextStrong">Precio</span>
 										<span class="listTextStrong"><span class="label label-info">'.$ItemPrice.'</span></span>
 									</div>
 								</div>
-								<div class="col-md-3 hideMobile990">
+								<div class="col-md-3 col-xs-6">
 									<div class="listRowInner">
 										<span class="listTextStrong">Cantidad</span>
-										<span class="listTextStrong"><span class="label label-primary">'.$Item['quantity'].'</span></span>
+										<span class="listTextStrong"><span class="label label-primary">'.$Item['quantity'].' / '.$Item['quantity_delivered'].' / '.$Item['quantity_returned'].'</span></span>
 									</div>
 								</div>
-								<div class="col-md-3 col-sm-6">
+								<div class="col-md-3 col-sm-12 col-xs-6">
 									<div class="listRowInner">
-										<span class="listTextStrong">Total Art.</span>
+										<span class="listTextStrong">Total</span>
 										<span class="listTextStrong"><span class="label label-success">'.$ItemTotal.'</span></span>
 									</div>
 								</div>
@@ -167,7 +187,7 @@ public function MakeRegs($Mode="List")
 			switch(strtolower($Mode))
 			{
 				case "list":
-						$Extra = !$Row->Data['extra']? '': '<div class="col-lg-2 col-md-3 col-sm-2 hideMobile990">
+						$Extra = !$Row->Data['extra']? '': '<div class="col-lg-2 col-md-3 col-sm-2 col-xs-12">
 										<div class="listRowInner">
 											<span class="emailTextResp">'.$Row->Data['extra'].'</span>
 										</div>
@@ -176,15 +196,16 @@ public function MakeRegs($Mode="List")
 						if($Row->Data['delivery_id'])
 						{
 							$DeliveryMan	= $Row->GetDeliveryMan();
-							$Col3Title = 'Repartidor';
-							$Col3Value = $DeliveryMan['first_name']." ".$DeliveryMan['last_name'];
-						}else{
-							$Col3Title = 'Cant. Total';
-							$Col3Value = $Rows[$i]['quantity'];
+							$DeliveryCol = '<div class="col-lg-3 col-md-3 col-sm-2 col-xs-6">
+										<div class="listRowInner">
+											<span class="listTextStrong">Repartidor</span>
+											<span class="listTextStrong"><span class="label bg-maroon">'.$DeliveryMan['first_name']." ".$DeliveryMan['last_name'].'</span></span>
+										</div>
+									</div>';
 						}
 
 					$RowBackground = $i % 2 == 0? '':' listRow2 ';
-
+					$TotalOrderAmount = $Row->Data['items'][0]['currency'].' '.number_format($Row->Data['total'],2).' / '.$Row->Data['items'][0]['currency'].' '.number_format($RealOrderAmount,2);
 					$Regs	.= '<div class="row listRow'.$RowBackground.'" id="row_'.$Row->ID.'" title="una orden de compra">
 									<div class="col-lg-3 col-md-5 col-sm-8 col-xs-10">
 										<div class="listRowInner">
@@ -197,16 +218,17 @@ public function MakeRegs($Mode="List")
 											</span>
 										</div>
 									</div>
-									<div class="col-lg-3 col-md-3 col-sm-2 hideMobile990">
+									'.$DeliveryCol.'
+									<div class="col-lg-3 col-md-3 col-sm-2 col-xs-6">
 										<div class="listRowInner">
-											<span class="listTextStrong">'.$Col3Title.'</span>
-											<span class="listTextStrong"><span class="label label-primary">'.$Col3Value.'</span></span>
+											<span class="listTextStrong">Cantidad Total</span>
+											<span class="listTextStrong"><span class="label label-primary">'.$Rows[$i]['quantity'].' / '.$OrderItemsDelivered.' / '.$OrderItemsReturned.'</span></span>
 										</div>
 									</div>
-									<div class="col-lg-2 col-md-3 col-sm-2 hideMobile990">
+									<div class="col-lg-2 col-md-3 col-sm-2 col-xs-6">
 										<div class="listRowInner">
-											<span class="listTextStrong">Precio Total</span>
-											<span class="emailTextResp"><span class="label label-success">'.$Row->Data['items'][0]['currency'].' '.$Row->Data['total'].'</span></span>
+											<span class="listTextStrong">Monto Total</span>
+											<span class="emailTextResp"><span class="label label-success">'.$TotalOrderAmount.'</span></span>
 										</div>
 									</div>
 									'.$Extra.'
@@ -653,48 +675,55 @@ public function MakeRegs($Mode="List")
 			// $Branch 	= $this->fetchAssoc('customer_branch','customer_id',"branch_id=".$_POST['customer']);
 			$Customer	= new Customer($_POST['customer']);
 			$Prices = array();
-
+			$Product = new Product();
 			foreach($Products as $Item)
 			{
-				$Cost		= $Item['cost'];
-				$Variation  = $Item['variation_id']==1? "percentage":"price";
-				if(intval($Customer->Data['type_id'])<4)
+				//print_r($Item);
+				$RelationPrice = $Product->GetProductPrice($Item['product_id'],$_POST['customer']);
+				if(!$RelationPrice)
 				{
-					if(!$Item['additional_price_wholesaler'])
+					$Cost		= $Item['cost'];
+					$Variation  = $Item['variation_id']==1? "percentage":"price";
+					if(intval($Customer->Data['type_id'])<4)
 					{
-						$Category = $this->fetchAssoc('product_category',"*","status='A' AND (additional_price_wholesaler<>0 OR additional_percentage_wholesaler<>0) AND category_id=".$Item['category_id']);
-						$Item['additional_price_wholesaler'] = $Category[0]['additional_price_wholesaler'];
-						$Item['additional_percentage_wholesaler'] = $Category[0]['additional_percentage_wholesaler'];
-						$Item['additional_price_retailer'] = $Category[0]['additional_price_retailer'];
-						$Item['additional_percentage_retailer'] = $Category[0]['additional_percentage_retailer'];
+						if(!$Item['additional_price_wholesaler'])
+						{
+							$Category = $this->fetchAssoc('product_category',"*","status='A' AND (additional_price_wholesaler<>0 OR additional_percentage_wholesaler<>0) AND category_id=".$Item['category_id']);
+							$Item['additional_price_wholesaler'] = $Category[0]['additional_price_wholesaler'];
+							$Item['additional_percentage_wholesaler'] = $Category[0]['additional_percentage_wholesaler'];
+							$Item['additional_price_retailer'] = $Category[0]['additional_price_retailer'];
+							$Item['additional_percentage_retailer'] = $Category[0]['additional_percentage_retailer'];
+						}
+	
+						if(!$Item['additional_price_wholesaler'])
+						{
+							$Config	= $this->fetchAssoc('product_configuration','*',"status='A' AND company_id=".$_SESSION['company_id'],'creation_date DESC');
+							$Item['additional_price_wholesaler'] = $Config[0]['additional_price_wholesaler'];
+							$Item['additional_percentage_wholesaler'] = $Config[0]['additional_percentage_wholesaler'];
+							$Item['additional_price_retailer'] = $Config[0]['additional_price_retailer'];
+							$Item['additional_percentage_retailer'] = $Config[0]['additional_percentage_retailer'];
+						}
+						if(intval($Customer->Data['type_id'])==1)
+							$Field = $Item["additional_".$Variation."_retailer"];
+						else
+							$Field = $Item["additional_".$Variation."_wholesaler"];
+					}else{
+						$Price = $this->fetchAssoc("customer_order_item","price","customer_id=".intval($_POST['customer'])." AND product_id=".$Item['product_id'],"creation_date DESC");
+						// echo $this->lastQuery()." - ";
+						// print_r($Price);
+						$Field = $Price[0]['price']-$Cost;
+						if($Field<1)
+							$Field	= $Customer->Data['additional_'.$Variation];
+						else
+							$Variation = "price";
 					}
-
-					if(!$Item['additional_price_wholesaler'])
-					{
-						$Config	= $this->fetchAssoc('product_configuration','*',"status='A' AND company_id=".$_SESSION['company_id'],'creation_date DESC');
-						$Item['additional_price_wholesaler'] = $Config[0]['additional_price_wholesaler'];
-						$Item['additional_percentage_wholesaler'] = $Config[0]['additional_percentage_wholesaler'];
-						$Item['additional_price_retailer'] = $Config[0]['additional_price_retailer'];
-						$Item['additional_percentage_retailer'] = $Config[0]['additional_percentage_retailer'];
-					}
-					if(intval($Customer->Data['type_id'])==1)
-						$Field = $Item["additional_".$Variation."_retailer"];
-					else
-						$Field = $Item["additional_".$Variation."_wholesaler"];
+	
+					$AdditionalPrice = $Variation=="percentage"? ($Cost*$Field)/100 : $Field ;
+					$Price = $Cost + $AdditionalPrice;
+					$Prices[] = round($Price);
 				}else{
-					$Price = $this->fetchAssoc("customer_order_item","price","customer_id=".intval($_POST['customer'])." AND product_id=".$Item['product_id'],"creation_date DESC");
-					// echo $this->lastQuery()." - ";
-					// print_r($Price);
-					$Field = $Price[0]['price']-$Cost;
-					if($Field<1)
-						$Field	= $Customer->Data['additional_'.$Variation];
-					else
-						$Variation = "price";
+					$Prices[] = $RelationPrice;
 				}
-
-				$AdditionalPrice = $Variation=="percentage"? ($Cost*$Field)/100 : $Field ;
-				$Price = $Cost + $AdditionalPrice;
-				$Prices[] = round($Price);
 			}
 		}
 		echo implode(",",$Prices);
@@ -770,13 +799,11 @@ public function MakeRegs($Mode="List")
 		$CustomerID = $_POST['cid'];
 		$OrderData = $this->fetchAssoc("customer_order","*","order_id=".$OrderID);
 		$Data = $OrderData[0];
-		$DeliveryID = $OrderData['delivery_id'];
-		$OrderStatus = $OrderData['status'];
 
 		$TotalAmount = 0;
-		if($OrderData['status'] = 'A')
+		if($Data['status'] == 'A')
 		{
-			if(intval($_POST['cash'])>0 || intval($_POST['checks'])>0)
+			if(floatval($_POST['cash'])>0 || intval($_POST['checks'])>0)
 				$MovementStatus = "F";
 			else
 				$MovementStatus = "A";
@@ -785,7 +812,7 @@ public function MakeRegs($Mode="List")
 			$LastMovementID = $DebitMovementID = Movement::InsertMovement($_POST['total_price'],$CustomerID,5,$this->MovementConcept.$OrderID,$OrderID,$MovementStatus);
 
 
-			if(intval($_POST['cash'])>0 || intval($_POST['checks'])>0)
+			if(floatval($_POST['cash'])>0 || intval($_POST['checks'])>0)
 			{
 				$TotalChecks = 0;
 				if(intval($_POST['checks'])>0)
@@ -794,7 +821,7 @@ public function MakeRegs($Mode="List")
 					for($I=1;$I<=intval($_POST['checks']);$I++)
 					{
 						$Checks[$I]['number'] = $_POST['check_number_'.$I];
-						$Checks[$I]['amount'] = $_POST['check_amount_'.$I];
+						$Checks[$I]['amount'] = floatval($_POST['check_amount_'.$I]);
 						$Checks[$I]['bank'] = ucfirst($_POST['check_bank_'.$I]);
 						$Checks[$I]['from'] = ucfirst($_POST['check_from_'.$I]);
 						$Checks[$I]['date'] = ToDBDate($_POST['check_date_'.$I]);
@@ -807,7 +834,7 @@ public function MakeRegs($Mode="List")
 					}
 
 				}
-				$TotalAmount = intval($_POST['cash']);
+				$TotalAmount = floatval($_POST['cash']);
 
 				if(intval($_POST['cash'])>0 && intval($_POST['checks'])>0)
 					$PaymentID = 3;
@@ -824,7 +851,7 @@ public function MakeRegs($Mode="List")
 			{
 				if($_POST['selected_'.$I]=='Y')
 				{
-					$QuantityDelivered = $_POST['quantity_'.$I];
+					$QuantityDelivered = floatval($_POST['quantity_'.$I]);
 					$this->execQuery("UPDATE","customer_order_item","delivered='Y',status='F',quantity_delivered=".$QuantityDelivered.",payment_status='F'","item_id=".$_POST['item_'.$I]);
 				}
 			}
@@ -841,5 +868,52 @@ public function MakeRegs($Mode="List")
 			echo "403";
 		}
 	}
+	
+	
+	// RETURN FOR ALL TYPES OF ORDERS
+	
+	public function Returnorder()
+	{
+		$OrderID = $_POST['id'];
+		$CustomerID = $_POST['cid'];
+		$OrderData = $this->fetchAssoc("customer_order","*","order_id=".$OrderID);
+		$Data = $OrderData[0];
+		$OrderID = $Data['order_id'];
+		
+		if($OrderID && $Data['status'] == 'F')
+		{
+			
+			// LAST MOVEMENT
+			$LastMovement = $this->fetchAssoc("movement","*","order_id=".$OrderID." AND (type_id=1 OR type_id=5) AND status='F'","movement_id DESC");
+			$LastMovementID = $LastMovement[0]['movement_id'];
+			if(!$LastMovementID)
+			{
+				echo "404";
+				die;
+			}
+			$PaymentID = 4;
+			$AmountReturned = 0;
+				
+
+			$Items = $_POST['items'];
+			for($I=1;$I<=$Items;$I++)
+			{
+				if($_POST['selected_'.$I]=='Y')
+				{
+					$QuantityReturned = floatval($_POST['quantity_'.$I]);
+					$ReturnedPrice = floatval($_POST['price_'.$I]);
+					$AmountReturned += ($QuantityReturned * $ReturnedPrice);
+					$this->execQuery("UPDATE","customer_order_item","returned='Y',quantity_returned=quantity_returned+".$QuantityReturned.",payment_status='F'","item_id=".$_POST['item_'.$I]." AND delivered='Y' AND quantity_delivered>=quantity_returned+".$QuantityReturned);
+				}
+			}
+			
+			// INSERT RETURN MOVEMENT
+			$LastMovementID = Movement::InsertMovement($AmountReturned,$CustomerID,6,"Devolución de Orden N°".$OrderID,$OrderID,"F",$PaymentID,$LastMovementID);
+			$this->execQuery("UPDATE","customer_order","returned_amount=returned_amount+".$AmountReturned.",returned='Y',updated_by=".$_SESSION['admin_id'],"order_id=".$OrderID);
+		}else{
+			echo "403";
+		}
+	}
+	
 }
 ?>

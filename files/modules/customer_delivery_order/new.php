@@ -76,9 +76,19 @@
                         <!--- ITEMS --->
                         <div id="ItemWrapper">
                             <?php $I = 1; ?>
-                            <?php foreach($Data['items'] as $Item){?>
+                            <?php 
+                                foreach($Data['items'] as $Item)
+                                {
+                                     if(strtolower($Item['size'])=='kgs')
+                                    {
+                                        $DecimalKgs = '[.99]';
+                                        $Item['quantity'] = number_format($Item['quantity'],2,'.','');
+                                    }else{
+                                        $DecimalKgs = '';
+                                        $Item['quantity'] = number_format($Item['quantity'],0,'.','');
+                                    }
+                            ?>
                             <!--- NEW ITEM --->
-                            <?php $DecimalKgs = strtolower($Item['size'])=='kgs'? '.99':''; ?>
                             <div id="item_row_<?php echo $I ?>" item="<?php echo $I ?>" class="row form-group inline-form-custom ItemRow bg-gray" style="margin-bottom:0px!important;padding:10px 0px!important;">
                                 <form id="item_form_<?php echo $I ?>" name="item_form_<?php echo $I ?>">
                                     <div class="col-xs-3 txC">
@@ -91,7 +101,7 @@
                                     </div>
                                     <div class="col-xs-2 txC">
                                         <span id="Quantity<?php echo $I ?>" class="Hidden ItemText<?php echo $I ?>"><?php echo $Item['quantity'].' '.$Item['size'] ?></span>
-                                        <?php echo insertElement('text','quantity_'.$I,$Item['quantity'],'ItemField'.$I.' form-control calcable QuantityItem txC','data-inputmask="\'mask\': \'9{+}'.$DecimalKgs.'\'" placeholder="Cantidad" validateEmpty="Ingrese una cantidad" validateMaxValue="'.$Item['restriction'].'///Ingrese un valor menor o igual a '.$Item['restriction'].'" style="max-width:50%!important;display:inline-block;"').' '.$Item['size']; ?>
+                                        <?php echo insertElement('text','quantity_'.$I,$Item['quantity'],'ItemField'.$I.' form-control calcable QuantityItem InputMask txC','data-inputmask="\'mask\': \'9{+}'.$DecimalKgs.'\'" placeholder="Cantidad" validateEmpty="Ingrese una cantidad" validateMaxValue="'.$Item['restriction'].'///Ingrese un valor menor o igual a '.$Item['restriction'].'" style="max-width:50%!important;display:inline-block;"').' '.$Item['size']; ?>
                                     </div>
                                     <div id="item_number_<?php echo $I ?>" class="col-xs-2 txC item_number" total="<?php echo $Item['total']; ?>" item="<?php echo $I ?>">$ <?php echo $Item['total']; ?></div>
                                     <div class="col-xs-3 txC">

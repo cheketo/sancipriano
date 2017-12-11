@@ -18,7 +18,7 @@ class CustomerDeliveryOrder extends DataBase
 		$this->Connect();
 		if($ID!=0)
 		{
-			$Data = $this->fetchAssoc($this->Table.' a INNER JOIN customer b ON (a.customer_id=b.customer_id) INNER JOIN customer_branch c ON (c.customer_id=a.customer_id) INNER JOIN customer_delivery d ON (a.delivery_id=d.delivery_id) LEFT JOIN geolocation_zone z ON (z.zone_id=c.zone_id)',"a.*,c.address,d.extra as delivery_extra,d.status as full_delivery_status,b.name,d.merluza,d.merluza_delivered,(d.merluza-d.merluza_delivered) as merluza_left,c.zone_id,z.short_name as zone",$this->TableID."=".$ID,'');
+			$Data = $this->fetchAssoc($this->Table.' a INNER JOIN customer b ON (a.customer_id=b.customer_id) INNER JOIN customer_branch c ON (c.customer_id=a.customer_id) INNER JOIN customer_delivery d ON (a.delivery_id=d.delivery_id) LEFT JOIN geolocation_zone z ON (z.zone_id=c.zone_id)',"a.*,c.address,d.extra as delivery_extra,d.status as full_delivery_status,b.name,d.merluza,d.merluza_delivered,(d.merluza-d.merluza_delivered) AS merluza_left,c.zone_id,z.short_name as zone",$this->TableID."=".$ID,'');
 			$this->Data = $Data[0];
 			$this->ID = $ID;
 			$this->Data['items'] = $this->GetItems();
@@ -206,7 +206,7 @@ public function MakeRegs($Mode="List")
     			    $Regs	.= '<div class="bg-blue row" style="margin:0px;padding:0px;padding-top:5px;min-height:40px;">
     			    	<div class="col-xs-3"><b><i class="fa fa-truck"></i> Reparto '.$Counter.'</b></div>
     			    	<div class="col-xs-3"><span class="label label-'.$LClass.'">'.$DStatus.'</span></div>
-    			    	<div class="col-xs-3">Merluza:<span class="label label-primary">'.$Row->Data['merluza_left'].'/'.$Row->Data['merluza'].'</span></div>
+    			    	<div class="col-xs-3">Merluza:<span class="label label-primary">'.$Row->Data['merluza'].' / '.$Row->Data['merluza_delivered'].' / '.$Row->Data['merluza_left'].'</span></div>
     			    	<div class="col-xs-3" style=""><a href="'.$DLink.'.php?id='.$Row->Data['delivery_id'].'" class="btn btn-'.$DClass.'"><i class="fa fa-'.$DText.'"></i></a></div>
     			    </div>';
     			    // $Regs	.= '<div class="bg-blue"><b><i class="fa fa-truck"></i> Reparto '.$Counter.'</b><span class="label label-'.$DClass.'">'.$DStatus.'</span></div>';
@@ -266,8 +266,9 @@ public function MakeRegs($Mode="List")
 				
 				$Date = explode(" ",$Item['delivery_date']);
 				$DeliveryDate = implode("/",array_reverse(explode("-",$Date[0])));
-				$ItemTotal = $Item['currency']." ".$Item['total'];
+				$ItemTotal = $Item['currency']." ".number_format($Item['total'],2).' / '.$Item['currency']." ".number_format(($Item['price']*$Item['quantity_delivered']),2);
 				$ItemPrice = $Item['currency']." ".$Item['price'];
+				$ItemQuantity = $Item['quantity'].' / '.$Item['quantity_delivered'];
 				
 				$Items .= '
 							<div class="row '.$RowClass.'" style="padding:5px;">
@@ -285,7 +286,7 @@ public function MakeRegs($Mode="List")
 								<div class="col-md-2">
 									<div class="listRowInner">
 										<span class="listTextStrong">Cantidad</span>
-										<span class="listTextStrong"><span class="label label-primary">'.$Item['quantity'].' '.$Item['size'].'</span></span>
+										<span class="listTextStrong"><span class="label label-primary">'.$ItemQuantity.'</span></span>
 									</div>
 								</div>
 								<div class="col-md-2">
@@ -328,7 +329,7 @@ public function MakeRegs($Mode="List")
 									</div>
 									<div class="col-lg-2 col-md-3 col-sm-2 hideMobile990">
 										<div class="listRowInner">
-											<span class="emailTextResp"><span class="label label-success">'.$Row->Data['items'][0]['currency'].' '.$Row->Data['total'].'</span></span>
+											<span class="emailTextResp"><span class="label label-success">'.$Row->Data['items'][0]['currency'].' '.$Row->Data['total'].' / '.$Row->Data['items'][0]['currency'].' '.$Row->Data['total_paid'].'</span></span>
 										</div>
 									</div>
 									'.$Extra.'

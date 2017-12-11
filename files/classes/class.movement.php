@@ -34,6 +34,7 @@
     		
             $DB->execQuery('UPDATE','customer','balance='.$Balance,"customer_id=".$CustomerID);
             $DB->execQuery('INSERT','movement','customer_id,type_id,order_id,payment_id,parent_id,check_id,amount,balance,concept,status,creation_date,created_by',$CustomerID.",".$TypeID.",".$OrderID.",".$PaymentID.",".$ParentID.",".$CheckID.",".$Amount.",".$Balance.",'".$Concept."','".$Status."',NOW(),".$_SESSION['admin_id']);
+            //echo $DB->lastQuery();
             return $DB->GetInsertId();
         }
         

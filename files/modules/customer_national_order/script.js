@@ -43,6 +43,11 @@ $(document).ready(function(){
 		notifyError('La orden no puede ser editada ya que no se encuentra en estado pendiente.');
 	}
 	
+	if(get['error']=="returned")
+	{
+		notifyError('No se puede devolver productos de esta orden.');
+	}
+	
 	if(get['error']=="user")
 	{
 		notifyError('La orden que desea editar no existe.');
@@ -98,7 +103,7 @@ function getProductsPrices(values,ids)
 		        success: function(data){
 		            if(data)
 		            {
-		            	//console.log(data);
+		            	console.log(data);
 		            	var prices = data.split(",");
 		            	var items = ids.split(",");
 		            	var decimal;
@@ -114,8 +119,11 @@ function getProductsPrices(values,ids)
 			            	}
 			            	$("#price_"+items[index]).val(price);
 			            	$("#Price"+items[index]).html("$ "+price);
-			            	calculateTotalOrderPrice();
+			            	
+			            	
 		            	});
+		            	calculateAllRowPrices();
+		            	calculateTotalOrderPrice();
 		            }else{
 		            	notifyError('Hubo un error al calcular el precio del producto');
 		                console.log('Sin información devuelta. Item='+ids);
@@ -329,6 +337,26 @@ function countItems()
 function calculateRowPrice()
 {
 	$(".calcable").change(function(){
+		var element = $(this).attr("id").split("_");
+		var id = element[1];
+		
+		var price = parseFloat($("#price_"+id).val());
+		var quantity = parseFloat($("#quantity_"+id).val())
+		if(price>0 && quantity>0)
+			var total = price*quantity;
+		else
+			var total = 0.00;
+		$("#item_number_"+id).attr("total",total);
+		$("#item_number_"+id).html("$ "+total.toFixed(2));	
+		
+		calculateTotalOrderPrice();
+		calculateTotalOrderQuantity();
+	});
+}
+
+function calculateAllRowPrices()
+{
+	$(".calcable").each(function(){
 		var element = $(this).attr("id").split("_");
 		var id = element[1];
 		
@@ -624,7 +652,8 @@ $(document).ready(function(){
 	updateRowBackgroundPayment();
 	showCheckForm();
 	cancelCheck();
-	addCheck()
+	addCheck();
+	cashChanged();
 	
 	if($(".InputMask").length>0)
 		$(".InputMask").inputmask();  //static mask
@@ -674,6 +703,7 @@ function calculateTotalOrderPricePayment()
 	});
 	$("#total_price").val(total);
 	$("#TotalPricePayment").html("$ "+total.toFixed(2));
+	calculateFinalBalance();
 }
 
 function countItemsPayment()
@@ -817,14 +847,15 @@ function addCheck()
 			var check = parseInt($("#checks").val())+1;
 			var amount = $("#check_amount").val();
 			amount = amount.split('$');
-			amount = amount[1];
+			amount = parseFloat(amount[1]).toFixed(2);
 			var from = $("#check_from").val();
 			var number = $("#check_number").val();
 			var bank = $("#check_bank").val();
 			var date = $("#check_date").val();
-			$("#CheckWrapper").append('<div class="col-xs-12 col-sm-6 col-md-4" id="check_'+check+'"><div class="box box-success"><div class="box-header with-border"><h4 class="box-title">Cheque N&deg; '+number+'</h4><input type="hidden" value="'+number+'" id="check_number_'+check+'" /><div class="box-tools pull-right"><i class="fa fa-times text-danger removeCheck" style="cursor:pointer;" check="'+check+'"></i></div></div><div class="box-body"><div class="row"><div class="col-xs-6">Monto:</div><div class="col-xs-6"><b>$ '+amount+'</b></div><input type="hidden" value="'+amount+'" id="check_amount_'+check+'" /></div><div class="row"><div class="col-xs-6">Banco:</div><div class="col-xs-6"><b>'+bank+'</b></div><input type="hidden" value="'+bank+'" id="check_bank_'+check+'" /></div><div class="row"><div class="col-xs-6">Emisor:</div><div class="col-xs-6"><b>'+from+'</b><input type="hidden" value="'+from+'" id="check_from_'+check+'" /></div></div><div class="row"><div class="col-xs-6">Vencimiento:</div><div class="col-xs-6"><b>'+date+'</b><input type="hidden" value="'+date+'" id="check_date_'+check+'" /></div></div></div></div></div>');
+			$("#CheckWrapper").append('<div class="col-xs-12 col-sm-6 col-md-4" id="check_'+check+'"><div class="box box-success"><div class="box-header with-border"><h4 class="box-title">Cheque N&deg; '+number+'</h4><input type="hidden" value="'+number+'" id="check_number_'+check+'" /><div class="box-tools pull-right"><i class="fa fa-times text-danger removeCheck" style="cursor:pointer;" check="'+check+'"></i></div></div><div class="box-body"><div class="row"><div class="col-xs-6">Monto:</div><div class="col-xs-6"><b>$ '+amount+'</b></div><input type="hidden" value="'+amount+'" id="check_amount_'+check+'" class="CheckAmount" /></div><div class="row"><div class="col-xs-6">Banco:</div><div class="col-xs-6"><b>'+bank+'</b></div><input type="hidden" value="'+bank+'" id="check_bank_'+check+'" /></div><div class="row"><div class="col-xs-6">Emisor:</div><div class="col-xs-6"><b>'+from+'</b><input type="hidden" value="'+from+'" id="check_from_'+check+'" /></div></div><div class="row"><div class="col-xs-6">Vencimiento:</div><div class="col-xs-6"><b>'+date+'</b><input type="hidden" value="'+date+'" id="check_date_'+check+'" /></div></div></div></div></div>');
 			$("#CancelCheck").click();
 			$("#checks").val(check);
+			calculateFinalBalance();
 			removeCheck().stopImmediatePropagation();
 		}
 	});
@@ -842,8 +873,235 @@ function removeCheck()
 			if(e)
 			{
 				$("#check_"+check).remove();
-				$("#checks").val(parseInt($("#checks").val())+1);
+				//$("#checks").val(parseInt($("#checks").val())+1);
+				calculateFinalBalance();
 			}
 		});
 	});
+}
+
+function cashChanged()
+{
+	$("#cash").change(function() {
+	    calculateFinalBalance();
+	});
+}
+
+function calculateFinalBalance()
+{
+	if($("#cash").length)
+	{
+		var initialBalance = parseFloat($("#initial_balance").val());
+		var total = parseFloat($("#total_price").val());
+		var cash = parseFloat($("#cash").val());
+		if(isNaN(cash)) cash = 0;
+		console.log("Cash: "+cash);
+		console.log("A pagar: "+total);
+		console.log("Inicial: "+initialBalance);
+		var check = 0;
+		$(".CheckAmount").each(function(){
+			check = check + parseFloat($(this).val());
+		});
+		console.log("Check: "+check);
+		var finalBalance = initialBalance + cash + check - total;
+		console.log("FinalBalance: "+finalBalance);
+		if(finalBalance<0)
+		{
+			$("#FinalBalance").removeClass("text-green");
+			$("#FinalBalance").addClass("text-red");
+		}else{
+			$("#FinalBalance").removeClass("text-red");
+			$("#FinalBalance").addClass("text-green");
+		}
+		
+		$("#FinalBalance").html('$ '+(finalBalance*-1).toFixed(2));
+	}
+	
+}
+
+//////////////////////////// RETURN ///////////////////////////////////////////
+$(document).ready(function(){
+	calculateRowPriceReturn();
+	countItemsReturn();
+	calculateTotalOrderPriceReturn();
+	calculateTotalOrderQuantityReturn();
+	saveItemReturn();
+	editItemReturn();
+	updateRowBackgroundReturn();
+});
+
+function calculateRowPriceReturn()
+{
+	$(".calcableReturn").keyup(function(){
+		var element = $(this).attr("id").split("_");
+		var id = element[1];
+		
+		var price = parseFloat($("#PriceReturn"+id).html());
+		var quantity = parseFloat($("#quantity_"+id).val().replace(/_/g, "0"))
+		if(price>0 && quantity>0)
+			var total = price*quantity;
+		else
+			var total = 0.00;
+		$("#item_number_"+id).attr("total",total);
+		$("#item_number_"+id).html("$ "+total.toFixed(2));	
+		
+		calculateTotalOrderQuantityReturn();
+	});
+}
+
+function calculateTotalOrderQuantityReturn()
+{
+	var total = 0;
+	$(".QuantityItemReturn").each(function(){
+		var val = parseFloat($(this).val().replace(/_/g, "0"));
+		if(val>0)
+			total = total + val;
+	});
+	
+	$("#TotalQuantityReturn").html(total);
+}
+
+function calculateTotalOrderPriceReturn()
+{
+	var total = 0.00;
+	$(".item_number").each(function(){
+		if($(this).parent().parent().hasClass('SelectedItem'))
+		{
+			var val = parseFloat($(this).attr("total"));
+			if(val>0)
+				total = total + val;
+		}
+	});
+	$("#total_price").val(total);
+	$("#TotalPriceReturn").html("$ "+total.toFixed(2));
+	calculateFinalBalanceReturn();
+}
+
+function countItemsReturn()
+{
+	$("#TotalItemsReturn").html($(".ItemRow").length);
+}
+
+function saveItemReturn()
+{
+	$(".SaveItemReturn").on("click",function(){
+		var id = $(this).attr("item");
+		if(validate.validateFields('item_form_'+id))
+		{
+			var quantity = $("#quantity_"+id).val().replace(/_/g, "0");
+			if(quantity && parseFloat(quantity)>0)
+			{
+				$("#QuantityReturn"+id).html(quantity);
+				$("#SaveItemReturn"+id+",#DeleteItemReturn"+id+",#quantity_"+id).addClass('Hidden');
+				$("#EditItemReturn"+id+",#QuantityReturn"+id).removeClass('Hidden');
+				$("#item_"+id).next().addClass('Hidden');
+				$("#item_row_"+id).removeClass('bg-gray');
+				$("#item_row_"+id).removeClass('bg-gray-active');
+				$("#item_row_"+id).addClass('bg-red');
+				$("#item_row_"+id).addClass('SelectedItem');
+				$("#selected_"+id).val('Y');
+				$("#quantity_"+id).val(quantity);
+				updateRowBackgroundReturn();
+				calculateTotalOrderPriceReturn();
+			}else{
+				notifyError("Debe ingresar una cantidad mayor a 0 para devolver un producto.");	
+			}
+		}
+	});
+}
+
+function editItemReturn()
+{
+	$(".EditItemReturn").on("click",function(){
+		var id = $(this).attr("item");
+		$("#SaveItemReturn"+id+",#DeleteItemReturn"+id+",#quantity_"+id).removeClass('Hidden');
+		$("#EditItemReturn"+id+",#QuantityReturn"+id).addClass('Hidden');
+		$("#item_"+id).next().removeClass('Hidden');
+		$("#item_row_"+id).removeClass('bg-red');
+		$("#item_row_"+id).removeClass('bg-red-active');
+		$("#item_row_"+id).removeClass('SelectedItem');
+		$("#selected_"+id).val('');
+		updateRowBackground();
+		calculateTotalOrderPriceReturn();
+	});
+}
+
+function updateRowBackgroundReturn()
+{
+	var bgClass1 = "bg-gray";
+	var bgClass2 = "bg-red";
+	$(".ItemRow").each(function(){
+		if(!$(this).hasClass('bg-red') && !$(this).hasClass('bg-red-active'))
+		{
+			$(this).removeClass("bg-gray");
+			$(this).removeClass("bg-gray-active");
+			$(this).addClass(bgClass1);
+		}else{
+			$(this).removeClass("bg-red");
+			$(this).removeClass("bg-red-active");
+			$(this).addClass(bgClass2);
+		}
+		if(bgClass1 == "bg-gray")
+			bgClass1 = "bg-gray-active";
+		else
+			bgClass1 = "bg-gray";
+			
+		if(bgClass2 == "bg-red")
+			bgClass2 = "bg-red-active";
+		else
+			bgClass2 = "bg-red";
+	});
+}
+
+$(function(){
+	$("#BtnReturn").on("click",function(e){
+		e.preventDefault();
+			alertify.confirm(utf8_decode('¿Desea devolver los productos seleccionados?<br><b>No podr&aacute; modificar la cantidad de productos devueltos luego de este paso.</b>'), function(e){
+				if(e)
+				{
+					var process		= '../../library/processes/proc.common.php?object=CustomerOrder';
+					var target		= '../customer_national_order/list.php?status=F&type='+get['type']+'&msg='+ $("#action").val();
+					
+					var haveData	= function(returningData)
+					{
+						$("input,select").blur();
+						if(returningData=="403")
+						{
+							notifyError("No es posible devolver los productos de esta orden. Ya fueron devueltos previamente.");
+						}else if(returningData=="404")
+						{
+							notifyError("La orden carece de un movimiento padre por lo cual no se puede realizar una devoluci&oacute;n.");
+						}else{
+							notifyError("Ha ocurrido un error durante el proceso de devoluci&oacute;n.");
+						}
+						console.log(returningData);
+					}
+					var noData		= function()
+					{
+						document.location = target;
+					}
+					sumbitFields(process,haveData,noData);
+				}
+			});
+	});
+});
+
+function calculateFinalBalanceReturn()
+{
+		var initialBalance = parseFloat($("#initial_balance").val());
+		var total = parseFloat($("#total_price").val());
+		var finalBalance = initialBalance + total;
+		console.log("FinalBalance: "+finalBalance);
+		if(finalBalance<0)
+		{
+			$("#FinalBalance").removeClass("text-green");
+			$("#FinalBalance").addClass("text-red");
+		}else{
+			$("#FinalBalance").removeClass("text-red");
+			$("#FinalBalance").addClass("text-green");
+		}
+		
+		$("#FinalBalance").html('$ '+(finalBalance*-1).toFixed(2));
+
+	
 }

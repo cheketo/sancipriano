@@ -43,6 +43,16 @@ class Product extends DataBase
 		$this->Data['price_retailer'] = round($this->Data['price_retailer']);
 	}
 	
+	public function GetProductPrice($PID,$CID)
+	{
+		$Relation = $this->fetchAssoc("relation_product_customer","price","status = 'A' AND customer_id=".$CID." AND product_id=".$PID);
+		//echo $this->lastQuery();
+		if($Relation[0]['price'])
+			return $Relation[0]['price'];
+		else
+			return 0;
+	}
+	
 	public function SetStockSize()
 	{
 		if($this->Data['is_decimal']=="N")
@@ -516,7 +526,25 @@ public function MakeRegs($Mode="List")
 		}else{
 			echo 401;
 		}
-		
+	}
+	
+	public function Relationcustomer()
+	{
+		$CustomerID = $_POST['cid'];
+		if($CustomerID>0)
+		{
+			$this->execQuery("UPDATE","relation_product_customer","status='I',updated_by=".$_SESSION['admin_id'],"customer_id=".$CustomerID);
+			$Products = $_POST['total'];
+			for($I=1;$I<=$Products;$I++)
+			{
+				$ProductID = $_POST['id'.$I];
+				$Price = $_POST['value'.$I];
+				$Values = $CustomerID.",".$ProductID.",".$Price.",NOW(),".$_SESSION['admin_id'].",".$_SESSION['company_id'];
+				$Fields .= $Fields? '),('.$Values:$Values;
+			}
+			$this->execQuery("INSERT","relation_product_customer","customer_id,product_id,price,creation_date,created_by,company_id",$Fields);
+			//echo $this->lastQuery();
+		}
 	}
 }
 ?>

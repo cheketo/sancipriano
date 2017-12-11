@@ -81,10 +81,10 @@ public function MakeRegs($Mode="List")
 			// if(!$Groups) $Groups = 'Ninguno';
 			$Actions	= 	'<span class="roundItemActionsGroup"><a><button type="button" class="btn bg-navy ExpandButton" id="expand_'.$Row->ID.'"><i class="fa fa-plus"></i></button></a> ';
 			$Actions	.= 	'<a aria-label="Cuenta Corriente" class="hint--bottom hint--bounce hint--success" href="view.php?id='.$Row->ID.'"><button type="button" class="btn btn-success"><i class="fa fa-dollar"></i></button></a>';
-			if($Row->Data['type_id']==4)
-			{
+			// if($Row->Data['type_id']==4)
+			// {
 				$Actions	.= 	' <a aria-label="Administrar Precios" class="hint--bottom hint--bounce hint--info" href="products.php?id='.$Row->ID.'"><button type="button" class="btn btn-info"><i class="fa fa-exchange"></i></button></a>';
-			}
+			// }
 			$Actions	.= 	'<a aria-label="Editar" class="hint--bottom hint--bounce hint--info" href="edit.php?id='.$Row->ID.'"><button type="button" class="btn btnBlue"><i class="fa fa-pencil"></i></button></a>';
 			if($Row->Data['status']=="A")
 			{
@@ -193,15 +193,15 @@ public function MakeRegs($Mode="List")
 
 	protected function InsertSearchField()
 	{
-		if(!$_GET['country'])
-		{
-			$CountryField = '<!-- Country -->
-          <div class="input-group">
-            <span class="input-group-addon order-arrows" order="country" mode="asc"><i class="fa fa-sort-alpha-asc"></i></span>
-            '.insertElement('text','country','','form-control','placeholder="Pa&iacute;s"').'
-          </div>';
-		}
-
+		// if(!$_GET['country'])
+		// {
+		// 	$CountryField = '<!-- Country -->
+  //        <div class="input-group">
+  //          <span class="input-group-addon order-arrows" order="country" mode="asc"><i class="fa fa-sort-alpha-asc"></i></span>
+  //          '.insertElement('text','country','','form-control','placeholder="Pa&iacute;s"').'
+  //        </div>';
+		// }
+		$Balance = array("0"=>"Cualquier Balance","1"=>"Balance Negativo","2"=>"Balance Positivo","3"=>"Balance 0","4"=>"Balance Negativo o 0","5"=>"Balance Positivo o 0");
 		return '
 			<!-- Name -->
           <div class="input-group">
@@ -222,6 +222,11 @@ public function MakeRegs($Mode="List")
           <div class="input-group">
             <span class="input-group-addon order-arrows" order="address" mode="asc"><i class="fa fa-sort-alpha-asc"></i></span>
             '.insertElement('text','address','','form-control','placeholder="Direcci&oacute;n"').'
+          </div>
+          <!-- Balance -->
+          <div class="input-group">
+            <span class="input-group-addon order-arrows" order="balance" mode="asc"><i class="fa fa-sort-alpha-asc"></i></span>
+            '.insertElement('select','tipo_balance','','form-control','',$Balance).'
           </div>
           '.$CountryField;
 	}
@@ -280,7 +285,30 @@ public function MakeRegs($Mode="List")
 		// {
 		// 	$this->AddWhereString(" AND c.provider_id = a.provider_id");
 		// }
-
+		
+		if($_POST['tipo_balance'])
+		{
+			switch ($_POST['tipo_balance']) {
+				case '1':
+					$Condition = "<";
+				break;
+				case '2':
+					$Condition = ">";
+				break;
+				case '3':
+					$Condition = "=";
+				break;
+				case '4':
+					$Condition = "<=";
+				break;
+				case '5':
+					$Condition = ">=";
+				break;
+				
+			}
+			$this->SetWhereCondition("a.balance",$Condition,"0.00");
+		}
+		
 		if($_POST['country']) $this->SetWhereCondition("g.name","LIKE", '%'.$_POST['country'].'%');
 		if($_GET['country']) $this->SetWhereCondition("g.name","LIKE", '%'.$_GET['country'].'%');
 
@@ -351,6 +379,7 @@ public function MakeRegs($Mode="List")
 		$Type 			= $_POST['type'];
 		$Name			= $_POST['name'];
 		$Balance		= $_POST['balance']? $_POST['balance']:0;
+		$OriginalBalance= $Balance;
 		$CUIT			= str_replace('-','',$_POST['cuit']);
 		$IVA			= $_POST['iva'];
 		$GrossIncome	= $_POST['gross_income_number'];
@@ -366,7 +395,7 @@ public function MakeRegs($Mode="List")
 		if(!$GrossIncome) $GrossIncome = 0;
 		// echo 'IIBB incompleto';
 
-		$Insert			= $this->execQuery('INSERT',$this->Table,'type_id,name,cuit,iva,additional_price,additional_percentage,iibb,international,balance,creation_date,created_by,company_id',"'".$Type."','".$Name."',".$CUIT.",".$IVA.",".$AdditionalPri.",".$AdditionalPer.",".$GrossIncome.",'".$International."',".$Balance.",NOW(),".$_SESSION['admin_id'].",".$_SESSION['company_id']);
+		$Insert			= $this->execQuery('INSERT',$this->Table,'type_id,name,cuit,iva,additional_price,additional_percentage,iibb,international,balance,original_balance,creation_date,created_by,company_id',"'".$Type."','".$Name."',".$CUIT.",".$IVA.",".$AdditionalPri.",".$AdditionalPer.",".$GrossIncome.",'".$International."',".$Balance.",".$OriginalBalance.",NOW(),".$_SESSION['admin_id'].",".$_SESSION['company_id']);
 		//echo $this->lastQuery();
 		$NewID 		= $this->GetInsertId();
 		$New 	= new Customer($NewID);

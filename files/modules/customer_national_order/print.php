@@ -22,8 +22,11 @@
     {
         $Customer = $DB->fetchAssoc("customer","balance","customer_id=".$Data['customer_id']);
         $Data['initial_balance'] = $Customer[0]['balance'];
-    }else
-        $Data['initial_balance'] = $Data['balance']  + $Data['total'] - $Data['total_paid'];
+    }else{
+        //CUSTOMER BALANACE UNTIL NOW
+		$MovementData = $DB->fetchAssoc("movement","*","order_id=".$ID." AND type_id=5");
+		$Data['initial_balance'] = floatval($MovementData[0]['balance'])+floatval($MovementData[0]['amount']);
+    }
     $InitialBalance = floatval($Data['initial_balance'])<floatval(0.00)? "(".number_format($Data['initial_balance']*-1, 2, ',', '.').")":number_format($Data['initial_balance']*-1, 2, ',', '.');
     $Balance = floatval($Data['balance'])<floatval(0.00)? "(".number_format($Data['balance']*-1, 2, ',', '.').")":number_format($Data['balance']*-1, 2, ',', '.');
     
@@ -61,9 +64,14 @@
                     if($Item['delivered']=='Y' || ($Data['status']=='A' && $Data['type']=='Y'))
                     {
                         if($Data['status']=='A' && $Data['type']=='Y')
+                        {
                             $TotalItem = $Item['price'] * $Item['quantity'];
-                        else
+                            $ItemQuantity = $Item['quantity']; 
+                        }else{
                             $TotalItem = $Item['price'] * $Item['quantity_delivered'];
+                            $ItemQuantity = $Item['quantity_delivered'];   
+                        }
+                            
                         $TotalOrder += $TotalItem;
             ?>
             <div class="PageCol ItemTitle">
@@ -73,7 +81,7 @@
                 $<?php echo number_format($Item['price'], 2, ',', '.') ?>
             </div>
             <div class="PageCol ItemQuantity">
-                <?php $ItemQuantity = $Item['decimal']=='Y'? number_format($Item['quantity'], 2, ',', '.'):number_format($Item['quantity'], 0, ',', '.'); ?>
+                <?php $ItemQuantity = $Item['decimal']=='Y'? number_format($ItemQuantity, 2, ',', '.'):number_format($ItemQuantity, 0, ',', '.'); ?>
                 <?php echo $ItemQuantity. " ".$Item['size'] ?>
             </div>
             <div class="PageCol ItemTotal">

@@ -77,7 +77,7 @@
               <div class="col-xs-12 col-sm-6">
                 <span class="input-group">
                   <span class="input-group-addon"><i class="fa fa-dollar"></i></span>
-                  <?php echo insertElement('text','balance','','form-control','validateOnlyNumbers="Ingrese n&uacute;meros &uacute;nicamente." placeholder="Balance"'); ?>
+                  <?php echo insertElement('text','balance','','form-control','validateOnlyNumbers="Ingrese n&uacute;meros &uacute;nicamente." placeholder="Balance Inicial"'); ?>
                 </span>
               </div>
             </div>
@@ -124,7 +124,7 @@
           </div>
           <hr>
           <div class="row txC">
-            <button type="button" class="btn btn-success btnGreen" id="BtnCreate"><i class="fa fa-plus"></i> Crear Proveedor</button>
+            <button type="button" class="btn btn-success btnGreen" id="BtnCreate"><i class="fa fa-plus"></i> Crear Cliente</button>
             <button type="button" class="btn btn-success btnBlue" id="BtnCreateNext"><i class="fa fa-plus"></i> Crear y Agregar Otro</button>
             <button type="button" class="btn btn-error btnRed" id="BtnCancel"><i class="fa fa-times"></i> Cancelar</button>
           </div>
