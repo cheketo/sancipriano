@@ -65,7 +65,7 @@
                                     if(strtolower($Item['size'])=='kgs')
                                     {
                                         $DecimalKgs = '[.99]';
-                                        // $Item['quantity'] = number_format($Item['quantity'],2,'.','');
+                                        $Item['quantity'] = number_format($Item['quantity'],2,'.','');
                                     }else{
                                         $DecimalKgs = '';
                                         $Item['quantity'] = number_format($Item['quantity'],0,'.','');
@@ -85,7 +85,7 @@
                                     </div>
                                     <div class="col-sm-2 col-xs-6 txC">
                                         <span id="QuantityPayment<?php echo $I ?>" class="Hidden ItemText<?php echo $I ?>"><?php echo $Item['quantity'].' '.$Item['size'] ?></span>
-                                        <?php echo insertElement('text','quantity_'.$I,$Item['quantity'],'ItemField'.$I.' form-control calcablePayment QuantityItemPayment InputMask txC','data-inputmask="\'mask\': \'9{+}'.$DecimalKgs.'\'" placeholder="Cantidad" validateEmpty="Ingrese una cantidad" style="max-width:70%!important;display:inline-block;"').' '.$Item['size']; ?>
+                                        <?php echo insertElement('text','quantity_'.$I,$Item['quantity'],'ItemField'.$I.' form-control calcablePayment QuantityItemPayment txC',' placeholder="Cantidad" validateEmpty="Ingrese una cantidad" style="max-width:70%!important;display:inline-block;"').' '.$Item['size']; ?>
                                     </div>
                                     <div id="item_number_<?php echo $I ?>" class="col-sm-1 col-xs-6 txC item_number" total="<?php echo $Item['total']; ?>" item="<?php echo $I ?>">$ <?php echo number_format($Item['total'],2); ?></div>
                                     <div class="col-sm-2 col-xs-6 txC">
