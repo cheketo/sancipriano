@@ -9,7 +9,8 @@
         $Data   = $Print->GetData();
         $Date = DBDate($Data['delivery_date']);
     }else{
-        $Date = DBDate($Data['modification_date']);    
+        // $Date = DBDate($Data['modification_date']);
+         $Date = DBDate($Data['delivery_date']);
     }
     
     ValidateID($Data['order_id']);
