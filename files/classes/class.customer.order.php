@@ -884,7 +884,7 @@ public function MakeRegs($Mode="List")
 		{
 			
 			// LAST MOVEMENT
-			$LastMovement = $this->fetchAssoc("movement","*","order_id=".$OrderID." AND (type_id=1 OR type_id=5) AND status='F'","movement_id DESC");
+			$LastMovement = $this->fetchAssoc("movement","*","order_id=".$OrderID." AND (type_id=1 OR type_id=5)","movement_id DESC");
 			$LastMovementID = $LastMovement[0]['movement_id'];
 			if(!$LastMovementID)
 			{

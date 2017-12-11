@@ -65,7 +65,7 @@
                                     if(strtolower($Item['size'])=='kgs')
                                     {
                                         $DecimalKgs = '[.99]';
-                                        $Item['quantity'] = number_format($Item['quantity'],2,'.','');
+                                        // $Item['quantity'] = number_format($Item['quantity'],2,'.','');
                                     }else{
                                         $DecimalKgs = '';
                                         $Item['quantity'] = number_format($Item['quantity'],0,'.','');
