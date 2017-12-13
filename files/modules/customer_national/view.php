@@ -4,7 +4,8 @@
     $View = new Customer($ID);
     $Movements = Movement::GetMovementsByCustomerID($ID);
     
-    $Head->setTitle($Menu->GetTitle());
+    $Head->setTitle($View->Data['name']);
+    $Head->setSubTitle($Menu->GetTitle());
     $Head->setHead();
     include('../../includes/inc.top.php');
     echo insertElement("hidden","cname",$View->Data['name']);

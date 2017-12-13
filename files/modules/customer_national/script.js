@@ -516,16 +516,28 @@ function CheckProductId(id)
 
 
 /////////////////////////////////// CUSTOMER ACCOUNT ////////////////////
+$(document).ready(function(){
+	if(get['msg']=='credit')
+	{
+		notifySuccess('Se ha <b>acreditado $'+get['amount']+'</b> en la cuenta corriente de <b>'+get['element']+'</b>');
+	}
+	
+	if(get['msg']=='debit')
+	{
+		notifySuccess('Se ha <b><span class="text-red">debitado</span> $'+get['amount']+'</b> en la cuenta corriente de <b>'+get['element']+'</b>');
+	}
+})
+
 $("#BtnCredit").click(function(){
 	if(validate.validateFields('new_credit'))
 	{
 		confirmText = " el cliente '<b>"+utf8_encode($("#cname").val())+"</b>'";
 
-		alertify.confirm(utf8_decode('¿Desea asignar un <span class="text-green">cr&eacute;dito</span> de <b>$'+$("#credit").val()+'</b> para'+confirmText+'?'), function(e){
+		alertify.confirm(utf8_decode('¿Desea asignar un <span class="text-green"><b>cr&eacute;dito</b></span> de <b>$'+$("#credit").val()+'</b> para'+confirmText+'?'), function(e){
 			if(e)
 			{
 				var process		= '../../library/processes/proc.common.php?object=Customer&action=Addcredit';
-				var target		= 'view.php?id='+get['id']+'&element='+utf8_encode($("#cname").val())+'&msg=credit';
+				var target		= 'view.php?id='+get['id']+'&element='+utf8_encode($("#cname").val())+'&msg=credit&amount='+$("#credit").val();
 				var haveData	= function(returningData)
 				{
 					$("input,select").blur();
@@ -548,11 +560,11 @@ $("#BtnDebit").click(function(){
 	{
 		confirmText = " el cliente '<b>"+utf8_encode($("#cname").val())+"</b>'";
 
-		alertify.confirm(utf8_decode('¿Desea asignar un <span class="text-red">d&eacute;bito</span> de <b>$'+$("#debit").val()+'</b> para'+confirmText+'?'), function(e){
+		alertify.confirm(utf8_decode('¿Desea asignar un <span class="text-red"><b>d&eacute;bito</b></span> de <b>$'+$("#debit").val()+'</b> para'+confirmText+'?'), function(e){
 			if(e)
 			{
 				var process		= '../../library/processes/proc.common.php?object=Customer&action=Adddebit';
-				var target		= 'view.php?id='+get['id']+'&element='+utf8_encode($("#cname").val())+'&msg=debit';
+				var target		= 'view.php?id='+get['id']+'&element='+utf8_encode($("#cname").val())+'&msg=debit&amount='+$("#debit").val();
 				var haveData	= function(returningData)
 				{
 					$("input,select").blur();
