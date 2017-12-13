@@ -857,5 +857,22 @@ public function MakeRegs($Mode="List")
 
         echo $HTML;
     }
+    
+    
+    public function Addcredit()
+    {
+    	$Amount = $_POST['credit'];
+    	$CustomerID = $_POST['cid'];
+    	$Concept = $_POST['credit_description'];
+    	Movement::InsertMovement($Amount,$CustomerID,4,$Concept,0,"F");
+    }
+    
+    public function Adddebit()
+    {
+    	$Amount = $_POST['debit'];
+    	$CustomerID = $_POST['cid'];
+    	$Concept = $_POST['debit_description'];
+    	Movement::InsertMovement($Amount,$CustomerID,3,$Concept,0,"F");
+    }
 }
 ?>

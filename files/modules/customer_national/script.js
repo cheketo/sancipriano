@@ -513,3 +513,59 @@ function CheckProductId(id)
 	})
 	return !exists;
 }
+
+
+/////////////////////////////////// CUSTOMER ACCOUNT ////////////////////
+$("#BtnCredit").click(function(){
+	if(validate.validateFields('new_credit'))
+	{
+		confirmText = " el cliente '<b>"+utf8_encode($("#cname").val())+"</b>'";
+
+		alertify.confirm(utf8_decode('¿Desea asignar un <span class="text-green">cr&eacute;dito</span> de <b>$'+$("#credit").val()+'</b> para'+confirmText+'?'), function(e){
+			if(e)
+			{
+				var process		= '../../library/processes/proc.common.php?object=Customer&action=Addcredit';
+				var target		= 'view.php?id='+get['id']+'&element='+utf8_encode($("#cname").val())+'&msg=credit';
+				var haveData	= function(returningData)
+				{
+					$("input,select").blur();
+					notifyError("Ha ocurrido un error durante el proceso de asignaci&oacute;n.");
+					console.log(returningData);
+				}
+				var noData		= function()
+				{
+					document.location = target;
+					
+				}
+				sumbitFields(process,haveData,noData);
+			}
+		});
+	}
+});
+
+$("#BtnDebit").click(function(){
+	if(validate.validateFields('new_debit'))
+	{
+		confirmText = " el cliente '<b>"+utf8_encode($("#cname").val())+"</b>'";
+
+		alertify.confirm(utf8_decode('¿Desea asignar un <span class="text-red">d&eacute;bito</span> de <b>$'+$("#debit").val()+'</b> para'+confirmText+'?'), function(e){
+			if(e)
+			{
+				var process		= '../../library/processes/proc.common.php?object=Customer&action=Adddebit';
+				var target		= 'view.php?id='+get['id']+'&element='+utf8_encode($("#cname").val())+'&msg=debit';
+				var haveData	= function(returningData)
+				{
+					$("input,select").blur();
+					notifyError("Ha ocurrido un error durante el proceso de asignaci&oacute;n.");
+					console.log(returningData);
+				}
+				var noData		= function()
+				{
+					document.location = target;
+					
+				}
+				sumbitFields(process,haveData,noData);
+			}
+		});
+	}
+});
