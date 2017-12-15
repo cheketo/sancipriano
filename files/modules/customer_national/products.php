@@ -8,8 +8,8 @@
     $Head->setTitle($Menu->GetTitle());
     $Head->setHead();
     
-    $ProductsQuery = $DB->fetchAssoc('product','product_id,title',"status='A'",'title');
-    $Products = $DB->fetchAssoc('relation_product_customer a JOIN product b ON (b.product_id=a.product_id)','a.*,b.title',"a.status='A' AND b.status='A' AND a.customer_id=".$ID,'b.title');
+    $ProductsQuery = $DB->fetchAssoc('product a JOIN product_brand b ON (b.brand_id=a.brand_id)',"a.product_id,CONCAT(a.title,' - ',b.name) AS title","a.status='A'",'a.title,b.name');
+    $Products = $DB->fetchAssoc('relation_product_customer a JOIN product b ON (b.product_id=a.product_id) JOIN product_brand c ON (c.brand_id=b.brand_id)','a.*,b.title,c.name AS brand',"a.status='A' AND b.status='A' AND a.customer_id=".$ID,'b.title');
     //print_r($Products);
     $HiddenClass = 'Hidden';
     if(count($Products)>0) $HiddenClass = '';
@@ -52,7 +52,7 @@
             <?php $Row = 1; foreach($Products as $Product) { ?>
                 <div class="row txC RelationRow" row="<?php echo $Row ?>">
 	                <div class="col-xs-12 col-sm-3 col-sm-offset-1">
-	                    <?php echo $Product['title'] ?>
+	                    <?php echo $Product['title']." - ".$Product['brand'] ?>
 	                    <input type="hidden" class="HiddenIDVal" name="id<?php echo $Row ?>" id="id<?php echo $Row ?>" value="<?php echo $Product['product_id'] ?>" />
 	                </div>
 	                <div class="col-xs-12 col-sm-3">

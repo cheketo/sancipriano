@@ -29,7 +29,7 @@ class CustomerOrder extends DataBase
 	{
 		if(empty($this->Items))
 		{
-			$this->Items = $this->fetchAssoc($this->Table."_item a LEFT JOIN product b ON (a.product_id = b.product_id) LEFT JOIN currency c ON (a.currency_id=c.currency_id) INNER JOIN product_size d ON (d.size_id=b.size_id)","a.*,(a.price * a.quantity) AS total,b.title,d.prefix AS size,d.decimal,c.prefix as currency,(a.quantity_delivered-a.quantity_returned) AS return_restriction",$this->TableID."=".$this->ID,'a.item_id');
+			$this->Items = $this->fetchAssoc($this->Table."_item a INNER JOIN product b ON (a.product_id = b.product_id) INNER JOIN currency c ON (a.currency_id=c.currency_id) INNER JOIN product_size d ON (d.size_id=b.size_id) INNER JOIN product_brand e ON (e.brand_id=b.brand_id)","a.*,(a.price * a.quantity) AS total,b.title,d.prefix AS size,d.decimal,c.prefix as currency,(a.quantity_delivered-a.quantity_returned) AS return_restriction,e.name AS brand",$this->TableID."=".$this->ID,'a.item_id');
 				//echo $this->lastQuery();
 		}
 		return $this->Items;
@@ -421,11 +421,15 @@ public function MakeRegs($Mode="List")
 	{
 		// ITEMS DATA
 		$Items = array();
+		$X=0;
 		for($I=1;$I<=$_POST['items'];$I++)
 		{
 			if($_POST['item_'.$I])
 			{
 				$Items[] = array('id'=>$_POST['item_'.$I],'price'=>$_POST['price_'.$I],'quantity'=>$_POST['quantity_'.$I]);
+				$Products[$X][0] = $_POST['item_'.$I];
+				$Products[$X][1] = $_POST['price_'.$I];
+				$X++;
 			}
 		}
 
@@ -455,18 +459,10 @@ public function MakeRegs($Mode="List")
 
 		$this->execQuery('insert','customer_order_item','order_id,customer_id,product_id,price,quantity,delivery_date,currency_id,creation_date,created_by,company_id',$Fields);
 		//echo $this->lastQuery();
-		if($Type=="N")
-		{
-			if($_POST['delivery_man'])
-				$this->Associate($NewID,$_POST['delivery_man']);
-
-			// INSERT MOVEMENT
-			// Movement::InsertMovement($Total,$CustomerID,1,$this->MovementConcept.$NewID,$NewID);
-		}else{
-			echo $NewID;
-			// INSERT MOVEMENT
-			// Movement::InsertMovement($Total,$CustomerID,1,'Compra en Local Nº'.$NewID,$NewID);
-		}
+		if($Type=="N" && $_POST['delivery_man'])
+			$this->Associate($NewID,$_POST['delivery_man']);
+			
+		Product::UpdateRelationByCustomer($CustomerID,$Products);
 	}
 
 	public function Update()
@@ -476,11 +472,15 @@ public function MakeRegs($Mode="List")
 
 		// ITEMS DATA
 		$Items = array();
+		$X=0;
 		for($I=1;$I<=$_POST['items'];$I++)
 		{
 			if($_POST['item_'.$I])
 			{
 				$Items[] = array('id'=>$_POST['item_'.$I],'price'=>$_POST['price_'.$I],'quantity'=>$_POST['quantity_'.$I]);
+				$Products[$X][0] = $_POST['item_'.$I];
+				$Products[$X][1] = $_POST['price_'.$I];
+				$X++;
 			}
 		}
 
@@ -513,14 +513,8 @@ public function MakeRegs($Mode="List")
 		}
 		$this->execQuery('insert','customer_order_item','order_id,customer_id,product_id,price,quantity,delivery_date,currency_id,creation_date,created_by,company_id',$Fields);
 		//echo $this->lastQuery();
-		if($Type=="N")
-		{
-			// UPDATE MOVEMENT
-			// Movement::UpdateMovementByOrderID($Total,$CustomerID,1,$this->MovementConcept.$ID,$ID);
-		}else{
-			// UPDATE MOVEMENT
-			//Movement::UpdateMovementByOrderID($Total,$CustomerID,1,'Compra en Local Nº'.$ID,$ID);
-		}
+		$Product = new Product();
+		$Product->UpdateRelationByCustomer($CustomerID,$Products);
 	}
 	
 	public function Associate($OrderID=0,$DeliveryManID=0)

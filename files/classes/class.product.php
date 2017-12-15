@@ -546,5 +546,41 @@ public function MakeRegs($Mode="List")
 			//echo $this->lastQuery();
 		}
 	}
+	
+	public function UpdateRelationByCustomer($CustomerID=0,$Products=array())
+	{
+		if($CustomerID)
+		{
+			$_POST['cid'] = $CustomerID;
+			$IsDistributor = $this->numRows("customer","*","type_id=4 AND customer_id=".$CustomerID);
+			$I=0;
+			if(!$IsDistributor)
+			{
+				$Relations = $this->fetchAssoc("relation_product_customer","product_id","status='A' AND customer_id=".$CustomerID);
+				foreach($Relations as $Relation)
+				{
+					$ProductsRelation[] = $Relation['product_id'];
+				}
+				foreach($Products as $Key=>$Product)
+				{
+					if(in_array($Product[0],$ProductsRelation))
+					{
+						$I++;
+						$_POST['id'.$I] = $Product[0];
+						$_POST['value'.$I] = $Product[1];
+					}
+				}
+			}else{
+				foreach($Products as $Key=>$Product)
+				{	
+					$I++;
+					$_POST['id'.$I] = $Product[0];
+					$_POST['value'.$I] = $Product[1];
+				}
+			}
+			$_POST['total'] = $I;
+			$this->Relationcustomer();
+		}
+	}
 }
 ?>
