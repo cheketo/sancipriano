@@ -579,7 +579,6 @@ public function MakeRegs($Mode="List")
 				}
 			}
 			$_POST['total'] = $I;
-			print_r($this);die();
 			$this->Relationcustomer();
 		}
 	}
