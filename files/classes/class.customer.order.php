@@ -461,8 +461,9 @@ public function MakeRegs($Mode="List")
 		//echo $this->lastQuery();
 		if($Type=="N" && $_POST['delivery_man'])
 			$this->Associate($NewID,$_POST['delivery_man']);
-			
-		Product::UpdateRelationByCustomer($CustomerID,$Products);
+		
+		$Product = new Product();
+		$Product->UpdateRelationByCustomer($CustomerID,$Products);
 	}
 
 	public function Update()
