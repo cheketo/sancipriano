@@ -561,13 +561,16 @@ public function MakeRegs($Mode="List")
 				{
 					$ProductsRelation[] = $Relation['product_id'];
 				}
-				foreach($Products as $Key=>$Product)
+				if(is_array($ProductsRelation))
 				{
-					if(in_array($Product[0],$ProductsRelation))
+					foreach($Products as $Key=>$Product)
 					{
-						$I++;
-						$_POST['id'.$I] = $Product[0];
-						$_POST['value'.$I] = $Product[1];
+						if(in_array($Product[0],$ProductsRelation))
+						{
+							$I++;
+							$_POST['id'.$I] = $Product[0];
+							$_POST['value'.$I] = $Product[1];
+						}
 					}
 				}
 			}else{
