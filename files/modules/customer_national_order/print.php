@@ -10,7 +10,14 @@
         $Date = DBDate($Data['delivery_date']);
     }else{
         // $Date = DBDate($Data['modification_date']);
-         $Date = DBDate($Data['delivery_date']);
+        if($Data['payment_status']=='F')
+        {
+            $PaymentDate = $DB->fetchAssoc('movement','creation_date','type_id=2 AND order_id='.$ID);
+            $Date = DBDate($PaymentDate[0]['creation_date']);
+        }else{
+            $Date = DBDate($Data['delivery_date']);
+        }
+        // print_r($Data);
     }
     
     ValidateID($Data['order_id']);
