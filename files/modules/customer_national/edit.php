@@ -33,7 +33,7 @@
               <div class="col-xs-12">
                 <span class="input-group">
                   <span class="input-group-addon"><i class="fa fa-building"></i></span>
-                  <?php echo insertElement('text','name',$Data['name'],'form-control',' placeholder="Nombre de la Empresa" validateEmpty="Ingrese un nombre." validateFromFile="../../library/processes/proc.common.php///El nombre ya existe///action:=validate///actualname:='.$Data['name'].'///object:=Customer" autofocus'); ?>
+                  <?php echo insertElement('text','name',htmlentities($Data['name']),'form-control',' placeholder="Nombre de la Empresa" validateEmpty="Ingrese un nombre." validateFromFile="../../library/processes/proc.common.php///El nombre ya existe///action:=validate///actualname:='.htmlentities($Data['name']).'///object:=Customer" autofocus'); ?>
                 </span>
               </div>
             </div>
