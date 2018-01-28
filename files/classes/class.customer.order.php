@@ -447,6 +447,8 @@ public function MakeRegs($Mode="List")
 		$Insert			= $this->execQuery('insert',$this->Table,'type,branch_id,customer_id,currency_id,extra,total,delivery_date,status,creation_date,created_by,company_id',"'".$Type."',".$BranchID.",".$CustomerID.",".$CurrencyID.",'".$Extra."',".$Total.",'".$Date."','".$Status."',NOW(),".$_SESSION['admin_id'].",".$_SESSION['company_id']);
 		//echo $this->lastQuery();
 		$NewID 		= $this->GetInsertId();
+		if($_POST['payorprint']=='Y')
+			echo $NewID;
 		$New 	= new CustomerOrder($NewID);
 
 		// INSERT ITEMS

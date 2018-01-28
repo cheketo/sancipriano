@@ -8,11 +8,7 @@
     $Status = $Edit->Data['status'];
     if($Status!='A')
     {
-        if (isset($_SERVER["HTTP_REFERER"])) {
-            header("Location: " . $_SERVER["HTTP_REFERER"].'&error=status');
-        }else{
-            header('Location: list.php?type=Y&status=A&error=status');
-        }
+        header('Location: list.php?type=Y&status=A&error=status');
 	    die();
     }
     

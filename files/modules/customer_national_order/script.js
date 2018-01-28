@@ -459,6 +459,8 @@ $(function(){
 							var target		= 'list.php?type='+$("#order_type").val()+'&status='+$("#status").val()+'&msg='+ $("#action").val();
 						else
 							var target		= 'list.php?type='+$("#order_type").val()+'&status='+status+'&msg='+ $("#action").val();
+						if(BtnID=="BtnPrint" && !get['id'])
+							$('#payorprint').val('Y');
 					}else{
 						if(BtnID=="BtnCreateNext")
 							var target		= 'new.php?type='+$("#order_type").val()+'&msg='+ $("#action").val();
@@ -467,7 +469,13 @@ $(function(){
 							{
 								var stateObj = { url: "list.php?status=A&type=Y" };
 								window.history.pushState(stateObj, "Ordenes en Local",stateObj.url);
-								var target		= 'payment.php?id='+get['id']+'&msg='+ $("#action").val();
+								if(get['id'])
+								{
+									var target		= 'payment.php?id='+get['id']+'&msg='+ $("#action").val();
+								}else{
+									$('#payorprint').val('Y');
+									//var target		= 'list.php?payment=yes&type='+$("#order_type").val()+'&status='+$("#status").val()+'&msg='+ $("#action").val();
+								}
 							}
 						}
 					}
@@ -487,12 +495,8 @@ $(function(){
 								// }
 								if(BtnID=="BtnPay")
 								{
-									// Change browser to emulate cancel button in payment page
-									//var stateObj = { url: "list.php?status=A&type=Y" };
-									//window.history.pushState(stateObj, "Ordenes en Local",stateObj.url);
-									//console.log(window.history.state);
+									console.log(returningData);
 									document.location = 'payment.php?id='+returningData+'&msg='+ $("#action").val();
-									//console.log('payment.php?id='+returningData+'&msg='+ $("#action").val());
 								}else{
 									if(BtnID=="BtnPrint")
 										print = "&print="+returningData;
@@ -502,14 +506,11 @@ $(function(){
 								
 							}
 						}
-						console.log(returningData);
 					}
 					var noData		= function()
 					{
 						if(BtnID=="BtnPrint")
 							print = "&print="+get['id'];
-						// 	$('<a href="print.php?id='+get['id']+'&msg='+ $("#action").val()+'" target="_blank"></a>')[0].click();
-							//window.open('print.php?id='+get['id']+'&msg='+ $("#action").val(),'_blank');
 						document.location = target+print;
 					}
 					sumbitFields(process,haveData,noData);
@@ -1088,6 +1089,8 @@ $(function(){
 
 function calculateFinalBalanceReturn()
 {
+	if($("#initial_balance").length)
+	{
 		var initialBalance = parseFloat($("#initial_balance").val());
 		var total = parseFloat($("#total_price").val());
 		var finalBalance = initialBalance + total;
@@ -1102,6 +1105,5 @@ function calculateFinalBalanceReturn()
 		}
 		
 		$("#FinalBalance").html('$ '+(finalBalance*-1).toFixed(2));
-
-	
+	}
 }

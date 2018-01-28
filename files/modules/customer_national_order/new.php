@@ -32,6 +32,7 @@
             <?php //echo insertElement("hidden","total_items","1"); ?>
             <?php echo insertElement("hidden","items","1"); ?>
             <?php echo insertElement("hidden","order"); ?>
+            <?php echo insertElement("hidden","payorprint"); ?>
             <h4 class="subTitleB"><i class="fa fa-building"></i> Cliente</h4>
             <div class="row form-group inline-form-custom">
               <div class="col-xs-12">
