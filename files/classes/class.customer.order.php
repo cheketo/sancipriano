@@ -30,7 +30,7 @@ class CustomerOrder extends DataBase
 		if(empty($this->Items))
 		{
 			$this->Items = $this->fetchAssoc($this->Table."_item a INNER JOIN product b ON (a.product_id = b.product_id) INNER JOIN currency c ON (a.currency_id=c.currency_id) INNER JOIN product_size d ON (d.size_id=b.size_id) INNER JOIN product_brand e ON (e.brand_id=b.brand_id)","a.*,(a.price * a.quantity) AS total,b.title,d.prefix AS size,d.decimal,c.prefix as currency,(a.quantity_delivered-a.quantity_returned) AS return_restriction,e.name AS brand",$this->TableID."=".$this->ID,'a.item_id');
-				//echo $this->lastQuery();
+				// echo $this->lastQuery();
 		}
 		return $this->Items;
 	}
@@ -672,55 +672,57 @@ public function MakeRegs($Mode="List")
 			// $Branch 	= $this->fetchAssoc('customer_branch','customer_id',"branch_id=".$_POST['customer']);
 			$Customer	= new Customer($_POST['customer']);
 			$Prices = array();
-			$Product = new Product();
 			foreach($Products as $Item)
 			{
+				$Product = new Product($Item['product_id']);
 				//print_r($Item);
-				$RelationPrice = $Product->GetProductPrice($Item['product_id'],$_POST['customer']);
-				if(!$RelationPrice)
-				{
-					$Cost		= $Item['cost'];
-					$Variation  = $Item['variation_id']==1? "percentage":"price";
-					if(intval($Customer->Data['type_id'])<4)
-					{
-						if(!$Item['additional_price_wholesaler'])
-						{
-							$Category = $this->fetchAssoc('product_category',"*","status='A' AND (additional_price_wholesaler<>0 OR additional_percentage_wholesaler<>0) AND category_id=".$Item['category_id']);
-							$Item['additional_price_wholesaler'] = $Category[0]['additional_price_wholesaler'];
-							$Item['additional_percentage_wholesaler'] = $Category[0]['additional_percentage_wholesaler'];
-							$Item['additional_price_retailer'] = $Category[0]['additional_price_retailer'];
-							$Item['additional_percentage_retailer'] = $Category[0]['additional_percentage_retailer'];
-						}
+				// $RelationPrice = $Product->GetProductPrice($Item['product_id'],$_POST['customer'],$Customer->Data['type_id']);
+				// if(!$RelationPrice)
+				// {
+				// 	$Cost		= $Item['cost'];
+				// 	$Variation  = $Item['variation_id']==1? "percentage":"price";
+				// 	if(intval($Customer->Data['type_id'])<4)
+				// 	{
+				// 		if(!$Item['additional_price_wholesaler'])
+				// 		{
+				// 			$Category = $this->fetchAssoc('product_category',"*","status='A' AND (additional_price_wholesaler<>0 OR additional_percentage_wholesaler<>0) AND category_id=".$Item['category_id']);
+				// 			$Item['additional_price_wholesaler'] = $Category[0]['additional_price_wholesaler'];
+				// 			$Item['additional_percentage_wholesaler'] = $Category[0]['additional_percentage_wholesaler'];
+				// 			$Item['additional_price_retailer'] = $Category[0]['additional_price_retailer'];
+				// 			$Item['additional_percentage_retailer'] = $Category[0]['additional_percentage_retailer'];
+				// 		}
 	
-						if(!$Item['additional_price_wholesaler'])
-						{
-							$Config	= $this->fetchAssoc('product_configuration','*',"status='A' AND company_id=".$_SESSION['company_id'],'creation_date DESC');
-							$Item['additional_price_wholesaler'] = $Config[0]['additional_price_wholesaler'];
-							$Item['additional_percentage_wholesaler'] = $Config[0]['additional_percentage_wholesaler'];
-							$Item['additional_price_retailer'] = $Config[0]['additional_price_retailer'];
-							$Item['additional_percentage_retailer'] = $Config[0]['additional_percentage_retailer'];
-						}
-						if(intval($Customer->Data['type_id'])==1)
-							$Field = $Item["additional_".$Variation."_retailer"];
-						else
-							$Field = $Item["additional_".$Variation."_wholesaler"];
-					}else{
-						$Price = $this->fetchAssoc("customer_order_item","price","customer_id=".intval($_POST['customer'])." AND product_id=".$Item['product_id'],"creation_date DESC");
-						// echo $this->lastQuery()." - ";
-						// print_r($Price);
-						$Field = $Price[0]['price']-$Cost;
-						if($Field<1)
-							$Field	= $Customer->Data['additional_'.$Variation];
-						else
-							$Variation = "price";
-					}
+				// 		if(!$Item['additional_price_wholesaler'])
+				// 		{
+				// 			$Config	= $this->fetchAssoc('product_configuration','*',"status='A' AND company_id=".$_SESSION['company_id'],'creation_date DESC');
+				// 			$Item['additional_price_wholesaler'] = $Config[0]['additional_price_wholesaler'];
+				// 			$Item['additional_percentage_wholesaler'] = $Config[0]['additional_percentage_wholesaler'];
+				// 			$Item['additional_price_retailer'] = $Config[0]['additional_price_retailer'];
+				// 			$Item['additional_percentage_retailer'] = $Config[0]['additional_percentage_retailer'];
+				// 		}
+				// 		if(intval($Customer->Data['type_id'])==1)
+				// 			$Field = $Item["additional_".$Variation."_retailer"];
+				// 		else
+				// 			$Field = $Item["additional_".$Variation."_wholesaler"];
+				// 	}else{
+				// 		$Price = $this->fetchAssoc("customer_order_item","price","customer_id=".intval($_POST['customer'])." AND product_id=".$Item['product_id'],"creation_date DESC");
+				// 		// echo $this->lastQuery()." - ";
+				// 		// print_r($Price);
+				// 		$Field = $Price[0]['price']-$Cost;
+				// 		if($Field<1)
+				// 			$Field	= $Customer->Data['additional_'.$Variation];
+				// 		else
+				// 			$Variation = "price";
+				// 	}
 	
-					$AdditionalPrice = $Variation=="percentage"? ($Cost*$Field)/100 : $Field ;
-					$Price = $Cost + $AdditionalPrice;
-					$Prices[] = round($Price);
-				}else{
-					$Prices[] = $RelationPrice;
-				}
+				// 	$AdditionalPrice = $Variation=="percentage"? ($Cost*$Field)/100 : $Field ;
+				// 	$Price = $Cost + $AdditionalPrice;
+				// 	$Prices[] = round($Price);
+				// }else{
+				// 	$Prices[] = $RelationPrice;
+				// }
+				
+				$Prices[] = $Product->GetProductPrice($_POST['customer'],$Customer->Data['type_id']);
 			}
 		}
 		echo implode(",",$Prices);

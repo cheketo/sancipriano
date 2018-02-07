@@ -11,6 +11,11 @@
     $Head->setHead();
     
     $Variation = $DB->fetchAssoc('product_variation','variation_id,title');
+    // $CustomerTypes = $DB->fetchAssoc("customer_type a LEFT JOIN relation_product_customer_type b ON (b.type_id=a.type_id)","a.*,b.additional_amount,b.additional_percentage","a.status='A' OR (a.status='A' AND b.status='A' AND b.product_id=".$ID.")","a.type_id","b.product_id,a.type_id");
+    $CustomerTypes = $DB->fetchAssoc("customer_type","*","status='A'","type_id");
+    $ProductCustomerRelations = $DB->fetchAssoc('relation_product_customer_type','*',"product_id=".$ID);
+    echo $DB->lastQuery();
+    // echo $DB->lastQuery();
     
     $AmountClass = $PercentClass = 'Hidden';
     
@@ -92,7 +97,7 @@
   <!-- ////////// SECOND SCREEN ////////////////// -->
   <div class="ProductDetails box animated fadeIn">
     <div class="box-header flex-justify-center">
-      <div class="col-md-6 ">
+      <div class="col-xs-12">
         <div class="innerContainer">
           <h4 class="subTitleB"><i class="fa fa-cube"></i> Detalles del Art&iacute;culo</h4>
           
@@ -127,35 +132,50 @@
               </div>
             </div>
             
-      
             <div id="PricePercentage" class="row form-group inline-form-custom <?php echo $PercentClass; ?>">
-              <div class="col-xs-12 col-sm-4 txR">
-                Porcentaje Minorista:
+              <?php
+                $I=0;
+                foreach($CustomerTypes as $CustomerType)
+                {
+                  $I++;
+                  $Percentage='';
+                  foreach($ProductCustomerRelations as $Relation)
+                  {
+                    if($Relation['type_id']==$CustomerType['type_id'])
+                      $Percentage = $Relation['additional_percentage'];
+                  }
+              ?>
+              <div class="col-xs-12 col-sm-3 txR">
+                Porcentaje <?php echo $CustomerType['name'];?>:
+                <?php echo insertElement("hidden","type".$I,$CustomerType['type_id']);?>
               </div>
               <div class="col-xs-12 col-sm-2">
-                <?php echo insertElement('text','percentage_retailer',$Data['additional_percentage_retailer'],'form-control priceInput ProductVariation PercentageField','placeholder="Sin Especificar" data-inputmask="\'alias\': \'numeric\', \'groupSeparator\': \'\', \'autoGroup\': true, \'digits\': 2, \'digitsOptional\': false, \'placeholder\': \'0\'"') ?>
+                <?php echo insertElement('text','additional_percentage'.$I,$Percentage,'form-control priceInput ProductVariation PercentageField','placeholder="Heredar" data-inputmask="\'alias\': \'numeric\', \'groupSeparator\': \'\', \'autoGroup\': true, \'digits\': 2, \'digitsOptional\': false, \'placeholder\': \'0\'"'); ?>
               </div>
-              <div class="col-xs-12 col-sm-4 txR">
-                Porcentaje Mayorista:
-              </div>
-              <div class="col-xs-12 col-sm-2">
-                <?php echo insertElement('text','percentage_wholesaler',$Data['additional_percentage_wholesaler'],'form-control priceInput ProductVariation PercentageField','placeholder="Sin Especificar" data-inputmask="\'alias\': \'numeric\', \'groupSeparator\': \'\', \'autoGroup\': true, \'digits\': 2, \'digitsOptional\': false, \'placeholder\': \'0\'"') ?>
-              </div>
+              <?php }  ?>
+              <?php echo insertElement("hidden","total_types",$I);?>
             </div>
             
             <div id="PriceAmount" class="row form-group inline-form-custom <?php echo $AmountClass; ?>">
-              <div class="col-xs-12 col-sm-4 txR">
-                Adicional Minorista:
+              <?php 
+                  $I=0;
+                  foreach($CustomerTypes as $CustomerType)
+                  {  
+                    $I++;
+                    $Amount='';
+                    foreach($ProductCustomerRelations as $Relation)
+                    {
+                      if($Relation['type_id']==$CustomerType['type_id'])
+                        $Amount = $Relation['additional_amount'];
+                    }
+              ?>
+              <div class="col-xs-12 col-sm-3 txR">
+                Adicional <?php echo $CustomerType['name'];?>:
               </div>
               <div class="col-xs-12 col-sm-2">
-                <?php echo insertElement('text','amount_retailer',$Data['additional_price_retailer'],'form-control priceInput ProductVariation AmountField' ,'placeholder="Sin Especificar" data-inputmask="\'alias\': \'numeric\', \'groupSeparator\': \'\', \'autoGroup\': true, \'digits\': 2, \'digitsOptional\': false, \'placeholder\': \'0\'"') ?>
+                <?php echo insertElement('text','additional_amount'.$I,$Amount,'form-control priceInput ProductVariation AmountField' ,'placeholder="Heredar" data-inputmask="\'alias\': \'numeric\', \'groupSeparator\': \'\', \'autoGroup\': true, \'digits\': 2, \'digitsOptional\': false, \'placeholder\': \'0\'"') ?>
               </div>
-              <div class="col-xs-12 col-sm-4 txR">
-                Adicional Mayorista:
-              </div>
-              <div class="col-xs-12 col-sm-2">
-                <?php echo insertElement('text','amount_wholesaler',$Data['additional_price_wholesaler'],'form-control priceInput ProductVariation AmountField','placeholder="Sin Especificar" data-inputmask="\'alias\': \'numeric\', \'groupSeparator\': \'\', \'autoGroup\': true, \'digits\': 2, \'digitsOptional\': false, \'placeholder\': \'0\'"') ?>
-              </div>
+              <?php }  ?>
             </div>
             
             

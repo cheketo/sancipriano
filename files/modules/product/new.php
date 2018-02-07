@@ -9,6 +9,7 @@
     include('../../includes/inc.top.php');
     
     $Variation = $DB->fetchAssoc('product_variation','variation_id,title');
+    $CustomerTypes = $DB->fetchAssoc("customer_type","*","status='A'","type_id");
     
     // HIDDEN ELEMENTS
     echo insertElement("hidden","action",'insert');
@@ -76,7 +77,7 @@
   <!-- ////////// SECOND SCREEN ////////////////// -->
   <div class="ProductDetails box animated fadeIn Hidden">
     <div class="box-header flex-justify-center">
-      <div class="col-md-6 ">
+      <div class="col-xs-12">
         <div class="innerContainer">
           <h4 class="subTitleB"><i class="fa fa-cube"></i> Detalles del Art&iacute;culo</h4>
           
@@ -108,33 +109,37 @@
             </div>
             
             <div id="PricePercentage" class="row form-group inline-form-custom Hidden">
-              <div class="col-xs-12 col-sm-4 txR">
-                Porcentaje Minorista:
+              <?php
+                $I=0;
+                foreach($CustomerTypes as $CustomerType)
+                {
+                    $I++;
+              ?>
+              <div class="col-xs-12 col-sm-3 txR">
+                Porcentaje <?php echo $CustomerType['name'];?>:
+                <?php echo insertElement("hidden","type".$I,$CustomerType['type_id']);?>
               </div>
               <div class="col-xs-12 col-sm-2">
-                <?php echo insertElement('text','percentage_retailer','','form-control priceInput ProductVariation PercentageField','placeholder="Sin Especificar" data-inputmask="\'alias\': \'numeric\', \'groupSeparator\': \'\', \'autoGroup\': true, \'digits\': 2, \'digitsOptional\': false, \'placeholder\': \'0\'"') ?>
+                <?php echo insertElement('text','additional_percentage'.$I,'','form-control priceInput ProductVariation PercentageField','placeholder="Heredar" data-inputmask="\'alias\': \'numeric\', \'groupSeparator\': \'\', \'autoGroup\': true, \'digits\': 2, \'digitsOptional\': false, \'placeholder\': \'0\'"'); ?>
               </div>
-              <div class="col-xs-12 col-sm-4 txR">
-                Porcentaje Mayorista:
-              </div>
-              <div class="col-xs-12 col-sm-2">
-                <?php echo insertElement('text','percentage_wholesaler','','form-control priceInput ProductVariation PercentageField','placeholder="Sin Especificar" data-inputmask="\'alias\': \'numeric\', \'groupSeparator\': \'\', \'autoGroup\': true, \'digits\': 2, \'digitsOptional\': false, \'placeholder\': \'0\'"') ?>
-              </div>
+              <?php }  ?>
+              <?php echo insertElement("hidden","total_types",$I);?>
             </div>
             
             <div id="PriceAmount" class="row form-group inline-form-custom Hidden">
-              <div class="col-xs-12 col-sm-4 txR">
-                Adicional Minorista:
+              <?php 
+                  $I=0;
+                  foreach($CustomerTypes as $CustomerType)
+                  {  
+                    $I++;
+              ?>
+              <div class="col-xs-12 col-sm-3 txR">
+                Adicional <?php echo $CustomerType['name'];?>:
               </div>
               <div class="col-xs-12 col-sm-2">
-                <?php echo insertElement('text','amount_retailer','','form-control priceInput ProductVariation AmountField' ,'placeholder="Sin Especificar" data-inputmask="\'alias\': \'numeric\', \'groupSeparator\': \'\', \'autoGroup\': true, \'digits\': 2, \'digitsOptional\': false, \'placeholder\': \'0\'"') ?>
+                <?php echo insertElement('text','additional_amount'.$I,'','form-control priceInput ProductVariation AmountField' ,'placeholder="Heredar" data-inputmask="\'alias\': \'numeric\', \'groupSeparator\': \'\', \'autoGroup\': true, \'digits\': 2, \'digitsOptional\': false, \'placeholder\': \'0\'"') ?>
               </div>
-              <div class="col-xs-12 col-sm-4 txR">
-                Adicional Mayorista:
-              </div>
-              <div class="col-xs-12 col-sm-2">
-                <?php echo insertElement('text','amount_wholesaler','','form-control priceInput ProductVariation AmountField','placeholder="Sin Especificar" data-inputmask="\'alias\': \'numeric\', \'groupSeparator\': \'\', \'autoGroup\': true, \'digits\': 2, \'digitsOptional\': false, \'placeholder\': \'0\'"') ?>
-              </div>
+              <?php }  ?>
             </div>
             
             <div class="row form-group inline-form-custom">

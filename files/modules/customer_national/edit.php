@@ -145,7 +145,7 @@
           </div>
           <hr>
           <div class="row txC">
-            <button type="button" class="btn btn-success btnGreen" id="BtnCreate"><i class="fa fa-pencil"></i> Editar Proveedor</button>
+            <button type="button" class="btn btn-success btnGreen" id="BtnCreate"><i class="fa fa-pencil"></i> Editar Cliente</button>
             <button type="button" class="btn btn-error btnRed" id="BtnCancel"><i class="fa fa-times"></i> Cancelar</button>
           </div>
         </div>
