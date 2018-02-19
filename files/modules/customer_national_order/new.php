@@ -95,7 +95,7 @@
                   </div>
                   <div class="col-sm-2 col-xs-6 txC">
                     <span id="Price1" class="Hidden ItemText1"></span>
-                    <?php echo insertElement('text','price_1','','ItemField1 form-control calcable txC','data-inputmask="\'mask\': \'9{+}.99\'" placeholder="Precio" validateEmpty="Ingrese un precio"'); ?>
+                    <?php echo insertElement('text','price_1','','ItemField1 form-control calcable txC OrderItemMask','data-inputmask="\'mask\': \'9{+}.99\'" placeholder="Precio" validateEmpty="Ingrese un precio"'); ?>
                   </div>
                   <div class="col-sm-2 col-xs-6 txC">
                     <span id="Quantity1" class="Hidden ItemText1"></span>

@@ -66,6 +66,7 @@ $(document).ready(function(){
 	deleteItem();
 	setDatePicker();
 	priceImputMask(1);
+	orderItemMask();
 	
 	if($('.chosenSelect').length>0)
 	{
@@ -227,6 +228,14 @@ function priceImputMask(id)
 	});	
 }
 
+function orderItemMask()
+{
+	$(".OrderItemMask").change(function(){
+		var number = $(this).val();
+		$(this).val(number.replace("_","0"));
+	});
+}
+
 //////////////////////////// ORDER ITEMS //////////////////////////////////
 function addOrderItem()
 {
@@ -256,6 +265,7 @@ function addOrderItem()
 	                countItems();
 	                calculateRowPrice();
 	                priceImputMask(id);
+	                orderItemMask();
 	                updateRowBackground();
 	                recalculateItemPrice();
 	                calculateTotalOrderPrice();
