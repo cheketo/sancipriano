@@ -168,6 +168,7 @@ function deleteElement(element)
             if(data)
             {
                 result = false;
+                console.log(data);
             }else{
                 grid.remove();
 			    row.remove();

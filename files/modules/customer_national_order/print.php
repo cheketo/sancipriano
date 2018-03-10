@@ -14,6 +14,8 @@
         {
             $PaymentDate = $DB->fetchAssoc('movement','creation_date','type_id=2 AND order_id='.$ID);
             $Date = DBDate($PaymentDate[0]['creation_date']);
+            if(!$Date)
+                $Date = DBDate($Data['delivery_date']);
         }else{
             $Date = DBDate($Data['delivery_date']);
         }
