@@ -472,7 +472,13 @@ public function MakeRegs($Mode="List")
 	{
 		$ID 	= $_POST['id'];
 		$Edit	= new CustomerOrder($ID);
-
+		
+		if($Edit->Data['delivery_id']>0)
+		{
+			$Delivery = new CustomerDeliveryOrder();
+			$Delivery->RemoveOrderItemsToDelivery($ID,$Edit->Data['delivery_id']);
+		}
+		
 		// ITEMS DATA
 		$Items = array();
 		$X=0;
@@ -552,13 +558,18 @@ public function MakeRegs($Mode="List")
 						$Position = $MaxPosition[0]['position'];
 				}
 				
-				if($Order['delivery_id']>0)
+				$Delivery = new CustomerDeliveryOrder();
+				$Delivery->AddOrderItemsToDelivery($Order['order_id'],$DeliveryID);
+				if($Order['delivery_id']>0 && $DeliveryID!=$Order['delivery_id'])
 				{
 					//$this->execQuery('DELETE','customer_delivery',"delivery_id NOT IN (SELECT delivery_id FROM customer_order) AND delivery_id <> ".$DeliveryID);
+					$Delivery->RemoveOrderItemsToDelivery($Order['order_id'],$Order['delivery_id']);
 					$OldDelivery = $this->fetchAssoc($this->Table,'*'," order_id<>".$Order['order_id']." AND delivery_id=".$Order['delivery_id']);
 					if(!count($OldDelivery)>0)
 					{
 						$this->execQuery('DELETE','customer_delivery','delivery_id='.$Order['delivery_id']);
+						$this->execQuery('DELETE','customer_delivery_item','delivery_id='.$Order['delivery_id']);
+						$this->execQuery('DELETE','relation_delivery_order','delivery_id='.$Order['delivery_id']);
 					}
 				}
 				$this->execQuery('update',$this->Table,"status='".$Status."', type='N', updated_by=".$_SESSION['admin_id'].", delivery_id=".$DeliveryID.",position=".$Position,'order_id='.$Order['order_id']);

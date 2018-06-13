@@ -14,6 +14,7 @@ if($(".delivery_date").length>0)
 	};
 }
 
+//////////////// ONLY FOR PRINT //////////////////////
 $(document).ready(function(){
 	
 	if($("#customer").val()!='')

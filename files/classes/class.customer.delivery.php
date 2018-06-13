@@ -25,7 +25,9 @@ class CustomerDelivery extends DataBase
 	{
 		if(empty($this->Data['orders']))
 		{
-			$this->Data['orders'] = $this->fetchAssoc("customer_order a LEFT JOIN customer b ON (a.customer_id=b.customer_id) LEFT JOIN currency c ON (a.currency_id=c.currency_id)","a.*,b.name,SUM(a.total) AS total_price,c.prefix AS currency",$this->TableID."=".$this->ID,'a.position','a.order_id');
+			$this->Data['orders'] = $this->fetchAssoc("relation_delivery_order p JOIN customer_order a ON (a.order_id=p.order_id) LEFT JOIN customer b ON (b.customer_id=a.customer_id) LEFT JOIN currency c ON (a.currency_id=c.currency_id)","a.*,b.name,SUM(a.total) AS total_price,c.prefix AS currency","p.status<>'I' AND p.".$this->TableID."=".$this->ID,'a.position','a.order_id');
+			$this->Data['orders'] = array_merge($this->Data['orders'],$this->fetchAssoc("relation_delivery_order p JOIN customer_delivery_order a ON (a.order_id=p.order_id AND a.delivery_id=".$this->ID.") LEFT JOIN customer b ON (b.customer_id=a.customer_id) LEFT JOIN currency c ON (a.currency_id=c.currency_id)","a.*,b.name,SUM(a.total) AS total_price,c.prefix AS currency","p.status='I' AND p.".$this->TableID."=".$this->ID,'a.position','a.order_id'));
+			//echo $this->lastQuery();
 			$this->Data['total'] = count($this->Data['orders']);
 			foreach($this->Data['orders'] as $Order)
 			{
@@ -46,7 +48,7 @@ class CustomerDelivery extends DataBase
 	{
 		if(!$this->Data['products'])
 		{
-			$this->Data['products'] = $this->fetchAssoc("customer_order_item a INNER JOIN customer_order b ON (a.order_id=b.order_id) INNER JOIN product c ON (c.product_id=a.product_id) INNER JOIN product_size d ON (c.size_id=d.size_id)",
+			$this->Data['products'] = $this->fetchAssoc("customer_order_item a INNER JOIN relation_delivery_order b ON (a.order_id=b.order_id AND b.status<>'I') INNER JOIN product c ON (c.product_id=a.product_id) INNER JOIN product_size d ON (c.size_id=d.size_id)",
 			"a.product_id,b.delivery_id,c.title,SUM(a.quantity) as quantity, SUM(a.quantity * a.price) AS total,d.prefix AS unit",
 			"b.delivery_id=".$this->ID,'',"a.product_id");	
 		}
@@ -139,28 +141,37 @@ public function MakeRegs($Mode="List")
 					$TotalTitle = 'Inicial';
 					$PrintHTML = '';
 				}
-				
-				switch ($Order['status'])
+				if($Order['delivery_id']==$Row->Data['delivery_id'])
 				{
-					case 'P':
-						if($Row->Data['status']=='A')
-							$OrderStatus = 'Pendiente de Carga';
-						else
-							$OrderStatus = 'Pendiente';
-						$OrderLabel = 'primary';
-					break;
-					case 'A':
-						$OrderStatus = 'Pendiente de Entrega';
-						$OrderLabel = 'warning';
-					break;
-					case 'F':
-						$OrderStatus = 'Entregado';
-						$OrderLabel = 'success';
-					break;
-					case 'V':
-						$OrderStatus = 'Vencido';
-						$OrderLabel = 'danger';
-					break;
+					switch ($Order['status'])
+					{
+						case 'P':
+							if($Row->Data['status']=='A')
+								$OrderStatus = 'Pendiente de Carga';
+							else
+								$OrderStatus = 'Pendiente';
+							$OrderLabel = 'primary';
+						break;
+						case 'A':
+							$OrderStatus = 'Pendiente de Entrega';
+							$OrderLabel = 'warning';
+						break;
+						case 'F':
+							$OrderStatus = 'Entregado';
+							$OrderLabel = 'success';
+						break;
+						case 'C':
+							$OrderStatus = 'Cancelado';
+							$OrderLabel = 'danger';
+						break;
+						case 'V':
+							$OrderStatus = 'Vencido';
+							$OrderLabel = 'danger';
+						break;
+					}
+				}else{
+					$OrderStatus = 'No Entregado';
+					$OrderLabel = 'danger';
 				}
 				
 				$DeliveryTotal += $OrderTotal;
@@ -321,7 +332,7 @@ public function MakeRegs($Mode="List")
 	public function ConfigureSearchRequest()
 	{
 		//$this->SetTable($this->Table.' a LEFT JOIN customer_order_item b ON (b.order_id=a.order_id) LEFT JOIN product c ON (b.product_id = c.product_id) LEFT JOIN customer_branch d ON (d.customer_id=a.customer_id)');
-		$this->SetTable($this->Table.' a LEFT JOIN customer_order b ON (b.delivery_id=a.delivery_id) LEFT JOIN customer_order_item c ON (c.order_id=b.order_id) LEFT JOIN product d ON (c.product_id = d.product_id) LEFT JOIN customer e ON (e.customer_id=b.customer_id)');
+		$this->SetTable($this->Table.' a LEFT JOIN customer_order b ON (b.delivery_id=a.delivery_id) LEFT JOIN customer_order_item c ON (c.order_id=b.order_id) LEFT JOIN product d ON (c.product_id = d.product_id) LEFT JOIN customer e ON (e.customer_id=b.customer_id) LEFT JOIN customer_delivery_order f ON (f.delivery_id=a.delivery_id) LEFT JOIN customer_delivery_order_item g ON (g.order_id=b.order_id AND g.delivery_id=a.delivery_id)');
 		$this->SetFields('a.delivery_id,b.order_id,b.type,b.total,b.extra,b.status,b.payment_status,b.delivery_status,e.name as customer');
 		$this->SetWhere("a.company_id=".$_SESSION['company_id']);
 		//$this->AddWhereString(" AND c.company_id = a.company_id");
@@ -441,9 +452,14 @@ public function MakeRegs($Mode="List")
 			
 			//SET DELIVERY ID TO ORDERS AND POSITION
 			$Position = 1;
+			$Delivery = new CustomerDeliveryOrder();
 			foreach($Orders as $OrderID)
 			{
+				$OrderDelivery = $this -> fetchAssoc('customer_order','delivery_id','order_id='.$OrderID);
+				if($OrderDelivery[0]['delivery_id']!=$ID)
+					$Delivery -> RemoveOrderItemsToDelivery($OrderID,$OrderDelivery[0]['delivery_id']);
 				$this->execQuery('UPDATE','customer_order',"delivery_date = '".$DeliveryDate."', position=".$Position.", status='A', delivery_id = ".$NewID,"order_id=".$OrderID);
+				$Delivery->AddOrderItemsToDelivery($OrderID,$NewID);
 				$Position++;
 			}
 			//DELETE REGS THAT DOESN'T HAVE ORDERS ASSOCIATED
@@ -460,8 +476,12 @@ public function MakeRegs($Mode="List")
 		$Orders			= explode(",",$_POST['orders']);
 		$Extra			= $_POST['extra'];
 		
+		
 		if(!empty($Orders))
 		{
+			$Delivery = new CustomerDeliveryOrder();
+			$Delivery -> RemoveAllOrdersFromDelivery($ID);
+		
 			//UPDATE DELIVERY
 			$this->execQuery('UPDATE',$this->Table,"extra='".$Extra."', delivery_date='".$DeliveryDate."', delivery_man_id=".$DeliveryManID,"delivery_id=".$ID);
 			
@@ -472,11 +492,15 @@ public function MakeRegs($Mode="List")
 			$Position = 1;
 			foreach($Orders as $OrderID)
 			{
+				$OrderDelivery = $this -> fetchAssoc('customer_order','delivery_id','order_id='.$OrderID);
+				if($OrderDelivery[0]['delivery_id']!=$ID)
+					$Delivery -> RemoveOrderItemsToDelivery($OrderID,$OrderDelivery[0]['delivery_id']);
 				$this->execQuery('UPDATE','customer_order',"delivery_date = '".$DeliveryDate."', position=".$Position.", status='A', delivery_id = ".$ID,"order_id=".$OrderID);
+				$Delivery->AddOrderItemsToDelivery($OrderID,$ID);
 				$Position++;
 			}
 			//DELETE REGS THAT DOESN'T HAVE ORDERS ASSOCIATED
-			$this->execQuery("DELETE",$this->Table," delivery_id NOT IN (SELECT delivery_id FROM customer_order)");
+			$this->execQuery("DELETE",$this->Table," delivery_id NOT IN (SELECT delivery_id FROM relation_delivery_order WHERE (status='A' OR status='F')");
 			
 		}
 	}
@@ -714,8 +738,78 @@ public function MakeRegs($Mode="List")
 	
 	public static function CheckExpired($DB)
 	{
+		self::InsertExpiredDeliveryOrders($DB);
+		// UPDATE ORDERS AND DELIVERY
 		$DB->execQuery('UPDATE','customer_delivery',"status='V'","delivery_date<'".date("Y-m-d")."' AND status IN ('A','P')");
-		$DB->execQuery('UPDATE','customer_order',"status='V',delivery_status='P'","delivery_date<'".date("Y-m-d")."' AND status IN ('A','P') AND type='N'");
+		$DB->execQuery('UPDATE','customer_order',"status='V',delivery_status='P',delivery_id=0","delivery_date<'".date("Y-m-d")."' AND status IN ('A','P') AND type='N'");
+	}
+	
+	public static function InsertExpiredDeliveryOrders($DB)
+	{
+		$Orders = $DB->fetchAssoc("customer_order a JOIN customer_delivery b ON (b.delivery_id = a.delivery_id AND b.delivery_date<'".date("Y-m-d")."' AND b.status IN ('A','P'))","a.*");
+		foreach ($Orders as $Order)
+		{
+			if($Order['delivery_id'])
+			{
+				$Order['status'] = 'V';
+				$Row = "NULL";
+				foreach ($Order as $Col => $Field)
+				{
+					$Row .= ",'".$Order[$Col]."'";
+				}
+				$Rows .= $Rows? '),('.$Row:$Row;
+				
+				$Items = $DB->fetchAssoc('customer_order_item','*',"order_id = ".$Order['order_id']);
+				foreach ($Items as $Item)
+				{
+					$Row = "NULL,".$Order['delivery_id'];
+					foreach($Item as $Col => $Field)
+					{
+						$Row.= ",'".$Item[$Col]."'";
+					}
+					$ItemsRow .= $ItemsRow? '),('.$Row:$Row;
+				}
+				$DB->execQuery('UPDATE','relation_delivery_order',"status='I'","delivery_id=".$Order['delivery_id']."AND order_id = ".$Order['order_id']." AND status <> 'I'");
+			}
+		}
+		// INSERT ORDER
+		$DB->execQuery('INSERT','customer_delivery_order',"  ",$Rows);
+		
+		// INSERT ORDER PRODUCTS
+		$DB->execQuery('INSERT','customer_delivery_order_item',"  ",$ItemsRows);
+	}
+	
+	public static function InsertCancelledDeliveryOrder($DB,$Order)
+	{
+		if(!$Order['delivery_id']);
+			$Order = $DB -> fetchAssoc('customer_order','*','order_id='.$OrderID);
+		if($Order['delivery_id'])
+		{
+			$Order['status'] = 'C';
+			$Row = "NULL";
+			foreach ($Order as $Col => $Field)
+			{
+				$Row .= ",'".$Order[$Col]."'";
+			}
+			$Rows .= $Rows? '),('.$Row:$Row;
+			
+			$Items = $DB->fetchAssoc('customer_order_item','*',"order_id = ".$Order['order_id']);
+			foreach ($Items as $Item)
+			{
+				$Row = "NULL,".$Order['delivery_id'];
+				foreach($Item as $Col => $Field)
+				{
+					$Row.= ",'".$Item[$Col]."'";
+				}
+				$ItemsRow .= $ItemsRow? '),('.$Row:$Row;
+			}
+			$DB->execQuery('UPDATE','relation_delivery_order',"status='I'","delivery_id=".$Order['delivery_id']."AND order_id = ".$Order['order_id']." AND status <> 'I'");
+		}
+		// INSERT ORDER
+		$DB->execQuery('INSERT','customer_delivery_order',"  ",$Rows);
+		
+		// INSERT ORDER PRODUCTS
+		$DB->execQuery('INSERT','customer_delivery_order_item',"  ",$ItemsRows);
 	}
 }
 ?>

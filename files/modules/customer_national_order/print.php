@@ -48,7 +48,7 @@
             {
         ?>
         <div class="PageHeader">
-            <h2><b>San Cipriano</b></h2>
+            <h2 id="SelectText"><b>San Cipriano</b></h2>
             <hr>
             <?php if($Data['type']=='N'){ ?>
             <h3>Reparto del d&iacute;a <b><?php echo $Date ?></b> - <b><?php echo $Data['delivery_man'] ?></b></h3>
@@ -218,6 +218,6 @@
         <?php
             }
         ?>
-        <div class="PageFooter txC">  
+        <div class="PageFooter txC">
         </div>
     </div>

@@ -53,7 +53,10 @@
     $ha .= $br;
     for($I=0;$I<15;$I++)
         $TitleSpace .= $s;
-
+?>
+<!--<button id="SelectAllButton">SELECCIONAR TODO</button>-->
+<div id="SelectText">
+<?php
 echo $br;
 echo $ha;
 echo $TitleSpace."SAN CIPRIANO".$br;
@@ -143,3 +146,12 @@ if($Data['status']=='F')
 echo $br;
 echo $br;
 ?>
+</div>
+
+<?php include("../../includes/inc.foot.php");?>
+<script type="text/javascript">
+$(document).ready(function(){
+	SelectText('SelectText');
+    // $("#SelectText").trigger("click");    
+});
+</script>

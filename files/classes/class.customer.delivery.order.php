@@ -77,6 +77,101 @@ class CustomerDeliveryOrder extends DataBase
 	{
 		return $this->GetDefaultImg();
 	}
+	
+	
+	public function AddOrderItemsToDelivery($OrderID,$DeliveryID=0)
+	{
+		$DeliveryID = $DeliveryID>0? $DeliveryID:$this->ID;
+		if($DeliveryID)
+		{
+			$Relation = $this->fetchAssoc('relation_delivery_order',"*","delivery_id=".$DeliveryID." AND order_id=".$OrderID." AND status='A'");
+			
+			$DeliveryItems = $this->fetchAssoc('customer_delivery_item','*',"delivery_id=".$DeliveryID);
+			$Items = $this->fetchAssoc('customer_order_item','*',"order_id=".$OrderID);
+			foreach($Items as $Item)
+			{
+				$ProductExists = false;
+				foreach($DeliveryItems as $DeliveryItem)
+				{
+					if($Item['product_id']==$DeliveryItem['product_id'])
+					{
+						$ProductExists = true;
+					}
+				}
+				
+				if($ProductExists)
+				{
+					$this->execQuery('UPDATE','customer_delivery_item',"initial_quantity=initial_quantity+".floatval($Item['quantity']),"delivery_id=".$DeliveryID." AND product_id=".$Item['product_id']);
+				}else{
+					$this->execQuery('INSERT','customer_delivery_item','product_id,delivery_id,initial_quantity,creation_date,created_by',$Item['product_id'].",".$DeliveryID.",".floatval($Item['quantity']).",NOW(),".$_SESSION['admin_id']);
+				}
+			}
+			if(!$Relation[0]['order_id'])
+			{
+				$this->execQuery('INSERT','relation_delivery_order','order_id,delivery_id,created_by,creation_date',$OrderID.",".$DeliveryID.",".$_SESSION['admin_id'].",NOW()");
+			}else{
+				if($Relation[0]['status']=='I')
+					$this->execQuery("UPDATE",'relation_delivery_order',"status='A', updated_by=".$_SESSION['admin_id'],"delivery_id=".$DeliveryID." AND order_id=".$OrderID." AND status='I'");
+			}
+			
+			// DELETE ORDER FORM DELIVERY ORDER TABLE (IF EXISTS)
+				$this->execQuery('DELETE','customer_delivery_order',"order_id=".$OrderID.",delivery_id=".$DeliveryID);
+				$this->execQuery('DELETE','customer_delivery_order_item',"order_id=".$OrderID.",delivery_id=".$DeliveryID);
+		}
+	}
+	
+	public function RemoveOrderItemsToDelivery($OrderID,$DeliveryID=0)
+	{
+		$DeliveryID = $DeliveryID>0? $DeliveryID:$this->ID;
+		if(!$DeliveryID)
+		{
+			$OrderDelivery = $this -> fetchAssoc('customer_order','delivery_id','order_id='.$OrderID);
+			$DeliveryID = $OrderDelivery[0]['delivery_id'];
+		}
+			
+		if($DeliveryID)
+		{
+			$Relation = $this->fetchAssoc('relation_delivery_order',"*","delivery_id=".$DeliveryID." AND order_id=".$OrderID." AND status='A'");
+			if($Relation[0]['order_id'])
+			{
+				
+				$DeliveryItems = $this->fetchAssoc('customer_delivery_item','*',"delivery_id=".$DeliveryID);
+				$Items = $this->fetchAssoc('customer_order_item','*',"order_id=".$OrderID);
+				foreach($Items as $Item)
+				{
+					$ProductDelete = false;
+					foreach($DeliveryItems as $DeliveryItem)
+					{
+						if($Item['product_id']==$DeliveryItem['product_id'])
+						{
+							if(floatval($DeliveryItem['initial_quantity'])-floatval($Item['quantity'])<=0)
+								$ProductDelete = true;
+						}
+					}
+					if($ProductDelete)
+						$this->execQuery('DELETE','customer_delivery_item',"product_id=".$Item['product_id']." AND delivery_id=".$DeliveryID);
+					else
+						$this->execQuery('UPDATE','customer_delivery_item',"initial_quantity=initial_quantity-".floatval($Item['quantity']),"product_id=".$Item['product_id']." AND delivery_id=".$DeliveryID);
+				}
+				$this->execQuery("UPDATE",'relation_delivery_order',"status='I', updated_by=".$_SESSION['admin_id'],"delivery_id=".$DeliveryID." AND order_id=".$OrderID." AND status='A'");
+			}
+			
+			
+		}
+	}
+	
+	public function RemoveAllOrdersFromDelivery($DeliveryID)
+	{
+		$this->execQuery("UPDATE",'relation_delivery_order',"status='I', updated_by=".$_SESSION['admin_id'],"delivery_id=".$DeliveryID." AND status='A'");
+		$this->execQuery('DELETE','customer_delivery_item',"delivery_id=".$DeliveryID);
+		
+		$Orders = $this->fetchAssoc('relation_delivery_order',"*","delivery_id=".$DeliveryID." AND status='A'");
+		foreach($Orders as $Order)
+		{
+			$this -> RemoveOrderItemsToDelivery($Order['order_id'],$DeliveryID);
+		}
+	}
+	
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////// SEARCHLIST FUNCTIONS ///////////////////////////////////////////////////////////////////////////
@@ -161,6 +256,7 @@ public function MakeRegs($Mode="List")
 			// print_r($Row);
 			// echo '</pre>';
 			$Actions	= 	'<span class="roundItemActionsGroup"><a><button type="button" class="btn btnGreen ExpandButton" title="Ver detalle" id="expand_'.$Row->ID.'"><i class="fa fa-plus"></i></button></a>';
+			
 			//$Actions	.= 	'<a href="../customer_national_order/view.php?id='.$Row->ID.'"><button type="button" class="btn btn-github" title="Ver Entrega"><i class="fa fa-eye"></i></button></a> ';
 			
     			if($Row->Data['delivery_id']!=$DeliveryID)
@@ -237,7 +333,10 @@ public function MakeRegs($Mode="List")
 						$Status = "Pendiente de Entrega";
 					    $SClass = 'danger';
 					    if($Rows[$i]['full_delivery_status']=='A')
+					    {
 					    	$Actions	.= 	'<a href="new.php?id='.$Row->ID.'"><button type="button" class="btn btn-dropbox" title="Entregar Mercader&iacute;a"><i class="fa fa-dropbox"></i></button></a>';
+					    	$Actions	.= 	'<a aria-label="Cancelar Entrega" class="hint--bottom hint--bounce hint--error deleteElement" process="../../library/processes/proc.common.php" id="delete_'.$Row->ID.'"><button type="button" class="btn btnRed"><i class="fa fa-times"></i></button></a>';
+					    }
 					break;
 					
 					case 'F':
@@ -312,7 +411,7 @@ public function MakeRegs($Mode="List")
 									
 					$RowBackground = $i % 2 == 0? '':' listRow2 ';
 					
-					$Regs	.= '<div class="row listRow'.$RowBackground.'" id="row_'.$Row->ID.'" title="una orden de compra">
+					$Regs	.= '<div class="row listRow'.$RowBackground.'" id="row_'.$Row->ID.'" title="una entrega">
 									
 									<div class="col-xs-1">
 									    '.$Orders.'.
@@ -405,7 +504,7 @@ public function MakeRegs($Mode="List")
 	
 	public function ConfigureSearchRequest()
 	{
-		$this->SetTable($this->Table.' a LEFT JOIN customer_order_item b ON (b.order_id=a.order_id) LEFT JOIN product c ON (b.product_id = c.product_id) LEFT JOIN customer d ON (d.customer_id=a.customer_id) INNER JOIN customer_delivery e ON (a.delivery_id=e.delivery_id)');
+		$this->SetTable($this->Table.' a LEFT JOIN customer_order_item b ON (b.order_id=a.order_id) LEFT JOIN product c ON (b.product_id = c.product_id) LEFT JOIN customer d ON (d.customer_id=a.customer_id) INNER JOIN customer_delivery e ON (a.delivery_id=e.delivery_id) LEFT JOIN customer_delivery_order f ON (f.delivery_id=e.delivery_id) LEFT JOIN customer_delivery_order_item g ON (g.order_id=f.order_id AND f.delivery_id=e.delivery_id) LEFT JOIN product h ON (h.product_id = g.product_id) LEFT JOIN customer i ON (i.customer_id=f.customer_id)');
 		$this->SetFields('a.order_id,a.delivery_id,a.type,a.total,a.extra,a.status,a.payment_status,a.delivery_status,d.name as customer,SUM(b.quantity) as quantity,e.status as full_delivery_status,e.merluza,e.merluza_delivered');
 		$this->SetWhere("e.delivery_man_id = ".$_SESSION['admin_id']." AND a.delivery_date='".date("Y-m-d")."' AND a.company_id=".$_SESSION['company_id']);
 		//$this->AddWhereString(" AND c.company_id = a.company_id");
@@ -577,13 +676,26 @@ public function MakeRegs($Mode="List")
 	// 	$this->execQuery('update',$this->Table,"status = '".$Status."'",$this->TableID."=".$ID);
 	// }
 	
-	// public function Delete()
-	// {
-	// 	// INSERT MOVEMENT
-	// 	$ID	= $_POST['id'];
-	// 	Movement::DeleteOrdersMovements($ID);
-	// 	$this->execQuery('update',$this->Table,"status = 'I'",$this->TableID."=".$ID);
-	// }
+	public function Delete()
+	{
+		// UPDATE ORDER STATUS
+		$ID	= $_POST['id'];
+		if($ID)
+		{
+			$Order  = $this->fetchAssoc('customer_order',"*","order_id=".$ID);
+			$DeliveryID = $Order[0]['delivery_id'];
+			if($DeliveryID)
+			{
+				CustomerDelivery::InsertCancelledDeliveryOrder($this,$Order[0]);
+				$this->execQuery('UPDATE','customer_order',"status = 'P',delivery_status = 'P', delivery_id=0","order_id=".$ID);
+				$this->UpdateDeliveryFinalStatus($DeliveryID);
+			}else{
+				echo 'No DeliveryID found.';
+			}
+		}else{
+			echo 'No ID selected.';
+		}
+	}
 	
 	public function Search()
 	{
@@ -697,15 +809,21 @@ public function MakeRegs($Mode="List")
 				
 			$this->execQuery("UPDATE","customer_order","total_paid=".$TotalAmount.",balance=".$FinalBalance.",merluza_price=".$_POST['merluza_price'].",merluza_delivered=".$MerluzaDelivered.",status='F',payment_status='F',delivery_status='F',updated_by=".$_SESSION['admin_id'],"order_id=".$OrderID);
 			
-			$OrdersLeft = $this->numRows("customer_order","order_id","status = 'A' AND delivery_id=".$DeliveryID);
-			
-			if($OrdersLeft<1)
-				$FinalDeliveryStatus = ",status='F'";
-			
-			$this->execQuery("UPDATE","customer_delivery","merluza_delivered=merluza_delivered+".$MerluzaDelivered.",total_paid=total_paid+".$TotalAmount.",updated_by=".$_SESSION['admin_id'].$FinalDeliveryStatus,"delivery_id=".$DeliveryID);
-			
+			// UPDATE DELIVERY STOCK AND PAYMENT
+			$this->execQuery("UPDATE","customer_delivery","merluza_delivered=merluza_delivered+".$MerluzaDelivered.",total_paid=total_paid+".$TotalAmount.",updated_by=".$_SESSION['admin_id'],"delivery_id=".$DeliveryID);
+			$this->UpdateDeliveryFinalStatus($DeliveryID);
 		}else{
 			echo "403";
+		}
+	}
+	
+	public function UpdateDeliveryFinalStatus($DeliveryID)
+	{
+		$OrdersLeft = $this->numRows("customer_order","order_id","status = 'A' AND delivery_id=".$DeliveryID);
+		if($OrdersLeft<1)
+		{
+			$FinalDeliveryStatus = ",status='F'";
+			$this->execQuery("UPDATE","customer_delivery","updated_by=".$_SESSION['admin_id'].$FinalDeliveryStatus,"delivery_id=".$DeliveryID);
 		}
 	}
 }
