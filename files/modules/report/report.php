@@ -2,15 +2,15 @@
     include("../../includes/inc.main.php");
     $Head->setTitle($Menu->GetTitle());
     $Head->setHead();
-    
+
     $Title = "An&aacute;lisis";
-    
+
     if($_GET['from'])
     {
       $FromFilter = " AND a.creation_date >= '".$_GET['from']."'";
       $Title .= " del ".DBDate($_GET['from']);
     }else{
-     $Title .= " desde el primer d&iacute;a"; 
+     $Title .= " desde el primer d&iacute;a";
     }
     if($_GET['to'])
     {
@@ -19,13 +19,14 @@
     }else{
       $Title .= " hasta hoy";
     }
-    
-    $Report = $DB->fetchAssoc('customer_order_item a',
-                    "SUM((a.quantity_delivered-a.quantity_returned)*(SELECT cost FROM product_cost_history WHERE cost_date <=a.creation_date ORDER BY cost_date DESC limit 1)) AS costs,
-                    SUM((a.quantity_delivered-a.quantity_returned)*a.price) AS sales,
-                    SUM((a.quantity_delivered-a.quantity_returned)*a.price) - SUM((a.quantity_delivered-a.quantity_returned)*(SELECT cost FROM product_cost_history WHERE cost_date <=a.creation_date ORDER BY cost_date DESC limit 1)) AS profits",
-                    "a.status <>'P'".$FromFilter.$ToFilter);
-    
+
+    $Report = $DB->fetchAssoc(
+    'customer_order_item a',
+    "SUM((a.quantity_delivered-a.quantity_returned)*(SELECT cost FROM product_cost_history WHERE cost_date <= a.creation_date AND product_id = a.product_id ORDER BY cost_date DESC limit 1)) AS costs,
+    SUM((a.quantity_delivered-a.quantity_returned)*a.price) AS sales,
+    SUM((a.quantity_delivered-a.quantity_returned)*a.price) - SUM((a.quantity_delivered-a.quantity_returned)*(SELECT cost FROM product_cost_history WHERE cost_date <=a.creation_date AND product_id = a.product_id ORDER BY cost_date DESC limit 1)) AS profits",
+    "a.status <>'P'".$FromFilter.$ToFilter);
+
     if(!$Report[0]['sales']) $Report[0]['sales'] = "0.00";
     if(!$Report[0]['costs']) $Report[0]['costs'] = "0.00";
     if(!$Report[0]['profits']) $Report[0]['profits'] = "0.00";
@@ -39,7 +40,7 @@
       $ProfitClass = 'red';
       $ProfitIcon = 'android-close';
     }
-    
+
     include('../../includes/inc.top.php');
     // echo $Query;
 ?>
@@ -86,7 +87,7 @@
           </div>
       </div>
     </div>
-    
+
     <hr>
             <div class="row txC">
               <button type="button" class="btn btn-primary" id="BtnCancel"><i class="fa fa-arrow-left"></i> Generar otro An&aacute;lisis</button>
@@ -95,7 +96,7 @@
     </div><!-- box -->
   </div><!-- box -->
   </div><!-- box -->
-  
+
 <?php
 include('../../includes/inc.bottom.php');
 ?>
