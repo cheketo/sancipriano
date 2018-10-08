@@ -1,8 +1,8 @@
 <?php
 class DataBase
 {
-	var $UserDB		= 'sancipriano';
-	var $PasswordDB	= 'Oraprod1810';
+	var $UserDB		= 'root';
+	var $PasswordDB	= 'mysql';
 	var $DataBase	= 'sancipriano';
 	var $ServerDB	= '127.0.0.1';
 	var $TypeDB 	= 'Mysql';
@@ -22,7 +22,7 @@ class DataBase
 	var $Table;
 	var $Fields = '*';
 
-	public function __construct($UserDB='sancipriano', $PasswordDB='Oraprod1810', $DataBase='sancipriano', $ServerDB='127.0.0.1',$TypeDB='Mysql'){
+	public function __construct($UserDB='root', $PasswordDB='mysql', $DataBase='sancipriano', $ServerDB='127.0.0.1',$TypeDB='Mysql'){
 		$this->UserDB 		= $UserDB;
 		$this->PasswordDB	= $PasswordDB;
 		$this->DataBase		= $DataBase;
