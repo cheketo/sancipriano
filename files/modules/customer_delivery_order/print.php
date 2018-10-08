@@ -10,7 +10,9 @@
     $Head->setStyle('../../../skin/css/print.css'); // Select Inputs With Tags
     $Head->setHead();
     
-    $Data['initial_balance'] = $Data['balance'] - $Data['total_paid'] + $Data['total'];
+    //$Data['initial_balance'] = $Data['balance'] - $Data['total_paid'] + $Data['total'];
+    $MovementData = $DB->fetchAssoc("movement","*","order_id=".$ID." AND type_id=5");
+	$Data['initial_balance'] = floatval($MovementData[0]['balance'])+floatval($MovementData[0]['amount']);
     
     $InitialBalance = floatval($Data['initial_balance'])<floatval(0.00)? "(".number_format($Data['initial_balance']*-1, 2, ',', '.').")":number_format($Data['initial_balance']*-1, 2, ',', '.');
     $Balance = floatval($Data['balance'])<floatval(0.00)? "(".number_format($Data['balance']*-1, 2, ',', '.').")":number_format($Data['balance']*-1, 2, ',', '.');
@@ -57,7 +59,7 @@
                 $<?php echo number_format($Item['price'], 2, ',', '.') ?>
             </div>
             <div class="PageCol ItemQuantity">
-                <?php $ItemQuantity = $Item['decimal']=='Y'? number_format($Item['quantity'], 2, ',', '.'):$Item['quantity']; ?>
+                <?php $ItemQuantity = $Item['decimal']=='Y'? number_format($Item['quantity_delivered'], 2, ',', '.'):$Item['quantity_delivered']; ?>
                 <?php echo $ItemQuantity. " ".$Item['size'] ?>
             </div>
             <div class="PageCol ItemTotal">

@@ -412,6 +412,10 @@ $(document).ready(function(){
 
 
 ////////////////////////////////////// PRODUCTS RELATION ///////////////////////////////////
+$(document).ready(function(){
+	if($("#BtnRelation").length)
+		DeleteProductRow();
+})
 $(function(){
 	$("#asoc").click(function(){
 		var product = $("#product");
@@ -449,6 +453,45 @@ $(function(){
 	})
 });
 
+$(function(){
+	$("#BtnRelation").on("click",function(e){
+		e.preventDefault();
+		if(validate.validateFields('*'))
+		{
+			confirmText = " el cliente '"+utf8_encode($("#cname").val())+"'";
+
+			alertify.confirm(utf8_decode('¿Desea establecer los precios para'+confirmText+'?'), function(e){
+				if(e)
+				{
+					var process		= '../../library/processes/proc.common.php?object=Product';
+					//var target		= 'list.php?element='+$('#title').val()+'&msg='+ $("#action").val();
+					var haveData	= function(returningData)
+					{
+						$("input,select").blur();
+						notifyError("Ha ocurrido un error durante el proceso para establecer los precios.");
+						console.log(returningData);
+					}
+					var noData		= function()
+					{
+						//document.location = target;
+						notifySuccess("Los precios para "+$("#cname").val()+" se han establecido correctamente.");
+					}
+					sumbitFields(process,haveData,noData);
+				}
+			});
+		}
+	});
+
+	$("input").keypress(function(e){
+		if(e.which==13){
+			if($("#BtnRelation").length)
+			{
+				$("#BtnRelation").click();
+			}
+		}
+	});
+});
+
 function DeleteProductRow()
 {
 	$(".DeleteProductRow").click(function(){
@@ -470,3 +513,71 @@ function CheckProductId(id)
 	})
 	return !exists;
 }
+
+
+/////////////////////////////////// CUSTOMER ACCOUNT ////////////////////
+$(document).ready(function(){
+	if(get['msg']=='credit')
+	{
+		notifySuccess('Se ha <b>acreditado $'+get['amount']+'</b> en la cuenta corriente de <b>'+get['element']+'</b>');
+	}
+	
+	if(get['msg']=='debit')
+	{
+		notifySuccess('Se ha <b><span class="text-red">debitado</span> $'+get['amount']+'</b> en la cuenta corriente de <b>'+get['element']+'</b>');
+	}
+})
+
+$("#BtnCredit").click(function(){
+	if(validate.validateFields('new_credit'))
+	{
+		confirmText = " el cliente '<b>"+utf8_encode($("#cname").val())+"</b>'";
+
+		alertify.confirm(utf8_decode('¿Desea asignar un <span class="text-green"><b>cr&eacute;dito</b></span> de <b>$'+$("#credit").val()+'</b> para'+confirmText+'?'), function(e){
+			if(e)
+			{
+				var process		= '../../library/processes/proc.common.php?object=Customer&action=Addcredit';
+				var target		= 'view.php?id='+get['id']+'&element='+utf8_encode($("#cname").val())+'&msg=credit&amount='+$("#credit").val();
+				var haveData	= function(returningData)
+				{
+					$("input,select").blur();
+					notifyError("Ha ocurrido un error durante el proceso de asignaci&oacute;n.");
+					console.log(returningData);
+				}
+				var noData		= function()
+				{
+					document.location = target;
+					
+				}
+				sumbitFields(process,haveData,noData);
+			}
+		});
+	}
+});
+
+$("#BtnDebit").click(function(){
+	if(validate.validateFields('new_debit'))
+	{
+		confirmText = " el cliente '<b>"+utf8_encode($("#cname").val())+"</b>'";
+
+		alertify.confirm(utf8_decode('¿Desea asignar un <span class="text-red"><b>d&eacute;bito</b></span> de <b>$'+$("#debit").val()+'</b> para'+confirmText+'?'), function(e){
+			if(e)
+			{
+				var process		= '../../library/processes/proc.common.php?object=Customer&action=Adddebit';
+				var target		= 'view.php?id='+get['id']+'&element='+utf8_encode($("#cname").val())+'&msg=debit&amount='+$("#debit").val();
+				var haveData	= function(returningData)
+				{
+					$("input,select").blur();
+					notifyError("Ha ocurrido un error durante el proceso de asignaci&oacute;n.");
+					console.log(returningData);
+				}
+				var noData		= function()
+				{
+					document.location = target;
+					
+				}
+				sumbitFields(process,haveData,noData);
+			}
+		});
+	}
+});

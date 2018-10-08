@@ -25,20 +25,68 @@ class Product extends DataBase
 	
 	public function SetPrice()
 	{
-		$Coeficients = $this->fetchAssoc('product_configuration','*',"status='A'","creation_date");
+		// $Coeficients = $this->fetchAssoc('product_configuration','*',"status='A'","creation_date");
 		// print_r($Coeficients); die;
 		if($this->Data['variation_id']=="1")
 		{
+			
 			$Type ="percentage";
-			$this->Data['price']			= $this->Data['cost'] + (($this->Data['cost']*$Coeficients[0]['additional_'.$Type.'_wholesaler'])/100);
-			$this->Data['price_retailer']	= $this->Data['cost'] + (($this->Data['cost']*$Coeficients[0]['additional_'.$Type.'_retailer'])/100);
+			
+			// $this->Data['price']			= $this->Data['additional_percentage_wholesaler']? $this->Data['cost'] + (($this->Data['cost']*$this->Data['additional_'.$Type.'_wholesaler'])/100) :$this->Data['cost'] + (($this->Data['cost']*$Coeficients[0]['additional_'.$Type.'_wholesaler'])/100);
+			// $this->Data['price_retailer']	= $this->Data['additional_percentage_retailer']? $this->Data['cost'] + (($this->Data['cost']*$this->Data['additional_'.$Type.'_retailer'])/100):$this->Data['cost'] + (($this->Data['cost']*$Coeficients[0]['additional_'.$Type.'_retailer'])/100);
 		}else{
 			$Type ="price";
-			$this->Data['price']			= $this->Data['cost']+$Coeficients[0]['additional_'.$Type.'_wholesaler'];
-			$this->Data['price_retailer']	= $this->Data['cost']+$Coeficients[0]['additional_'.$Type.'_retailer'];
+			// $this->Data['price']			= $this->Data['additional_price_wholesaler']? $this->Data['cost']+$this->Data['additional_'.$Type.'_wholesaler']:$this->Data['cost']+$Coeficients[0]['additional_'.$Type.'_wholesaler'];
+			// $this->Data['price_retailer']	= $this->Data['additional_price_retailer']? $this->Data['cost']+$this->Data['additional_'.$Type.'_retailer']:$this->Data['cost']+$Coeficients[0]['additional_'.$Type.'_retailer'];
 		}
-		$this->Data['price'] = round($this->Data['price']);
-		$this->Data['price_retailer'] = round($this->Data['price_retailer']);
+		// $this->Data['price'] = round($this->Data['price']);
+		// $this->Data['price_retailer'] = round($this->Data['price_retailer']);
+		
+		// $this->Data['prices'] = $this->fetchAssoc(
+		// 	"customer_type a LEFT JOIN relation_product_customer_type b ON (b.type_id=a.type_id)",
+		// 	"a.name,ROUND(IF(1=".$this->Data['variation_id'].",(IF(b.additional_percentage IS NULL,(".$this->Data['cost']."+((".$this->Data['cost']." * a.percentage) / 100)),(".$this->Data['cost']."+((".$this->Data['cost']." * b.additional_percentage) / 100)))),(IF(b.additional_amount IS NULL,(".$this->Data['cost']."+a.amount),(".$this->Data['cost']."+b.additional_amount)))),2) AS  price",
+		// 	"a.status = 'A' OR (a.status = 'A' AND b.status='A' AND product_id=".$this->Data['product_id'].")"
+		// 	);
+		
+		
+		$Types = $this->fetchAssoc('customer_type','*',"status='A'");
+		foreach($Types as $Type)
+		{
+			$Price = array();
+			$Price['name'] = $Type['name'];
+			$Price['type_id'] = $Type['type_id'];
+			$Relation = $this->fetchAssoc('relation_product_customer_type','*',"type_id=".$Type['type_id']." AND product_id=".$this->Data['product_id']);
+			if($this->Data['variation_id']=="1")
+			{
+				if($Relation[0]['additional_percentage'])
+					$Price['price'] = round($this->Data['cost'] + (($this->Data['cost']*$Relation[0]['additional_percentage'])/100));
+				else
+					$Price['price'] = round($this->Data['cost'] + (($this->Data['cost']*$Type['percentage'])/100));
+			}else{
+				if($Relation[0]['additional_amount'])
+					$Price['price'] = round($this->Data['cost']+$Relation[0]['additional_amount']);
+				else
+					$Price['price'] = round($this->Data['cost']+$Type['amount']);
+			}
+			$this->Data['prices'][] = $Price;
+		}
+	}
+	
+	public function GetProductPrice($CID,$CT)
+	{
+		$Relation = $this->fetchAssoc("relation_product_customer","price","status = 'A' AND customer_id=".$CID." AND product_id=".$this->ID);
+		//echo $this->lastQuery();
+		if($Relation[0]['price'])
+		{
+			return $Relation[0]['price'];
+		}else{
+			foreach($this->Data['prices'] as $Type)
+			{
+				if($Type['type_id']==$CT)
+					return $Type['price'];
+			}
+		
+		}
 	}
 	
 	public function SetStockSize()
@@ -91,6 +139,22 @@ public function MakeRegs($Mode="List")
 		{
 			$Row	=	new Product($Rows[$i][$this->TableID]);
 			
+			$TypePrices = '';
+			foreach($Row->Data['prices'] as $PriceType)
+			{
+				$TypePrices .= '
+							<div class="row hideMobile990" style="padding:5px 0px;">
+								<div class="col-xs-12 hideMobile990">
+									<div class="listRowInner">
+										<span class="listTextStrong">'.$PriceType['name'].'</span>
+										<span class="listTextStrong"><span class="label label-success">$ '.$PriceType['price'].'</span></span>
+									</div>
+								</div>
+							</div>
+				';
+			}
+			
+			
 			$Items = '<div style="margin-top:10px;">';
 				
 				$Items .= '
@@ -114,6 +178,7 @@ public function MakeRegs($Mode="List")
 									</div>
 								</div>
 							</div>
+							'.$TypePrices.'
 							<div class="row hideMobile990" style="padding:5px 0px;">
 								<div class="col-xs-12 hideMobile990">
 									<div class="listRowInner">
@@ -123,8 +188,8 @@ public function MakeRegs($Mode="List")
 							</div>
 							';
 			$Items .='</div>';
-			$Price = "$ ".$Row->Data['price'];
-			$PriceRetail = "$ ".$Row->Data['price_retailer'];
+			// $Price = "$ ".$Row->Data['price'];
+			// $PriceRetail = "$ ".$Row->Data['price_retailer'];
 			
 			$Actions= '';
 			$Actions	.= 	'<span class="roundItemActionsGroup"><a><button type="button" class="btn btnGreen ExpandButton" id="expand_'.$Row->ID.'"><i class="fa fa-plus"></i></button></a>';
@@ -148,6 +213,7 @@ public function MakeRegs($Mode="List")
 											<span class="listTextStrong"><span class="label label-info">'.$Row->Data['brand'].'</span></span>
 										</div>
 									</div>
+									
 									<div class="col-lg-3 col-md-3 col-sm-3 hideMobile990">
 										<div class="listRowInner">
 											<span class="listTextStrong">Mayorista</span>
@@ -160,6 +226,7 @@ public function MakeRegs($Mode="List")
 											<span class="listTextStrong"><span class="label label-success">'.$PriceRetail.'</span></span>
 										</div>
 									</div>
+									
 									<div class="col-lg-3 col-md-3 col-sm-3 hideMobile990">
 										<div class="listRowInner">
 											<span class="listTextStrong">Stock</span>
@@ -367,6 +434,37 @@ public function MakeRegs($Mode="List")
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////// PROCESS METHODS ///////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	public function InsertCustomerPrices($ID)
+	{
+		if($ID)
+		{
+			if($_POST['variation']==1)
+			{
+				$Variation = 'percentage';
+			}else{
+				$Variation = 'amount';
+			}
+			for($I=1;$I<=$_POST['total_types'];$I++)
+			{
+				
+				if($_POST['additional_'.$Variation.$I]>0)
+				{
+					//$Prices[] = array("type_id"=>$_POST['type'.$I],"additional_".$Variation => $_POST['additional_'.$Variation.$I]);
+					$Field = $_POST['type'.$I].",".$ID.",".$_POST['additional_'.$Variation.$I].",'A',NOW(),".$_SESSION['admin_id'].",".$_SESSION['company_id'];
+					$Fields .= $Fields? "),(".$Field:$Field;
+				}
+			}
+			if($Fields)
+			{
+				$this->execQuery('DELETE','relation_product_customer_type',"product_id=".$ID);
+				$this->execQuery('INSERT','relation_product_customer_type','type_id,product_id,additional_'.$Variation.',status,creation_date,created_by,company_id',$Fields);
+				// print_r($_POST);
+				// echo $this->lastQuery();
+				
+			}
+		}
+	}
+	
 	
 	public function Insert()
 	{
@@ -378,10 +476,10 @@ public function MakeRegs($Mode="List")
 		$Rack		= $_POST['rack'];
 		$Size		= $_POST['size'];
 		$Variation	= $_POST['variation'];
-		$PRetailer	= $_POST['percentage_retailer']?$_POST['percentage_retailer']:0;
-		$PWholesaler= $_POST['percentage_wholesaler']?$_POST['percentage_wholesaler']:0;
-		$ARetailer	= $_POST['amount_retailer']?$_POST['amount_retailer']:0;
-		$AWholesaler= $_POST['amount_wholesaler']?$_POST['amount_wholesaler']:0;
+		// $PRetailer	= $_POST['percentage_retailer']?$_POST['percentage_retailer']:0;
+		// $PWholesaler= $_POST['percentage_wholesaler']?$_POST['percentage_wholesaler']:0;
+		// $ARetailer	= $_POST['amount_retailer']?$_POST['amount_retailer']:0;
+		// $AWholesaler= $_POST['amount_wholesaler']?$_POST['amount_wholesaler']:0;
 		
 		$Stock		= $_POST['stock'];
 		$StockMin	= $_POST['stock_min'];
@@ -395,9 +493,10 @@ public function MakeRegs($Mode="List")
 		if(!$StockMax) $StockMax = 0;
 		// if(!$PriceFob) $PriceFob = 0;
 		// if(!$PriceDispatch) $PriceDispatch = 0;
-		$Insert		= $this->execQuery('insert',$this->Table,'title,category_id,cost,variation_id,additional_price_retailer,additional_price_wholesaler,additional_percentage_retailer,additional_percentage_wholesaler,brand_id,rack,size_id,stock,stock_min,stock_max,description,creation_date,company_id,created_by',"'".$Title."',".$Category.",".$Cost.",".$Variation.",".$ARetailer.",".$AWholesaler.",".$PRetailer.",".$PWholesaler.",".$Brand.",'".$Rack."',".$Size.",".$Stock.",".$StockMin.",".$StockMax.",'".$Description."',NOW(),".$_SESSION['company_id'].",".$_SESSION['admin_id']);
+		$Insert		= $this->execQuery('insert',$this->Table,'title,category_id,cost,variation_id,brand_id,rack,size_id,stock,stock_min,stock_max,description,creation_date,company_id,created_by',"'".$Title."',".$Category.",".$Cost.",".$Variation.",".$Brand.",'".$Rack."',".$Size.",".$Stock.",".$StockMin.",".$StockMax.",'".$Description."',NOW(),".$_SESSION['company_id'].",".$_SESSION['admin_id']);
 		$ID = $this->GetInsertId();
 		$this->ChangeCost($Cost,'NOW()',$ID);
+		$this->InsertCustomerPrices($ID);
 		//echo $this->lastQuery();
 	}	
 	
@@ -415,10 +514,10 @@ public function MakeRegs($Mode="List")
 		$Rack		= $_POST['rack'];
 		$Size		= $_POST['size'];
 		$Variation	= $_POST['variation'];
-		$PRetailer	= $_POST['percentage_retailer']?$_POST['percentage_retailer']:0;
-		$PWholesaler= $_POST['percentage_wholesaler']?$_POST['percentage_wholesaler']:0;
-		$ARetailer	= $_POST['amount_retailer']?$_POST['amount_retailer']:0;
-		$AWholesaler= $_POST['amount_wholesaler']?$_POST['amount_wholesaler']:0;
+		// $PRetailer	= $_POST['percentage_retailer']?$_POST['percentage_retailer']:0;
+		// $PWholesaler= $_POST['percentage_wholesaler']?$_POST['percentage_wholesaler']:0;
+		// $ARetailer	= $_POST['amount_retailer']?$_POST['amount_retailer']:0;
+		// $AWholesaler= $_POST['amount_wholesaler']?$_POST['amount_wholesaler']:0;
 		$StockMin	= $_POST['stock_min'];
 		$StockMax	= $_POST['stock_max'];
 		$Description= $_POST['description'];
@@ -426,9 +525,10 @@ public function MakeRegs($Mode="List")
 		if(!$StockMin) $StockMin = 0;
 		if(!$StockMax) $StockMax = 0;
 		
-		$Update		= $this->execQuery('update',$this->Table,"title='".$Title."',category_id=".$Category.",brand_id=".$Brand.",cost=".$Cost.",variation_id=".$Variation.",additional_price_retailer=".$ARetailer.",additional_price_wholesaler=".$AWholesaler.",additional_percentage_retailer=".$PRetailer.",additional_percentage_wholesaler=".$PWholesaler.",rack='".$Rack."',size_id='".$Size."',stock_min='".$StockMin."',stock_max='".$StockMax."',description='".$Description."',updated_by=".$_SESSION['admin_id'],$this->TableID."=".$ID);
+		$Update		= $this->execQuery('update',$this->Table,"title='".$Title."',category_id=".$Category.",brand_id=".$Brand.",cost=".$Cost.",variation_id=".$Variation.",rack='".$Rack."',size_id='".$Size."',stock_min='".$StockMin."',stock_max='".$StockMax."',description='".$Description."',updated_by=".$_SESSION['admin_id'],$this->TableID."=".$ID);
 		//echo $this->lastQuery();
 		$this->ChangeCost($Cost,'NOW()',$ID);
+		$this->InsertCustomerPrices($ID);
 	}
 	
 	public function Activate()
@@ -514,7 +614,64 @@ public function MakeRegs($Mode="List")
 		}else{
 			echo 401;
 		}
-		
+	}
+	
+	public function Relationcustomer()
+	{
+		$CustomerID = $_POST['cid'];
+		if($CustomerID>0)
+		{
+			$this->execQuery("UPDATE","relation_product_customer","status='I',updated_by=".$_SESSION['admin_id'],"customer_id=".$CustomerID);
+			$Products = $_POST['total'];
+			for($I=1;$I<=$Products;$I++)
+			{
+				$ProductID = $_POST['id'.$I];
+				$Price = $_POST['value'.$I];
+				$Values = $CustomerID.",".$ProductID.",".$Price.",NOW(),".$_SESSION['admin_id'].",".$_SESSION['company_id'];
+				$Fields .= $Fields? '),('.$Values:$Values;
+			}
+			$this->execQuery("INSERT","relation_product_customer","customer_id,product_id,price,creation_date,created_by,company_id",$Fields);
+			//echo $this->lastQuery();
+		}
+	}
+	
+	public function UpdateRelationByCustomer($CustomerID=0,$Products=array())
+	{
+		if($CustomerID)
+		{
+			$_POST['cid'] = $CustomerID;
+			// $IsDistributor = $this->numRows("customer","*","type_id=4 AND customer_id=".$CustomerID);
+			$I=0;
+			// if(!$IsDistributor)
+			// {
+				$Relations = $this->fetchAssoc("relation_product_customer","product_id","status='A' AND customer_id=".$CustomerID);
+				foreach($Relations as $Relation)
+				{
+					$ProductsRelation[] = $Relation['product_id'];
+				}
+				if(is_array($ProductsRelation))
+				{
+					foreach($Products as $Key=>$Product)
+					{
+						if(in_array($Product[0],$ProductsRelation))
+						{
+							$I++;
+							$_POST['id'.$I] = $Product[0];
+							$_POST['value'.$I] = $Product[1];
+						}
+					}
+				}
+			// }else{
+			// 	foreach($Products as $Key=>$Product)
+			// 	{	
+			// 		$I++;
+			// 		$_POST['id'.$I] = $Product[0];
+			// 		$_POST['value'.$I] = $Product[1];
+			// 	}
+			// }
+			$_POST['total'] = $I;
+			$this->Relationcustomer();
+		}
 	}
 }
 ?>

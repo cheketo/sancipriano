@@ -123,7 +123,7 @@
                   </div>
                   <div class="col-sm-2 col-xs-6 txC">
                     <span id="Price<?php echo $I ?>" class="Hidden ItemText<?php echo $I ?>">$ <?php echo $Item['price'] ?></span>
-                    <?php echo insertElement('text','price_'.$I,$Item['price'],'ItemField'.$I.' form-control calcable txC','data-inputmask="\'mask\': \'9{+}.99\'" placeholder="Precio" validateEmpty="Ingrese un precio"'); ?>
+                    <?php echo insertElement('text','price_'.$I,$Item['price'],'ItemField'.$I.' form-control calcable txC OrderItemMask','data-inputmask="\'mask\': \'9{+}.99\'" placeholder="Precio" validateEmpty="Ingrese un precio"'); ?>
                   </div>
                   <div class="col-sm-2 col-xs-6 txC">
                     <span id="Quantity<?php echo $I ?>" class="Hidden ItemText<?php echo $I ?>"><?php echo $Item['quantity'] ?></span>

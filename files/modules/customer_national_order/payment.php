@@ -8,13 +8,13 @@
     $Status = $Edit->Data['status'];
     if($Status!='A')
     {
-        if (isset($_SERVER["HTTP_REFERER"])) {
-            header("Location: " . $_SERVER["HTTP_REFERER"].'&error=status');
-        }else{
-            header('Location: list.php?type=Y&status=A&error=status');
-        }
+        header('Location: list.php?type=Y&status=A&error=status');
 	    die();
     }
+    
+    $Customer = new Customer($Data['customer_id']);
+    $CData = $Customer->GetData();
+    $InitialBalance = $CData['balance']!=0? $CData['balance']*(-1):0;
     
     $Head->setTitle($Data['name']);
     $Head->setSubTitle("Pagar Orden");
@@ -55,9 +55,20 @@
                         <!--- ITEMS --->
                         <div id="ItemWrapper">
                             <?php $I = 1; ?>
-                            <?php foreach($Data['items'] as $Item){?>
+                            <?php 
+                                foreach($Data['items'] as $Item)
+                                {
+                                    if(strtolower($Item['size'])=='kgs')
+                                    {
+                                        $DecimalKgs = '[.99]';
+                                        $Item['quantity'] = number_format($Item['quantity'],2,'.','');
+                                    }else{
+                                        $DecimalKgs = '';
+                                        $Item['quantity'] = number_format($Item['quantity'],0,'.','');
+                                    }
+                            ?>
                             <!--- NEW ITEM --->
-                            <?php $DecimalKgs = strtolower($Item['size'])=='kgs'? '.99':''; ?>
+                            
                             <div id="item_row_<?php echo $I ?>" item="<?php echo $I ?>" class="row form-group inline-form-custom ItemRow bg-gray" style="margin-bottom:0px!important;padding:10px 0px!important;">
                                 <form id="item_form_<?php echo $I ?>" name="item_form_<?php echo $I ?>">
                                     <div class="col-sm-4 col-xs-12 txC">
@@ -70,13 +81,13 @@
                                     </div>
                                     <div class="col-sm-2 col-xs-6 txC">
                                         <span id="QuantityPayment<?php echo $I ?>" class="Hidden ItemText<?php echo $I ?>"><?php echo $Item['quantity'].' '.$Item['size'] ?></span>
-                                        <?php echo insertElement('text','quantity_'.$I,$Item['quantity'],'ItemField'.$I.' form-control calcablePayment QuantityItemPayment txC','data-inputmask="\'mask\': \'9{+}'.$DecimalKgs.'\'" placeholder="Cantidad" validateEmpty="Ingrese una cantidad" style="max-width:70%!important;display:inline-block;"').' '.$Item['size']; ?>
+                                        <?php echo insertElement('text','quantity_'.$I,$Item['quantity'],'ItemField'.$I.' form-control calcablePayment QuantityItemPayment txC',' placeholder="Cantidad" validateEmpty="Ingrese una cantidad" style="max-width:70%!important;display:inline-block;"').' '.$Item['size']; ?>
                                     </div>
-                                    <div id="item_number_<?php echo $I ?>" class="col-sm-1 col-xs-6 txC item_number" total="<?php echo $Item['total']; ?>" item="<?php echo $I ?>">$ <?php echo $Item['total']; ?></div>
+                                    <div id="item_number_<?php echo $I ?>" class="col-sm-1 col-xs-6 txC item_number" total="<?php echo $Item['total']; ?>" item="<?php echo $I ?>">$ <?php echo number_format($Item['total'],2); ?></div>
                                     <div class="col-sm-2 col-xs-6 txC">
                                         <button type="button" id="SaveItemPayment<?php echo $I ?>" title="Entregar" class="btn btnGreen SaveItemPayment" style="margin:0px;" item="<?php echo $I ?>"><i class="fa fa-check"></i></button>
                                         <button type="button" id="EditItemPayment<?php echo $I ?>" class="btn btnBlue EditItemPayment Hidden" style="margin:0px;" item="<?php echo $I ?>"><i class="fa fa-pencil"></i></button>
-                                        <button type="button" id="DeleteItemPayment<?php echo $I ?>"  title="No puede ser entregado" class="btn btnRed DeleteItemPayment" style="margin:0px;" item="<?php echo $I ?>"><i class="fa fa-times"></i></button>	  
+                                        <!--<button type="button" id="DeleteItemPayment<?php echo $I ?>"  title="No puede ser entregado" class="btn btnRed DeleteItemPayment" style="margin:0px;" item="<?php echo $I ?>"><i class="fa fa-times"></i></button>	  -->
                                         <?php echo insertElement('hidden','selected_'.$I);?>
                                     </div>
                                 </form>
@@ -95,17 +106,16 @@
                             &nbsp;
                         </div>
                         <!--- TOTALS --->
-                        <!--- TOTALS --->
                         <div class="row form-group inline-form-custom">
                             <div class="col-xs-12 txC">
-                                <h3>Total: <strong  id="TotalPricePayment" class="text-green">$ 0.00</strong></h3>
+                                <h3>Total a Pagar: <strong  id="TotalPricePayment" class="text-green">$ 0.00</strong></h3>
                                 <?php echo insertElement("hidden","total_price","0"); ?>
                             </div>
                         </div>
                         <!--- TOTALS --->
                     </div>
                     
-                    <h4 class="subTitleB"><i class="fa fa-cubes"></i> Pago</h4>
+                    <h4 class="subTitleB"><i class="fa fa-dollar"></i> Pago</h4>
                     <div class="row">
                         <div class="col-sm-3 col-xs-12">Pago con efectivo: <b>$<?php echo insertElement('text','cash','0','form-control txC InputMask','data-inputmask="\'mask\': \'9{+}[.99]\'" placeholder="0"  style="max-width:75px!important;display:inline-block; border:0px; border-bottom:1px solid;padding:0px!important;height:auto;"'); ?></b></div>
                         <div class="col-sm-9 col-xs-12 txC">
@@ -138,6 +148,18 @@
                     <div class="row" id="CheckWrapper">
                         <!--CHECKS CONTAINER-->
                     </div>
+                    <hr>
+                    <!--- TOTALS --->
+                    <div class="row form-group inline-form-custom">
+                        <div class="col-sm-6 col-xs-12 txC">
+                            <h4>Saldo Incial: <strong  id="InitialBalance" class="">$ <?php echo $InitialBalance; ?></strong></h4>
+                            <?php echo insertElement("hidden","initial_balance",$CData['balance']); ?>
+                        </div>
+                        <div class="col-sm-6 col-xs-12 txC">
+                            <h4>Saldo Final: <strong  id="FinalBalance" class="text-green">$ 0.00</strong></h4>
+                        </div>
+                    </div>
+                    <!--- TOTALS --->
                     <hr>
                     <div class="row txC">
                         <!--<button type="button" class="btn btn-success btnGreen" id="BtnCreate"><i class="fa fa-check-square"></i> Terminar Entrega</button>-->
