@@ -19,7 +19,7 @@
             $DB = self::Connect();
             if(!$Concept)
             {
-
+                $Concept = "Sin concepto. Usuario N°".$_SESSION['admin_id'];
             }
 
             $Customer = $DB->fetchAssoc("customer","*","customer_id=".$CustomerID);
