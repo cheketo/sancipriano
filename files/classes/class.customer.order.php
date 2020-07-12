@@ -114,9 +114,10 @@ public function MakeRegs($Mode="List")
 			}
 			if($Row->Data['status']=="F" || ($Row->Data['status']=="A" && $Row->Data['type']=="Y"))
 			{
-				$Actions	.= 	'<a href="print.php?id='.$Row->ID.'" target="_blank"><button type="button" class="btn btn-info" title="Imprimir Recibo"><i class="fa fa-print"></i></button></a>';
+				$Actions	.= 	'<a href="print.php?id='.$Row->ID.'" target="_blank"><button type="button" class="btn btn-info" title="Imprimir Recibo"><i class="fa fa-print"></i></button></a> ';
+				$Actions	.= 	'<a href="ticket.php?id='.$Row->ID.'" target="_blank"><button type="button" class="btn btn-info" title="Imprimir Ticket"><i class="fa fa-ticket"></i></button></a>';
 			}
-			
+
 			$ItemsReturned=0;
 			$ItemsDelivered=0;
 			foreach($Row->Data['items'] as $Item)
@@ -124,10 +125,10 @@ public function MakeRegs($Mode="List")
 				$ItemsReturned += $Item['quantity_returned'];
 				$ItemsDelivered += $Item['quantity_delivered'];
 			}
-			
+
 			if($Row->Data['status']=="F" && $ItemsReturned<$ItemsDelivered)
 			{
-				
+
 				$Actions	.= 	'<a href="return.php?id='.$Row->ID.'&type='.$_GET['type'].'"><button type="button" class="btn btn-warning" title="Devoluci&oacute;n de Mercader&iacute;a"><i class="fa fa-retweet"></i></button></a>';
 			}
 
@@ -266,7 +267,7 @@ public function MakeRegs($Mode="List")
         if(!$Regs) $Regs.= '<div class="callout callout-info"><h4><i class="icon fa fa-info-circle"></i> No se encontraron ordenes de compras.</h4><p>Puede crear una orden haciendo click <a href="new.php?type='.$_GET['type'].'">aqui</a>.</p></div>';
 		return $Regs;
 	}
-	
+
 	public function InsertDefaultSearchButtons()
 	{
 		$Delete = ($_GET['type']=='Y' && $_GET['status']!='F') || ($_GET['type']=='N' && $_GET['status']=='P')? '<button type="button" title="Borrar registros seleccionados" class="btn bg-red animated fadeIn NewElementButton Hidden DeleteSelectedElements"><i class="fa fa-trash-o"></i></button>':'';
@@ -463,7 +464,7 @@ public function MakeRegs($Mode="List")
 		//echo $this->lastQuery();
 		if($Type=="N" && $_POST['delivery_man'])
 			$this->Associate($NewID,$_POST['delivery_man']);
-		
+
 		$Product = new Product();
 		$Product->UpdateRelationByCustomer($CustomerID,$Products);
 	}
@@ -472,13 +473,13 @@ public function MakeRegs($Mode="List")
 	{
 		$ID 	= $_POST['id'];
 		$Edit	= new CustomerOrder($ID);
-		
+
 		if($Edit->Data['delivery_id']>0)
 		{
 			$Delivery = new CustomerDeliveryOrder();
 			$Delivery->RemoveOrderItemsToDelivery($ID,$Edit->Data['delivery_id']);
 		}
-		
+
 		// ITEMS DATA
 		$Items = array();
 		$X=0;
@@ -504,6 +505,11 @@ public function MakeRegs($Mode="List")
 		$Branch 		= $this->fetchAssoc('customer_branch','branch_id',"customer_id=".$CustomerID);
 		$BranchID		= $Branch[0]['branch_id'];
 
+		// if( $Edit->Data[ 'customer_id' ] != $CustomerID )
+		// {
+		//
+		// }
+
 		$Update		= $this->execQuery('update','customer_order',"type='".$Type."',branch_id=".$BranchID.",customer_id='".$CustomerID."',currency_id=".$CurrencyID.",extra='".$Extra."',total=".$Total.",delivery_date='".$Date."',status='".$Status."',updated_by=".$_SESSION['admin_id'],"order_id=".$ID);
 		//echo $this->lastQuery();
 
@@ -525,7 +531,7 @@ public function MakeRegs($Mode="List")
 		$Product = new Product();
 		$Product->UpdateRelationByCustomer($CustomerID,$Products);
 	}
-	
+
 	public function Associate($OrderID=0,$DeliveryManID=0)
 	{
 		$IDs = $OrderID==0? $_POST['selected']."0": $OrderID;
@@ -557,7 +563,7 @@ public function MakeRegs($Mode="List")
 					if($MaxPosition[0]['position']>1)
 						$Position = $MaxPosition[0]['position'];
 				}
-				
+
 				$Delivery = new CustomerDeliveryOrder();
 				$Delivery->AddOrderItemsToDelivery($Order['order_id'],$DeliveryID);
 				if($Order['delivery_id']>0 && $DeliveryID!=$Order['delivery_id'])
@@ -702,7 +708,7 @@ public function MakeRegs($Mode="List")
 				// 			$Item['additional_price_retailer'] = $Category[0]['additional_price_retailer'];
 				// 			$Item['additional_percentage_retailer'] = $Category[0]['additional_percentage_retailer'];
 				// 		}
-	
+
 				// 		if(!$Item['additional_price_wholesaler'])
 				// 		{
 				// 			$Config	= $this->fetchAssoc('product_configuration','*',"status='A' AND company_id=".$_SESSION['company_id'],'creation_date DESC');
@@ -725,14 +731,14 @@ public function MakeRegs($Mode="List")
 				// 		else
 				// 			$Variation = "price";
 				// 	}
-	
+
 				// 	$AdditionalPrice = $Variation=="percentage"? ($Cost*$Field)/100 : $Field ;
 				// 	$Price = $Cost + $AdditionalPrice;
 				// 	$Prices[] = round($Price);
 				// }else{
 				// 	$Prices[] = $RelationPrice;
 				// }
-				
+
 				$Prices[] = $Product->GetProductPrice($_POST['customer'],$Customer->Data['type_id']);
 			}
 		}
@@ -878,10 +884,10 @@ public function MakeRegs($Mode="List")
 			echo "403";
 		}
 	}
-	
-	
+
+
 	// RETURN FOR ALL TYPES OF ORDERS
-	
+
 	public function Returnorder()
 	{
 		$OrderID = $_POST['id'];
@@ -889,10 +895,10 @@ public function MakeRegs($Mode="List")
 		$OrderData = $this->fetchAssoc("customer_order","*","order_id=".$OrderID);
 		$Data = $OrderData[0];
 		$OrderID = $Data['order_id'];
-		
+
 		if($OrderID && $Data['status'] == 'F')
 		{
-			
+
 			// LAST MOVEMENT
 			$LastMovement = $this->fetchAssoc("movement","*","order_id=".$OrderID." AND (type_id=1 OR type_id=5)","movement_id DESC");
 			$LastMovementID = $LastMovement[0]['movement_id'];
@@ -903,7 +909,7 @@ public function MakeRegs($Mode="List")
 			}
 			$PaymentID = 4;
 			$AmountReturned = 0;
-				
+
 
 			$Items = $_POST['items'];
 			for($I=1;$I<=$Items;$I++)
@@ -916,7 +922,7 @@ public function MakeRegs($Mode="List")
 					$this->execQuery("UPDATE","customer_order_item","returned='Y',quantity_returned=quantity_returned+".$QuantityReturned.",payment_status='F'","item_id=".$_POST['item_'.$I]." AND delivered='Y' AND quantity_delivered>=quantity_returned+".$QuantityReturned);
 				}
 			}
-			
+
 			// INSERT RETURN MOVEMENT
 			$LastMovementID = Movement::InsertMovement($AmountReturned,$CustomerID,6,"Devolución de Orden N°".$OrderID,$OrderID,"F",$PaymentID,$LastMovementID);
 			$this->execQuery("UPDATE","customer_order","returned_amount=returned_amount+".$AmountReturned.",returned='Y',updated_by=".$_SESSION['admin_id'],"order_id=".$OrderID);
@@ -924,6 +930,6 @@ public function MakeRegs($Mode="List")
 			echo "403";
 		}
 	}
-	
+
 }
 ?>

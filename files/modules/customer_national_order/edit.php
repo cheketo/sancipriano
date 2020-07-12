@@ -1,6 +1,6 @@
 <?php
     include("../../includes/inc.main.php");
-    
+
     $ID     = $_GET['id'];
     $Edit   = new CustomerOrder($ID);
     // print_r($Edit); die;
@@ -17,16 +17,18 @@
 			die();
     }
     $Items  = $DB->fetchAssoc('customer_order_item a INNER JOIN product b ON (a.product_id = b.product_id)','b.title AS product,a.*,(a.price * a.quantity) AS total','order_id='.$ID);
+    $Customer = new Customer($Data['customer_id']);
+    // print_r( $Customer->Data[ 'name' ] );
     // $Branch = $DB->fetchAssoc('customer_branch','address','branch_id='.$Data['branch_id']);
     // $Branch = $Branch[0]['address'];
-    
+
     if($Data['type']=='N' && ($Status=='A' || $Data['delivery_id']))
     {
       $DeliveryMan = $Edit->GetDeliveryMan();
     }else{
       $DeliveryOption = ' ';
     }
-    
+
     $OrderType = array("Y"=>"En Local","N"=>"Con Entrega");
     if($Data['type']=='Y')
     {
@@ -34,9 +36,9 @@
     }else{
       $DBName = "CONCAT(name,' - (Z ',zone,')') as name";
     }
-    
+
     $PageTitle = $Data['status']=='V'? "Reactivar":"Editar";
-    
+
     $Head->setTitle($PageTitle." Orden de ".$Data['name']);
     $Head->setSubTitle($Menu->GetTitle());
     $Head->setIcon($Menu->GetHTMLicon());
@@ -48,11 +50,12 @@
   <div class="box animated fadeIn">
     <div class="box-header flex-justify-center">
       <div class="col-xs-12">
-        
+
           <div class="innerContainer main_form">
             <!--<form id="new_order">-->
             <?php echo insertElement("hidden","action",'update'); ?>
             <?php echo insertElement("hidden","id",$ID); ?>
+            <?php echo insertElement("hidden","customer",$Data['customer_id']); ?>
             <?php echo insertElement("hidden","type",$Data['type']); ?>
             <?php echo insertElement("hidden","status",$Status); ?>
             <?php echo insertElement("hidden","customer_name",$Data['name']); ?>
@@ -60,12 +63,16 @@
             <h4 class="subTitleB"><i class="fa fa-building"></i> Cliente</h4>
             <div class="row form-group inline-form-custom">
               <div class="col-xs-12">
-                  <?php //echo insertElement('select','customer',$Data['branch_id'],'form-control chosenSelect','data-placeholder="Seleccione un Cliente" validateEmpty="Seleccione un cliente"',$DB->fetchAssoc('customer a INNER JOIN customer_branch b ON (a.customer_id=b.customer_id) INNER JOIN customer_type c ON (a.type_id=c.type_id)',"b.branch_id,CONCAT(a.name,' - (Z ',a.zone,')') as address","a.status='A' AND a.company_id=".$_SESSION['company_id'],'b.address'),' ',''); ?>
-                  <?php echo insertElement('select','customer',$Data['customer_id'],'form-control chosenSelect','data-placeholder="Seleccione un Cliente" validateEmpty="Seleccione un cliente"',$DB->fetchAssoc('customer',"customer_id,".$DBName,"status='A' AND company_id=".$_SESSION['company_id'],'name'),' ',''); ?>
+                <h4><strong>
+                  <?php
+                     // echo insertElement('select','customer',$Data['customer_id'],'form-control chosenSelect','data-placeholder="Seleccione un Cliente" validateEmpty="Seleccione un cliente"',$DB->fetchAssoc('customer',"customer_id,".$DBName,"status='A' AND company_id=".$_SESSION['company_id'],'name'),' ','');
+                    echo $Customer->Data[ 'name' ];
+                  ?>
+                </strong></h4>
               </div>
             </div>
             <div id="CustomerData">
-              
+
             </div>
             <br>
             <h4 class="subTitleB"><i class="fa fa-ticket"></i> Tipo de Orden</h4>
@@ -74,7 +81,7 @@
                   <?php echo insertElement('select','order_type',$Data['type'],'form-control chosenSelect','disabled="disabled"',$OrderType); ?>
               </div>
             </div>
-            
+
             <?php $Hidden = $Data['type']=='N'?'':'Hidden'; ?>
             <div id="DeliveryWrapper" class="<?php echo $Hidden; ?>">
               <h4 class="subTitleB"><i class="fa fa-truck"></i> Repartidor</h4>
@@ -84,13 +91,13 @@
                 </div>
               </div>
             </div>
-           
+
             <br>
             <h4 class="subTitleB"><i class="fa fa-cubes"></i> Productos</h4>
-            
+
             <div style="margin:0px 10px;">
               <div class="row form-group inline-form-custom bg-light-blue" style="margin-bottom:0px!important;">
-                
+
                 <div class="col-sm-4 col-xs-12 txC">
                   <strong>Art&iacute;culo</strong>
                 </div>
@@ -111,9 +118,9 @@
                 <?php $I = 1; ?>
                 <?php foreach($Items as $Item){?>
                 <!--- NEW ITEM --->
-                <?php 
-                  $Date = explode(" ",$Item['delivery_date']); 
-                  $Date = implode("/",array_reverse(explode("-",$Date[0]))); 
+                <?php
+                  $Date = explode(" ",$Item['delivery_date']);
+                  $Date = implode("/",array_reverse(explode("-",$Date[0])));
                 ?>
                 <div id="item_row_<?php echo $I ?>" item="<?php echo $I ?>" class="row form-group inline-form-custom ItemRow bg-gray" style="margin-bottom:0px!important;padding:10px 0px!important;">
                   <form id="item_form_<?php echo $I ?>" name="item_form_<?php echo $I ?>">
@@ -129,7 +136,7 @@
                     <span id="Quantity<?php echo $I ?>" class="Hidden ItemText<?php echo $I ?>"><?php echo $Item['quantity'] ?></span>
                     <?php echo insertElement('text','quantity_'.$I,$Item['quantity'],'ItemField'.$I.' form-control calcable QuantityItem txC','validateOnlyNumbers="Solo se permiten n&uacute;meros" placeholder="Cantidad" validateEmpty="Ingrese una cantidad"'); ?>
                   </div>
-                  
+
                   <div id="item_number_<?php echo $I ?>" class="col-sm-1 col-xs-6 txC item_number" total="<?php echo $Item['total']; ?>" item="<?php echo $I ?>">$ <?php echo $Item['total']; ?></div>
                   <div class="col-sm-2 col-xs-6 txC">
   									  <button type="button" id="SaveItem<?php echo $I ?>" class="btn btnGreen SaveItem" style="margin:0px;" item="<?php echo $I ?>"><i class="fa fa-check"></i></button>
@@ -159,8 +166,8 @@
               </div>
               <!--- TOTALS --->
             </div>
-            
-            
+
+
             <div class="row">
               <div class="col-sm-6 col-xs-12 txC">
                 <button type="button" id="add_order_item" class="btn btn-warning"><i class="fa fa-plus"></i> <strong>Agregar Art&iacute;culo</strong></button>
@@ -174,7 +181,7 @@
                 </span>
               </div>
             </div>
-            
+
             <h4 class="subTitleB"><i class="fa fa-info-circle"></i> Informaci&oacute;n Extra</h4><div class="row form-group inline-form-custom">
               <div class="col-xs-12">
                   <?php echo insertElement('textarea','extra',$Edit->Data['extra'],'form-control',' placeholder="Ingrese otros datos..."'); ?>
