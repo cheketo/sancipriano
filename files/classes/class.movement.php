@@ -31,7 +31,7 @@
             {
         		    $Balance = floatval($Balance) + floatval($Amount);
         		}else{
-        		    $Balance = floatval($Balance) + floatval($Amount);
+        		    $Balance = floatval($Balance) - floatval($Amount);
             }
 
             $DB->execQuery('UPDATE','customer','balance='.$Balance,"customer_id=".$CustomerID);
