@@ -125,10 +125,10 @@ public function MakeRegs($Mode="List")
 
 							</div>';
 			}
-			
+
 			$BalanceClass = $Row->Data['balance']>=0?'success':'danger';
 			$Row->Data['balance'] = $Row->Data['balance']? $Row->Data['balance']: '0.00';
-			
+
 			switch(strtolower($Mode))
 			{
 				case "list":
@@ -285,7 +285,7 @@ public function MakeRegs($Mode="List")
 		// {
 		// 	$this->AddWhereString(" AND c.provider_id = a.provider_id");
 		// }
-		
+
 		if($_POST['tipo_balance'])
 		{
 			switch ($_POST['tipo_balance']) {
@@ -304,11 +304,11 @@ public function MakeRegs($Mode="List")
 				case '5':
 					$Condition = ">=";
 				break;
-				
+
 			}
 			$this->SetWhereCondition("a.balance",$Condition,"0.00");
 		}
-		
+
 		if($_POST['country']) $this->SetWhereCondition("g.name","LIKE", '%'.$_POST['country'].'%');
 		if($_GET['country']) $this->SetWhereCondition("g.name","LIKE", '%'.$_GET['country'].'%');
 
@@ -426,7 +426,7 @@ public function MakeRegs($Mode="List")
 		$GrossIncome	= $_POST['gross_income_number'];
 		$AdditionalPer	= $_POST['additional_percentage'];
 		$AdditionalPri	= $_POST['additional_price'];
-		
+
 		//VALIDATIONS
 		if(!$Name) echo 'Falta Nombre';
 		if(!$Type) echo 'Tipo incompleto';
@@ -857,21 +857,25 @@ public function MakeRegs($Mode="List")
 
         echo $HTML;
     }
-    
-    
+
+
     public function Addcredit()
     {
-    	$Amount = $_POST['credit'];
+    	$Amount = trim($_POST['credit']);
     	$CustomerID = $_POST['cid'];
     	$Concept = $_POST['credit_description'];
+
+			$Amount = $Amount < 0? $Amount*(-1):$Amount;
     	Movement::InsertMovement($Amount,$CustomerID,4,$Concept,0,"F");
     }
-    
+
     public function Adddebit()
     {
-    	$Amount = $_POST['debit'];
+    	$Amount = trim($_POST['debit']);
     	$CustomerID = $_POST['cid'];
     	$Concept = $_POST['debit_description'];
+
+			$Amount = $Amount < 0? $Amount*(-1):$Amount;
     	Movement::InsertMovement($Amount,$CustomerID,3,$Concept,0,"F");
     }
 }

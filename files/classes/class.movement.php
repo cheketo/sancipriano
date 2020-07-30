@@ -22,9 +22,11 @@
                 $Concept = "Sin concepto. Usuario N°".$_SESSION['admin_id'];
             }
 
-            $Customer = $DB->fetchAssoc("customer","*","customer_id=".$CustomerID);
-    		    $Customer = $Customer[0];
-    		    $Balance = $Customer['balance'];
+            // $Customer = $DB->fetchAssoc("customer","*","customer_id=".$CustomerID);
+    		    // $Customer = $Customer[0];
+    		    // $Balance = $Customer['balance'];
+
+            $Balance = $DB->fetchAssoc("movement","MAX(movement_id)","customer_id=".$CustomerID)[0]['balance'];
 
         		$Type = $DB->fetchAssoc("movement_type","*","type_id=".$TypeID);
         		if($Type[0]['operation']=="C")
