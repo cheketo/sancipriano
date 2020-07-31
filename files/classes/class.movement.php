@@ -26,7 +26,8 @@
     		    // $Customer = $Customer[0];
     		    // $Balance = $Customer['balance'];
 
-            $Balance = $DB->fetchAssoc("movement","MAX(movement_id)","customer_id=".$CustomerID)[0]['balance'];
+            $Balance = $DB->fetchAssoc("movement","movement_id, balance, creation_date","customer_id=".$CustomerID, "movement_id DESC")[0];
+            $Balance = $Balance['balance'];
 
         		$Type = $DB->fetchAssoc("movement_type","*","type_id=".$TypeID);
         		if($Type[0]['operation']=="C")
