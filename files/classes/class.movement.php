@@ -11,7 +11,7 @@
         public static function GetMovementsByCustomerID($ID)
         {
             $DB = self::Connect();
-            return $DB->fetchAssoc('movement a INNER JOIN movement_type b ON (a.type_id=b.type_id) LEFT JOIN payment c ON (c.payment_id=a.payment_id)','a.*,b.title AS type,b.operation,c.title AS payment','customer_id='.$ID,'a.creation_date DESC,a.type_id DESC');
+            return $DB->fetchAssoc('movement a INNER JOIN movement_type b ON (a.type_id=b.type_id) LEFT JOIN payment c ON (c.payment_id=a.payment_id)','a.*,b.title AS type,b.operation,c.title AS payment','customer_id='.$ID,'a.creation_date DESC,a.movement_id DESC');
         }
 
         public static function InsertMovement($Amount=0,$CustomerID,$TypeID,$Concept="",$OrderID=0,$Status="P",$PaymentID=0,$ParentID=0,$CheckID=0)

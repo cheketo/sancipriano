@@ -51,8 +51,11 @@ class Security extends dataBase
 				$GroupsAllowed 	= $this->numRows("relation_menu_group","*","menu_id = ".$this->MenuData['menu_id']." AND group_id IN (".$MenuGroups.")");
 
 				if($Rows<1 && $Exceptions<1 && $GroupsAllowed<1){
+					// $this->fetchAssoc("relation_admin_menu","*","menu_id = ".$this->MenuData['menu_id']." AND admin_id = ".$AdminID);
+					// var_dump($this->lastQuery());
+					// die();
 					header("Location: ".$_SERVER['HTTP_REFERER']); echo '<script>window.history.go(-1)</script>';
-					
+
 				}
 			}elseif($this->Link==self::LOGIN){
 				header("Location: ".self::DESTINATION);
