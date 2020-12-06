@@ -8,7 +8,7 @@
     <!--  <div class="pull-left image">-->
     <!--    <img src="../../../skin/images/customers/1.png" style="max-width:100%;" alt="User Image">-->
     <!--  </div>-->
-      <!-- <div class="pull-left info">
+    <!-- <div class="pull-left info"> -->
     <!--    <h4><p>Fascination</p></h4>-->
     <!--    <a href="#"><i class="fa fa-circle text-success"></i> Online</a>-->
     <!--  </div> -->
@@ -30,7 +30,10 @@
     <ul class="sidebar-menu">
       <!--<li class="header">MEN&Uacute; DEL SISTEMA</li>-->
       <?php
-        $Menu   ->insertMenu($_SESSION['profile_id'],$_SESSION['admin_id']);
+        if($_SESSION['profile_id'] && $_SESSION['admin_id'])
+        {
+          $Menu->insertMenu($_SESSION['profile_id'],$_SESSION['admin_id']);
+        }
       ?>
     </ul>
   </section>

@@ -86,7 +86,10 @@ class CustomerDelivery extends DataBase
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 public function MakeRegs($Mode="List")
 	{
+		$DeliveryTotalTitleFlag = false;
 		$Rows	= $this->GetRegs();
+		$Regs 	= '';
+		$Restrict = '';
 		// echo $this->lastQuery();
 		for($i=0;$i<count($Rows);$i++)
 		{
@@ -235,6 +238,8 @@ public function MakeRegs($Mode="List")
 						$DeliveryTotalTitle = 'Recaudado';
 					else
 						$DeliveryTotalTitle = 'Proyectado';
+
+					$Row->Data['orders'][0]['currency'] = isset($Row->Data['orders'][0]) && isset($Row->Data['orders'][0]['currency'])? $Row->Data['orders'][0]['currency']:'';
 					
 					$Regs	.= '<div class="row listRow'.$RowBackground.'" id="row_'.$Row->ID.'" title="un reparto">
 									<div class="col-lg-4 col-md-5 col-sm-4 col-xs-5">
@@ -298,6 +303,7 @@ public function MakeRegs($Mode="List")
 	
 	protected function InsertSearchField()
 	{
+		$_GET['delivery_date'] = isset($_GET['delivery_date'])? $_GET['delivery_date']: '';
 		return '<!-- Customer Branch -->
           <div class="input-group">
             <span class="input-group-addon order-arrows" order="name" mode="asc"><i class="fa fa-sort-alpha-asc"></i></span>
@@ -318,7 +324,7 @@ public function MakeRegs($Mode="List")
 	
 	protected function InsertSearchButtons()
 	{
-		if($_REQUEST['status'])
+		if(isset($_REQUEST['status']))
 			$Status = $_REQUEST['status'];
 		else
 			$Status = 'P';
@@ -334,19 +340,20 @@ public function MakeRegs($Mode="List")
 		//$this->SetTable($this->Table.' a LEFT JOIN customer_order_item b ON (b.order_id=a.order_id) LEFT JOIN product c ON (b.product_id = c.product_id) LEFT JOIN customer_branch d ON (d.customer_id=a.customer_id)');
 		$this->SetTable($this->Table.' a LEFT JOIN customer_order b ON (b.delivery_id=a.delivery_id) LEFT JOIN customer_order_item c ON (c.order_id=b.order_id) LEFT JOIN product d ON (c.product_id = d.product_id) LEFT JOIN customer e ON (e.customer_id=b.customer_id) LEFT JOIN customer_delivery_order f ON (f.delivery_id=a.delivery_id) LEFT JOIN customer_delivery_order_item g ON (g.order_id=b.order_id AND g.delivery_id=a.delivery_id)');
 		$this->SetFields('a.delivery_id,b.order_id,b.type,b.total,b.extra,b.status,b.payment_status,b.delivery_status,e.name as customer');
-		$this->SetWhere("a.company_id=".$_SESSION['company_id']);
+		if($_SESSION['company_id'])
+			$this->SetWhere("a.company_id=".$_SESSION['company_id']);
 		//$this->AddWhereString(" AND c.company_id = a.company_id");
 		$this->SetGroupBy("a.".$this->TableID);
 		
-		foreach($_POST as $Key => $Value)
-		{
-			$_POST[$Key] = $Value;
-		}
+		// foreach($_POST as $Key => $Value)
+		// {
+		// 	$_POST[$Key] = $Value;
+		// }
 			
-		if($_POST['name']) $this->SetWhereCondition("e.name","LIKE","%".$_POST['name']."%");
+		if(isset($_POST['name'])) $this->SetWhereCondition("e.name","LIKE","%".$_POST['name']."%");
 		//if($_POST['title']) $this->SetWhereCondition("c.title","LIKE","%".$_POST['title']."%");
 		//if($_POST['extra']) $this->SetWhereCondition("a.extra","LIKE","%".$_POST['extra']."%");
-		if($_REQUEST['delivery_date'])
+		if(isset($_REQUEST['delivery_date']))
 		{
 			$Date = strtolower($_REQUEST['delivery_date']);
 			if($Date=='today' || $Date=='expired')
@@ -368,50 +375,49 @@ public function MakeRegs($Mode="List")
 		// }
 		
 		
-		if($_REQUEST['status'])
+		if(isset($_REQUEST['status']))
 		{
-			if($_REQUEST['status']!='X')
+			if(isset($_REQUEST['status'])!='X')
 			{
-				if($_POST['status']) $this->SetWhereCondition("a.status","=", $_POST['status']);
-				if($_GET['status']) $this->SetWhereCondition("a.status","=", $_GET['status']);
+				if(isset($_POST['status'])) $this->SetWhereCondition("a.status","=", $_POST['status']);
+				if(isset($_GET['status'])) $this->SetWhereCondition("a.status","=", $_GET['status']);
 			}else{
-				if($_POST['status']) $this->SetWhereCondition("a.status","<>", "I");
-				if($_GET['status']) $this->SetWhereCondition("a.status","<>", "I");
+				if(isset($_POST['status'])) $this->SetWhereCondition("a.status","<>", "I");
+				if(isset($_GET['status'])) $this->SetWhereCondition("a.status","<>", "I");
 			}
 		}else{
-			if($_REQUEST['delivery_date']!="expired")
+			if(!isset($_REQUEST['delivery_date']) || $_REQUEST['delivery_date']!="expired")
 				$this->SetWhereCondition("a.status","=","P");
 			else
 				$this->SetWhereCondition("a.status","=","V");
 		}
-			if(strtolower($_POST['view_order_mode'])=="desc")
-				$Mode = "DESC";
-			else
-				$Mode = $_POST['view_order_mode'];
+		$Mode = "DESC";
+		if(isset($_POST['view_order_mode']) && strtolower($_POST['view_order_mode'])!="desc")
+			$Mode = $_POST['view_order_mode'];
 			
-			$Order = strtolower($_POST['view_order_field']);
-			switch($Order)
-			{
-				case "name": 
-					$Order = 'name';
-					$Prefix = "e.";
-				break;
-				// case "title": 
-				// 	$Order = 'title';
-				// 	$Prefix = "c.";
-				// break;
-				default:
-					$Order = 'delivery_date';
-					$Prefix = "a.";	
-				break;
-			}
-			$this->SetOrder($Prefix.$Order." ".$Mode);
+		$Order = isset($_POST['view_order_field'])? strtolower($_POST['view_order_field']):'';
+		switch($Order)
+		{
+			case "name": 
+				$Order = 'name';
+				$Prefix = "e.";
+			break;
+			// case "title": 
+			// 	$Order = 'title';
+			// 	$Prefix = "c.";
+			// break;
+			default:
+				$Order = 'delivery_date';
+				$Prefix = "a.";	
+			break;
+		}
+		$this->SetOrder($Prefix.$Order." ".$Mode);
 		// }
-		if($_POST['regsperview'])
+		if(isset($_POST['regsperview']))
 		{
 			$this->SetRegsPerView($_POST['regsperview']);
 		}
-		if(intval($_POST['view_page'])>0)
+		if(isset($_POST['view_page']) && intval($_POST['view_page'])>0)
 			$this->SetPage($_POST['view_page']);
 	}
 
@@ -438,9 +444,9 @@ public function MakeRegs($Mode="List")
 	{
 		// Basic Data
 		$DeliveryDate	= ToDBDate($_POST['delivery_date']);
-		$DeliveryManID	= $_POST['delivery_man'];
+		$DeliveryManID	= isset($_POST['delivery_man'])? $_POST['delivery_man']:0;
 		$Orders			= explode(",",$_POST['orders']);
-		$Extra			= $_POST['extra'];
+		$Extra			= isset($_POST['extra'])?$_POST['extra']:'';
 		$Status			= 'P';
 		
 		if(!empty($Orders))
@@ -449,7 +455,9 @@ public function MakeRegs($Mode="List")
 			$this->execQuery('insert',$this->Table,'delivery_man_id,delivery_date,extra,status,creation_date,created_by,company_id',$DeliveryManID.",'".$DeliveryDate."','".$Extra."','".$Status."',NOW(),".$_SESSION['admin_id'].",".$_SESSION['company_id']);
 			//echo $this->lastQuery();
 			$NewID 		= $this->GetInsertId();
-			
+			// echo "<br>";
+			// print_r($NewID);
+			// die();
 			//SET DELIVERY ID TO ORDERS AND POSITION
 			$Position = 1;
 			$Delivery = new CustomerDeliveryOrder();
@@ -694,6 +702,7 @@ public function MakeRegs($Mode="List")
 			}
 			$HTML .= '<li cli="'.$Order['order_id'].'"><span class="'.$TextClass.'"><i class="fa fa-map-marker"></i> <b>'.$Order['address'].'</b></span><span class="text-black"> - <b>Z '.$Order['zone'].'</b> - '.$Date.$DeliveryMan.'</span></li>';
 		}
+		$Order = isset($Order) && is_array($Order)? $Order:[];
 		if(!count($Order))
 			$HTML = "No existen ordenes programadas para el ".$_POST['date'];
 		
@@ -772,18 +781,21 @@ public function MakeRegs($Mode="List")
 				$DB->execQuery('UPDATE','relation_delivery_order',"status='I'","delivery_id=".$Order['delivery_id']."AND order_id = ".$Order['order_id']." AND status <> 'I'");
 			}
 		}
-		// INSERT ORDER
-		$DB->execQuery('INSERT','customer_delivery_order',"  ",$Rows);
-		
-		// INSERT ORDER PRODUCTS
-		$DB->execQuery('INSERT','customer_delivery_order_item',"  ",$ItemsRows);
+		if( isset($Rows) && isset($ItemsRows) )
+		{
+			// INSERT ORDER
+			$DB->execQuery('INSERT','customer_delivery_order',"  ",$Rows);
+			
+			// INSERT ORDER PRODUCTS
+			$DB->execQuery('INSERT','customer_delivery_order_item',"  ",$ItemsRows);
+		}
 	}
 	
 	public static function InsertCancelledDeliveryOrder($DB,$Order)
 	{
-		if(!$Order['delivery_id']);
+		if(!isset($Order['delivery_id']) || !$Order['delivery_id'])
 			$Order = $DB -> fetchAssoc('customer_order','*','order_id='.$OrderID);
-		if($Order['delivery_id'])
+		if( isset($Order['delivery_id']) && $Order['delivery_id'] )
 		{
 			$Order['status'] = 'C';
 			$Row = "NULL";
@@ -805,11 +817,15 @@ public function MakeRegs($Mode="List")
 			}
 			$DB->execQuery('UPDATE','relation_delivery_order',"status='I'","delivery_id=".$Order['delivery_id']."AND order_id = ".$Order['order_id']." AND status <> 'I'");
 		}
-		// INSERT ORDER
-		$DB->execQuery('INSERT','customer_delivery_order',"  ",$Rows);
-		
-		// INSERT ORDER PRODUCTS
-		$DB->execQuery('INSERT','customer_delivery_order_item',"  ",$ItemsRows);
+
+		if( isset($Rows) && isset($ItemsRows) )
+		{
+			// INSERT ORDER
+			$DB->execQuery('INSERT','customer_delivery_order',"  ",$Rows);
+			
+			// INSERT ORDER PRODUCTS
+			$DB->execQuery('INSERT','customer_delivery_order_item',"  ",$ItemsRows);
+		}
 	}
 }
 ?>

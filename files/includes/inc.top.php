@@ -1,5 +1,6 @@
-<?php if(!$_COOKIE['renovatio-skin']) $_COOKIE['renovatio-skin'] = 'skin-purple-light'; ?>
-<body class="hold-transition <?php echo $_COOKIE['sidebarmenu']." ".$_COOKIE['renovatio-skin'] ?> sidebar-mini">
+<?php
+if( !isset($_COOKIE['renovatio-skin']) || !$_COOKIE['renovatio-skin']) $_COOKIE['renovatio-skin'] = 'skin-purple-light'; ?>
+<body class="hold-transition <?php if(isset($_COOKIE['sidebarmenu'])) echo $_COOKIE['sidebarmenu'] ?> <?= $_COOKIE['renovatio-skin'] ?> sidebar-mini">
 <!-- Site wrapper -->
 <div class="wrapper">
   <?php include('../../includes/inc.header.php'); ?>

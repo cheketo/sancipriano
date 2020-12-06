@@ -17,7 +17,7 @@ class Category extends DataBase
 			$Data = $this->fetchAssoc($this->Table,"*",$this->TableID."=".$ID);
 			$this->Data = $Data[0];
 			$this->ID = $ID;
-			if($this->Data['parent_id'])
+			if(isset($this->Data['parent_id']) && $this->Data['parent_id'])
 			{
 				$Parent = $this->fetchAssoc($this->Table,"title","category_id=".$this->Data['parent_id']);
 				$this->Data['parent'] = $Parent[0]['title'];
@@ -32,7 +32,6 @@ class Category extends DataBase
 			$this->Prodcuts = $this->fetchAssoc("relation_product_category",'product_id',$this->TableID." =".$this->ID);
 		}
 		return $this->Products;
-		
 	}
 	
 	public function GetImg()
@@ -47,7 +46,7 @@ class Category extends DataBase
 		foreach($Categories as $Category)
 		{
 			$Children = $this->fetchAssoc($this->Table,$this->TableID,"status='A' AND parent_id =".$Category['category_id']);
-			if(count($Children)>0)
+			if($Children && count($Children)>0)
 				$Parents[] = array('category_id' => $Category['category_id'], 'title' => $Category['title']);
 		}
 		return $Parents;
@@ -55,14 +54,13 @@ class Category extends DataBase
 	
 	public function GetAllCategories($Order='parent_id,title')
 	{
-		return $this->fetchAssoc($this->Table,'*',"status='A' AND company_id = ".$_SESSION['company_id'],$Order);
-		
+		return $this->fetchAssoc($this->Table,'*',"status='A' AND company_id = ".$_SESSION['company_id'],$Order);	
 	}
 	
 	public function CalculateCategoryLevel($CategoryID)
 	{
 		$Parent = $this->fetchAssoc($this->Table,"parent_id","category_id=".$CategoryID);
-		$ParentID = $Parent[0]['parent_id'];
+		$ParentID = isset($Parent[0])?$Parent[0]['parent_id']:0;
 		if($ParentID>0)
 		{
 			return 1 + $this->CalculateCategoryLevel($ParentID);
@@ -81,7 +79,7 @@ public function MakeRegs($Mode="List")
 		for($i=0;$i<count($Rows);$i++)
 		{
 			$Row	=	new Category($Rows[$i][$this->TableID]);
-			$Actions= '';
+			$Regs = $Actions = $Restrict = '';
 			//var_dump($Row);
 			// $UserGroups = $Row->GetGroups();
 			// $Groups='';
@@ -99,7 +97,7 @@ public function MakeRegs($Mode="List")
 				$Actions	.= '<a class="activateElement" process="../../library/processes/proc.common.php" id="activate_'.$Row->ID.'"><button type="button" class="btn btnGreen"><i class="fa fa-check-circle"></i></button></a>';
 			}
 			$Actions	.= '</span>';
-			if($Row->Data['parent'])
+			if(isset($Row->Data['parent']) && $Row->Data['parent'])
 				$Row->Data['parent'] = '<span class="label label-primary">'.ucfirst($Row->Data['parent']).'</span>';
 			else
 				$Row->Data['parent'] = '<span class="label label-warning">Categor&iacute;a Principal</span>';
@@ -208,9 +206,9 @@ public function MakeRegs($Mode="List")
 			$_POST[$Key] = $Value;
 		}
 			
-		if($_POST['title']) $this->SetWhereCondition("b.title","LIKE","%".$_POST['title']."%");
-		if($_POST['short_title']) $this->SetWhereCondition("b.short_title","LIKE","%".$_POST['short_title']."%");
-		if(!is_null($_POST['parent']))
+		if(isset($_POST['title']) && $_POST['title']) $this->SetWhereCondition("b.title","LIKE","%".$_POST['title']."%");
+		if(isset($_POST['short_title']) && $_POST['short_title']) $this->SetWhereCondition("b.short_title","LIKE","%".$_POST['short_title']."%");
+		if(isset($_POST['parent']) && !is_null($_POST['parent']))
 		{
 			switch($_POST['parent'])
 			{
@@ -237,18 +235,17 @@ public function MakeRegs($Mode="List")
 		// {
 		// 	$this->AddWhereString(" AND c.company_id = a.company_id");
 		// }
-		if($_REQUEST['status'])
+		if(isset($_REQUEST['status']) && $_REQUEST['status'])
 		{
-			if($_POST['status']) $this->SetWhereCondition("b.status","=", $_POST['status']);
-			if($_GET['status']) $this->SetWhereCondition("b.status","=", $_GET['status']);	
+			if(isset($_POST['status']) && $_POST['status']) $this->SetWhereCondition("b.status","=", $_POST['status']);
+			if(isset($_GET['status']) && $_GET['status']) $this->SetWhereCondition("b.status","=", $_GET['status']);	
 		}else{
 			$this->SetWhereCondition("b.status","=","A");
 		}
-		if($_POST['view_order_field'])
+		if(isset($_POST['view_order_field']) && $_POST['view_order_field'])
 		{
-			if(strtolower($_POST['view_order_mode'])=="desc")
-				$Mode = "DESC";
-			else
+			$Mode = "DESC";
+			if(isset($_POST['view_order_mode']) && strtolower($_POST['view_order_mode'])!="desc")
 				$Mode = $_POST['view_order_mode'];
 			
 			$Order = strtolower($_POST['view_order_field']);
@@ -265,11 +262,11 @@ public function MakeRegs($Mode="List")
 			}
 			$this->SetOrder($Prefix.$Order." ".$Mode);
 		}
-		if($_POST['regsperview'])
+		if(isset($_POST['regsperview']) && $_POST['regsperview'])
 		{
 			$this->SetRegsPerView($_POST['regsperview']);
 		}
-		if(intval($_POST['view_page'])>0)
+		if(isset($_POST['view_page']) && intval($_POST['view_page'])>0)
 			$this->SetPage($_POST['view_page']);
 	}
 
@@ -295,14 +292,12 @@ public function MakeRegs($Mode="List")
 	public function Insert()
 	{
 		$Title		= $_POST['title'];
-		$ShortTitle	= $_POST['short_title'];
-		$Parent		= $_POST['parent'];
-		$PRetailer	= $_POST['percentage_retailer']?$_POST['percentage_retailer']:0;
-		$PWholesaler= $_POST['percentage_wholesaler']?$_POST['percentage_wholesaler']:0;
-		$ARetailer	= $_POST['amount_retailer']?$_POST['amount_retailer']:0;
-		$AWholesaler= $_POST['amount_wholesaler']?$_POST['amount_wholesaler']:0;
-		
-		if(!$Parent) $Parent = 0;
+		$ShortTitle	= isset($_POST['short_title'])?$_POST['short_title']:'';
+		$Parent		= isset($_POST['parent'])?$_POST['parent']:0;
+		$PRetailer	= isset($_POST['percentage_retailer'])?$_POST['percentage_retailer']:0;
+		$PWholesaler= isset($_POST['percentage_wholesaler'])?$_POST['percentage_wholesaler']:0;
+		$ARetailer	= isset($_POST['amount_retailer'])?$_POST['amount_retailer']:0;
+		$AWholesaler= isset($_POST['amount_wholesaler'])?$_POST['amount_wholesaler']:0;
 		$Insert			= $this->execQuery('insert',$this->Table,'title,short_title,parent_id,additional_price_retailer,additional_price_wholesaler,additional_percentage_retailer,additional_percentage_wholesaler,creation_date,company_id,created_by',"'".$Title."','".$ShortTitle."',".$Parent.",".$ARetailer.",".$AWholesaler.",".$PRetailer.",".$PWholesaler.",NOW(),".$_SESSION['company_id'].",".$_SESSION['admin_id']);
 		//echo $this->lastQuery();
 	}	
@@ -312,15 +307,12 @@ public function MakeRegs($Mode="List")
 		$ID 		= $_POST['id'];
 		$Edit		= new Category($ID);
 		$Title		= $_POST['title'];
-		$ShortTitle	= $_POST['short_title'];
-		$Parent		= $_POST['parent'];
-		$PRetailer	= $_POST['percentage_retailer']?$_POST['percentage_retailer']:0;
-		$PWholesaler= $_POST['percentage_wholesaler']?$_POST['percentage_wholesaler']:0;
-		$ARetailer	= $_POST['amount_retailer']?$_POST['amount_retailer']:0;
-		$AWholesaler= $_POST['amount_wholesaler']?$_POST['amount_wholesaler']:0;
-		
-		if(!$Parent) $Parent = 0;
-		
+		$ShortTitle	= isset($_POST['short_title'])?$_POST['short_title']:'';
+		$Parent		= isset($_POST['parent'])?$_POST['parent']:0;
+		$PRetailer	= isset($_POST['percentage_retailer'])?$_POST['percentage_retailer']:0;
+		$PWholesaler= isset($_POST['percentage_wholesaler'])?$_POST['percentage_wholesaler']:0;
+		$ARetailer	= isset($_POST['amount_retailer'])?$_POST['amount_retailer']:0;
+		$AWholesaler= isset($_POST['amount_wholesaler'])?$_POST['amount_wholesaler']:0;
 		$Update		= $this->execQuery('update',$this->Table,"title='".$Title."',short_title='".$ShortTitle."',parent_id=".$Parent.",additional_price_retailer=".$ARetailer.", =".$AWholesaler.",additional_percentage_retailer=".$PRetailer.",additional_percentage_wholesaler=".$PWholesaler.",updated_by=".$_SESSION['admin_id'],$this->TableID."=".$ID);
 		//echo $this->lastQuery();
 	}
@@ -360,7 +352,7 @@ public function MakeRegs($Mode="List")
 	public function Validate()
 	{
 		$Name 			= $_POST['title'];
-		$ActualName 	= $_POST['actualtitle'];
+		$ActualName 	= isset($_POST['actualtitle'])?$_POST['actualtitle']:null;
 
 	    if($ActualName)
 	    	$TotalRegs  = $this->numRows($this->Table,'*',"title = '".$Name."' AND title<> '".$ActualName."'");

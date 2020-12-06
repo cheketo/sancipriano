@@ -26,7 +26,10 @@ class Security extends dataBase
 		$this->File		= basename($_SERVER['PHP_SELF']);
 		$this->getLink();
 		$MenuData		= $this->fetchAssoc("menu","menu_id,public","link LIKE '%".$this->Link."%'");
-		$this->MenuData	= $MenuData[0];
+		if( isset($MenuData[0]) )
+		{
+			$this->MenuData	= $MenuData[0];
+		}
 	}
 
 	public function checkProfile($AdminID=0)

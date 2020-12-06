@@ -56,14 +56,14 @@ class Product extends DataBase
 			$Price['name'] = $Type['name'];
 			$Price['type_id'] = $Type['type_id'];
 			$Relation = $this->fetchAssoc('relation_product_customer_type','*',"type_id=".$Type['type_id']." AND product_id=".$this->Data['product_id']);
-			if($this->Data['variation_id']=="1")
+			if(isset($this->Data['variation_id']) && $this->Data['variation_id']=="1")
 			{
-				if($Relation[0]['additional_percentage'])
+				if(isset($Relation[0]) && $Relation[0]['additional_percentage'])
 					$Price['price'] = round($this->Data['cost'] + (($this->Data['cost']*$Relation[0]['additional_percentage'])/100));
 				else
 					$Price['price'] = round($this->Data['cost'] + (($this->Data['cost']*$Type['percentage'])/100));
 			}else{
-				if($Relation[0]['additional_amount'])
+				if(isset($Relation[0]) && $Relation[0]['additional_amount'])
 					$Price['price'] = round($this->Data['cost']+$Relation[0]['additional_amount']);
 				else
 					$Price['price'] = round($this->Data['cost']+$Type['amount']);
@@ -134,11 +134,12 @@ class Product extends DataBase
 public function MakeRegs($Mode="List")
 	{
 		$Rows	= $this->GetRegs();
+		$Regs = '';
+		$Restrict = '';
 		//echo $this->lastQuery();
 		for($i=0;$i<count($Rows);$i++)
 		{
 			$Row	=	new Product($Rows[$i][$this->TableID]);
-			
 			$TypePrices = '';
 			foreach($Row->Data['prices'] as $PriceType)
 			{
@@ -188,8 +189,8 @@ public function MakeRegs($Mode="List")
 							</div>
 							';
 			$Items .='</div>';
-			// $Price = "$ ".$Row->Data['price'];
-			// $PriceRetail = "$ ".$Row->Data['price_retailer'];
+			$Price = isset($Row->Data['price'])?"$ ".$Row->Data['price']:'';
+			$PriceRetail = isset($Row->Data['price_retailer'])?"$ ".$Row->Data['price_retailer']:'';
 			
 			$Actions= '';
 			$Actions	.= 	'<span class="roundItemActionsGroup"><a><button type="button" class="btn btnGreen ExpandButton" id="expand_'.$Row->ID.'"><i class="fa fa-plus"></i></button></a>';
@@ -205,6 +206,7 @@ public function MakeRegs($Mode="List")
 			{
 				case "list":
 					$RowBackground = $i % 2 == 0? '':' listRow2 ';
+					$Row->Data['cod'] = isset($Row->Data['cod'])? $Row->Data['cod']:'';
 					$Regs	.= '<div class="row listRow'.$RowBackground.$Restrict.'" id="row_'.$Row->ID.'" title="'.$Row->Data['title'].'">
 									<div class="col-lg-3 col-md-3 col-sm-10 col-xs-10">
 										<div class="listRowInner" style="text-align:left!important;">
@@ -264,7 +266,7 @@ public function MakeRegs($Mode="List")
 				break;
 			}
         }
-        if(!$Regs) $Regs.= '<div class="callout callout-info"><h4><i class="icon fa fa-info-circle"></i> No se encontraron art&iacute;culos.</h4><p>Puede crear un art&iacute;culo haciendo click <a href="new.php">aqui</a>.</p></div>';
+        if(!isset($Regs) || !$Regs) $Regs.= '<div class="callout callout-info"><h4><i class="icon fa fa-info-circle"></i> No se encontraron art&iacute;culos.</h4><p>Puede crear un art&iacute;culo haciendo click <a href="new.php">aqui</a>.</p></div>';
 		return $Regs;
 	}
 	
@@ -348,9 +350,9 @@ public function MakeRegs($Mode="List")
 			$_POST[$Key] = $Value;
 		}
 			
-		if($_POST['title']) $this->SetWhereCondition("a.title","LIKE","%".$_POST['title']."%");
-		if($_POST['category']) $this->SetWhereCondition("a.category_id","=",$_POST['category']);
-		if($_POST['brand']) $this->SetWhereCondition("a.brand_id","=",$_POST['brand']);
+		if(isset($_POST['title']) && $_POST['title']) $this->SetWhereCondition("a.title","LIKE","%".$_POST['title']."%");
+		if(isset($_POST['category']) && $_POST['category']) $this->SetWhereCondition("a.category_id","=",$_POST['category']);
+		if(isset($_POST['brand']) && $_POST['brand']) $this->SetWhereCondition("a.brand_id","=",$_POST['brand']);
 		// if($_POST['country']){
 		// 	$this->SetWhereCondition("c.title","LIKE","%".$_POST['country']."%");
 		// 	$this->AddWhereString(" AND b.country_id = c.country_id");
@@ -364,10 +366,10 @@ public function MakeRegs($Mode="List")
 		// {
 		// 	$this->AddWhereString(" AND c.company_id = a.company_id");
 		// }
-		if($_REQUEST['status'])
+		if(isset($_REQUEST['status']) && $_REQUEST['status'])
 		{
-			if($_POST['status']) $this->SetWhereCondition("a.status","=", $_POST['status']);
-			if($_GET['status']) $this->SetWhereCondition("a.status","=", $_GET['status']);	
+			if(isset($_POST['status']) && $_POST['status']) $this->SetWhereCondition("a.status","=", $_POST['status']);
+			if(isset($_GET['status']) && $_GET['status']) $this->SetWhereCondition("a.status","=", $_GET['status']);	
 		}else{
 			$this->SetWhereCondition("a.status","=","A");
 		}
@@ -376,11 +378,10 @@ public function MakeRegs($Mode="List")
 		$Order = 'title';
 		//$Mode = 'ASC';
 		$this->SetOrder($Order);
-		if($_POST['view_order_field'])
+		if(isset($_POST['view_order_field']) && $_POST['view_order_field'])
 		{
-			if(strtolower($_POST['view_order_mode'])=="desc")
-				$Mode = "DESC";
-			else
+			$Mode = "DESC";
+			if(isset($_POST['view_order_mode']) && strtolower($_POST['view_order_mode'])!="desc")
 				$Mode = $_POST['view_order_mode'];
 			
 			$Order = strtolower($_POST['view_order_field']);
@@ -401,11 +402,11 @@ public function MakeRegs($Mode="List")
 		
 		
 		
-		if($_POST['regsperview'])
+		if(isset($_POST['regsperview']) && $_POST['regsperview'])
 		{
 			$this->SetRegsPerView($_POST['regsperview']);
 		}
-		if(intval($_POST['view_page'])>0)
+		if(isset($_POST['view_page']) && intval($_POST['view_page'])>0)
 			$this->SetPage($_POST['view_page']);
 	}
 
@@ -438,16 +439,17 @@ public function MakeRegs($Mode="List")
 	{
 		if($ID)
 		{
-			if($_POST['variation']==1)
+			if(isset($_POST['variation']) && $_POST['variation']==1)
 			{
 				$Variation = 'percentage';
 			}else{
 				$Variation = 'amount';
 			}
-			for($I=1;$I<=$_POST['total_types'];$I++)
+			$Fields = '';
+			$TotalTypes = isset($_POST['total_types'])? $_POST['total_types']:0;
+			for($I=1;$I<=$TotalTypes;$I++)
 			{
-				
-				if($_POST['additional_'.$Variation.$I]>0)
+				if(isset($_POST['additional_'.$Variation.$I]) && $_POST['additional_'.$Variation.$I]>0)
 				{
 					//$Prices[] = array("type_id"=>$_POST['type'.$I],"additional_".$Variation => $_POST['additional_'.$Variation.$I]);
 					$Field = $_POST['type'.$I].",".$ID.",".$_POST['additional_'.$Variation.$I].",'A',NOW(),".$_SESSION['admin_id'].",".$_SESSION['company_id'];
@@ -481,19 +483,19 @@ public function MakeRegs($Mode="List")
 		// $ARetailer	= $_POST['amount_retailer']?$_POST['amount_retailer']:0;
 		// $AWholesaler= $_POST['amount_wholesaler']?$_POST['amount_wholesaler']:0;
 		
-		$Stock		= $_POST['stock'];
-		$StockMin	= $_POST['stock_min'];
-		$StockMax	= $_POST['stock_max'];
-		$Description= $_POST['description'];
+		$Stock		= isset($_POST['stock'])? $_POST['stock']:0;
+		$StockMin	= isset($_POST['stock_min'])? $_POST['stock_min']:0;
+		$StockMax	= isset($_POST['stock_max'])? $_POST['stock_max']:0;
+		$Description= isset($_POST['description'])? $_POST['description']:'';
 		// $Dispatch	= $_POST['dispatch'];
 		// $PriceRetail	= str_replace('$','',$_POST['price_retailer']);
 		//$PriceDispatch	= $_POST['price_dispatch'];
-		if(!$Stock) $Stock = 0;
-		if(!$StockMin) $StockMin = 0;
-		if(!$StockMax) $StockMax = 0;
+		// if(!$Stock) $Stock = 0;
+		// if(!$StockMin) $StockMin = 0;
+		// if(!$StockMax) $StockMax = 0;
 		// if(!$PriceFob) $PriceFob = 0;
 		// if(!$PriceDispatch) $PriceDispatch = 0;
-		$Insert		= $this->execQuery('insert',$this->Table,'title,category_id,cost,variation_id,brand_id,rack,size_id,stock,stock_min,stock_max,description,creation_date,company_id,created_by',"'".$Title."',".$Category.",".$Cost.",".$Variation.",".$Brand.",'".$Rack."',".$Size.",".$Stock.",".$StockMin.",".$StockMax.",'".$Description."',NOW(),".$_SESSION['company_id'].",".$_SESSION['admin_id']);
+		$Insert	= $this->execQuery('insert',$this->Table,'title,category_id,cost,variation_id,brand_id,rack,size_id,stock,stock_min,stock_max,description,creation_date,company_id,created_by',"'".$Title."',".$Category.",".$Cost.",".$Variation.",".$Brand.",'".$Rack."',".$Size.",".$Stock.",".$StockMin.",".$StockMax.",'".$Description."',NOW(),".$_SESSION['company_id'].",".$_SESSION['admin_id']);
 		$ID = $this->GetInsertId();
 		$this->ChangeCost($Cost,'NOW()',$ID);
 		$this->InsertCustomerPrices($ID);
@@ -506,24 +508,21 @@ public function MakeRegs($Mode="List")
 		$Edit		= new Product($ID);
 		
 		$Title		= $_POST['title'];
-		$Category	= $_POST['category'];
+		$Category	= isset($_POST['category'])?$_POST['category']:0;
 		// $Price		= str_replace('$','',$_POST['price']);
 		// $PriceRetail= str_replace('$','',$_POST['price_retailer']);
 		$Cost		= str_replace('$','',$_POST['cost']);
-		$Brand		= $_POST['brand'];
+		$Brand		= isset($_POST['brand'])?$_POST['brand']:0;
 		$Rack		= $_POST['rack'];
 		$Size		= $_POST['size'];
-		$Variation	= $_POST['variation'];
+		$Variation	= isset($_POST['variation'])? $_POST['variation']:0;
 		// $PRetailer	= $_POST['percentage_retailer']?$_POST['percentage_retailer']:0;
 		// $PWholesaler= $_POST['percentage_wholesaler']?$_POST['percentage_wholesaler']:0;
 		// $ARetailer	= $_POST['amount_retailer']?$_POST['amount_retailer']:0;
 		// $AWholesaler= $_POST['amount_wholesaler']?$_POST['amount_wholesaler']:0;
-		$StockMin	= $_POST['stock_min'];
-		$StockMax	= $_POST['stock_max'];
-		$Description= $_POST['description'];
-		
-		if(!$StockMin) $StockMin = 0;
-		if(!$StockMax) $StockMax = 0;
+		$StockMin	= isset($_POST['stock_min'])? $_POST['stock_min']:0;
+		$StockMax	= isset($_POST['stock_max'])? $_POST['stock_max']:0;
+		$Description= isset($_POST['description'])? $_POST['description']:'';
 		
 		$Update		= $this->execQuery('update',$this->Table,"title='".$Title."',category_id=".$Category.",brand_id=".$Brand.",cost=".$Cost.",variation_id=".$Variation.",rack='".$Rack."',size_id='".$Size."',stock_min='".$StockMin."',stock_max='".$StockMax."',description='".$Description."',updated_by=".$_SESSION['admin_id'],$this->TableID."=".$ID);
 		//echo $this->lastQuery();
@@ -565,13 +564,16 @@ public function MakeRegs($Mode="List")
 	
 	public function Validate()
 	{
-		$Name 			= strtolower($_POST['title']);
-		$ActualName 	= strtolower($_POST['actualtitle']);
-
-	    if($ActualName)
-	    	$TotalRegs  = $this->numRows($this->Table,'*',"title = '".$Name."' AND title<> '".$ActualName."'");
-    	else
-		    $TotalRegs  = $this->numRows($this->Table,'*',"title = '".$Name."'");
+		$Name 			= isset($_POST['title'])? strtolower($_POST['title']):null;
+		$ActualName 	= isset($_POST['actualtitle'])? strtolower($_POST['actualtitle']):null;
+		$TotalRegs		= 0;
+		if($Name)
+		{
+			if($ActualName)
+				$TotalRegs  = $this->numRows($this->Table,'*',"title = '".$Name."' AND title<> '".$ActualName."'");
+			else
+				$TotalRegs  = $this->numRows($this->Table,'*',"title = '".$Name."'");
+		}
 		if($TotalRegs>0) echo $TotalRegs;
 	}
 	
@@ -598,10 +600,10 @@ public function MakeRegs($Mode="List")
 	
 	public function Config()
 	{
-		$Wpercent		= floatval($_POST['wpercent'])>=0? floatval($_POST['wpercent']):-1;
-		$Wadditional	= floatval($_POST['wadditional'])>=0? floatval($_POST['wadditional']):-1;
-		$Rpercent		= floatval($_POST['rpercent'])>=0? floatval($_POST['rpercent']):-1;
-		$Radditional	= floatval($_POST['radditional'])>=0? floatval($_POST['radditional']):-1;
+		$Wpercent		= isset($_POST['wpercent']) && floatval($_POST['wpercent'])>=0? floatval($_POST['wpercent']):-1;
+		$Wadditional	= isset($_POST['wadditional']) && floatval($_POST['wadditional'])>=0? floatval($_POST['wadditional']):-1;
+		$Rpercent		= isset($_POST['rpercent']) && floatval($_POST['rpercent'])>=0? floatval($_POST['rpercent']):-1;
+		$Radditional	= isset($_POST['radditional']) && floatval($_POST['radditional'])>=0? floatval($_POST['radditional']):-1;
 		
 		if($Wpercent>-1 && $Wadditional>-1 && $Rpercent>-1 && $Radditional>-1)
 		{
@@ -623,6 +625,7 @@ public function MakeRegs($Mode="List")
 		{
 			$this->execQuery("UPDATE","relation_product_customer","status='I',updated_by=".$_SESSION['admin_id'],"customer_id=".$CustomerID);
 			$Products = $_POST['total'];
+			$Fields = '';
 			for($I=1;$I<=$Products;$I++)
 			{
 				$ProductID = $_POST['id'.$I];

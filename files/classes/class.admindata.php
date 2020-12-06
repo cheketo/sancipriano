@@ -50,7 +50,7 @@ class AdminData extends DataBase
 	
 	public function GetCustomer()
 	{
-		if(!$this->Customer)
+		if(!isset($this->Customer) && !$this->Customer)
 		{
 			$Rs 	= $this->fetchAssoc("admin_company",'*',"company_id =".$this->AdminData['company_id']);
 			$this->Customer = $Rs[0];
@@ -60,7 +60,7 @@ class AdminData extends DataBase
 
 	public function GetGroups()
 	{
-		if(!$this->Groups)
+		if(!isset($this->Groups) && !$this->Groups)
 		{
 			$Rs 	= $this->fetchAssoc('admin_group','*',"status = 'A' AND group_id IN (SELECT group_id FROM relation_admin_group WHERE admin_id=".$this->AdminID.")","title");
 			$this->Groups = $Rs;
@@ -79,11 +79,9 @@ class AdminData extends DataBase
 		return $this->ProfileID;
 	}
 
-	
-
 	public function GetCheckedMenues()
 	{
-		if(count($this->Menues)<1)
+		if(!isset($this->Menues) || count($this->Menues)<1)
 		{
 			$Relations	= $this->fetchAssoc('relation_admin_menu','*',"admin_id = ".$this->AdminID);
 			foreach($Relations as $Relation)

@@ -8,12 +8,10 @@
     <!-- logo for regular state and mobile devices -->
     <span class="logo-lg"><b>San Cipriano</b></span>
   </a>
-
   <!-- Header Navbar: style can be found in header.less -->
   <nav class="navbar navbar-static-top">
     <!-- Sidebar toggle button-->
     <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button" id="SidebarToggle"></a>
-
     <div class="navbar-custom-menu">
       <ul class="nav navbar-nav">
         <!-- Notifications: style can be found in dropdown.less -->
@@ -41,16 +39,16 @@
         <!-- User Account: style can be found in dropdown.less -->
         <li class="dropdown user user-menu">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-            <img src="<?php echo $Admin->Img; ?>" class="user-image" alt="User Image">
-            <span class="hidden-xs" id="userfullname"><?php echo $Admin->FullName; ?></span>
+            <img src="<?php if(isset($Admin->Img)) echo $Admin->Img; ?>" class="user-image" alt="User Image">
+            <span class="hidden-xs" id="userfullname"><?php if(isset($Admin->FullName)) echo $Admin->FullName; ?></span>
           </a>
           <ul class="dropdown-menu">
             <!-- User image -->
             <li class="user-header">
-              <img src="<?php echo $Admin->Img; ?>" class="img-circle" alt="User Image">
+              <img src="<?php if(isset($Admin->Img)) echo $Admin->Img; ?>" class="img-circle" alt="User Image">
               <p>
-                <?php echo $Admin->FullUserName; ?>
-                <small><?php echo ucfirst($Admin->ProfileName); ?></small>
+                <?php if(isset($Admin->FullName)) echo $Admin->FullUserName; ?>
+                <small><?php if(isset($Admin->ProfileName)) echo ucfirst($Admin->ProfileName); ?></small>
               </p>
             </li>
 
@@ -81,6 +79,9 @@
 <?php include('../../includes/inc.nav.php'); ?>
 
 <!-- =============================================== -->
-<?php if($Menu->GetLink()=="user/profile.php"){ ?>
-<?php include('../../includes/inc.sidebar.php'); ?>
-<?php } ?>
+<?php 
+  if($Menu->GetLink()=="user/profile.php")
+  {
+    include('../../includes/inc.sidebar.php');
+  }
+?>

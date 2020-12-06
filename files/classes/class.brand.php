@@ -6,6 +6,8 @@ class Brand extends DataBase
 	var $Data;
 	var $Products = array();
 	var $DefaultImgURL = '../../../skin/images/brands/default/default.png';
+	var $Table = 'product_brand';
+	var $TableID = 'brand_id';
 
 	public function __construct($ID=0)
 	{
@@ -13,9 +15,9 @@ class Brand extends DataBase
 		if($ID!=0)
 		{
 			$Data = $this->fetchAssoc("product_brand","*","brand_id=".$ID);
-			$this->Data = $Data[0];
+			$this->Data = isset($Data[0])?$Data[0]:[];
 			$this->ID = $ID;
-			if($this->Data['country_id'])
+			if(isset($this->Data['country_id']) && $this->Data['country_id'])
 			{
 				$Country = $this->fetchAssoc('admin_country','*','country_id='.$this->Data['country_id']);
 				$this->Data['country'] = $Country[0]['title'];
@@ -44,6 +46,8 @@ class Brand extends DataBase
 public function MakeRegs($Mode="List")
 	{
 		$Rows	= $this->GetRegs();
+		$Regs	= '';
+		$Restrict = '';
 		//echo $this->lastQuery();
 		for($i=0;$i<count($Rows);$i++)
 		{
@@ -67,7 +71,7 @@ public function MakeRegs($Mode="List")
 			}
 			$Actions	.= '</span>';
 			
-			if($Row->Data['country'])
+			if(isset($Row->Data['country']) && $Row->Data['country'])
 			{
 				$Row->Data['country'] = '<span class="label label-primary">'.ucfirst($Row->Data['country']).'</span>';
 			}else{
@@ -148,7 +152,8 @@ public function MakeRegs($Mode="List")
 	{
 		$this->SetTable('product_brand b, admin_country c');
 		$this->SetFields('b.*,c.title');
-		$this->SetWhere("b.company_id = ".$_SESSION['company_id']);
+		if($_SESSION['company_id'])
+			$this->SetWhere("b.company_id = ".$_SESSION['company_id']);
 		//$this->AddWhereString(" AND c.company_id = a.company_id");
 		$this->SetOrder('name');
 		$this->SetGroupBy("b.brand_id");
@@ -158,8 +163,8 @@ public function MakeRegs($Mode="List")
 			$_POST[$Key] = $Value;
 		}
 			
-		if($_POST['name']) $this->SetWhereCondition("b.name","LIKE","%".$_POST['name']."%");
-		if($_POST['country']){
+		if(isset($_POST['name']) && $_POST['name']) $this->SetWhereCondition("b.name","LIKE","%".$_POST['name']."%");
+		if(isset($_POST['country']) && $_POST['country']){
 			$this->SetWhereCondition("c.title","LIKE","%".$_POST['country']."%");
 			$this->AddWhereString(" AND b.country_id = c.country_id");
 		}
@@ -172,18 +177,17 @@ public function MakeRegs($Mode="List")
 		// {
 		// 	$this->AddWhereString(" AND c.company_id = a.company_id");
 		// }
-		if($_REQUEST['status'])
+		if(isset($_REQUEST['status']) && $_REQUEST['status'])
 		{
-			if($_POST['status']) $this->SetWhereCondition("b.status","=", $_POST['status']);
-			if($_GET['status']) $this->SetWhereCondition("b.status","=", $_GET['status']);	
+			if(isset($_POST['status']) && $_POST['status']) $this->SetWhereCondition("b.status","=", $_POST['status']);
+			if(isset($_GET['status']) && $_GET['status']) $this->SetWhereCondition("b.status","=", $_GET['status']);	
 		}else{
 			$this->SetWhereCondition("b.status","=","A");
 		}
-		if($_POST['view_order_field'])
+		if(isset($_POST['view_order_field']))
 		{
-			if(strtolower($_POST['view_order_mode'])=="desc")
-				$Mode = "DESC";
-			else
+			$Mode = "DESC";
+			if(isset($_POST['view_order_mode']) && strtolower($_POST['view_order_mode'])!="desc")
 				$Mode = $_POST['view_order_mode'];
 			
 			$Order = strtolower($_POST['view_order_field']);
@@ -200,11 +204,11 @@ public function MakeRegs($Mode="List")
 			}
 			$this->SetOrder($Prefix.$Order." ".$Mode);
 		}
-		if($_POST['regsperview'])
+		if(isset($_POST['regsperview']))
 		{
 			$this->SetRegsPerView($_POST['regsperview']);
 		}
-		if(intval($_POST['view_page'])>0)
+		if(isset($_POST['view_page']) && intval($_POST['view_page'])>0)
 			$this->SetPage($_POST['view_page']);
 	}
 
@@ -230,9 +234,8 @@ public function MakeRegs($Mode="List")
 	public function Insert()
 	{
 		$Name			= $_POST['name'];
-		$Country		= $_POST['country'];
-		if(!$Country) $Country = 0;
-		$Insert			= $this->execQuery('insert','product_brand','name,country_id,creation_date,company_id',"'".$Name."',".$Country.",NOW(),".$_SESSION['company_id']);
+		$Country		= isset($_POST['country'])? $_POST['country']:0;
+		$Insert			= $this->execQuery('insert',$this->Table,'name,country_id,creation_date,company_id',"'".$Name."',".$Country.",NOW(),".$_SESSION['company_id']);
 		//echo $this->lastQuery();
 	}	
 	
@@ -241,22 +244,22 @@ public function MakeRegs($Mode="List")
 		$ID 		= $_POST['id'];
 		$Edit		= new Brand($ID);
 		$Name		= $_POST['name'];
-		$Country	= $_POST['country'];
+		$Country	= isset($_POST['country'])? $_POST['country']:0;;
 		
-		$Update		= $this->execQuery('update','product_brand',"name='".$Name."',country_id=".$Country,"brand_id=".$ID);
+		$Update		= $this->execQuery('update',$this->Table,"name='".$Name."',country_id=".$Country,"brand_id=".$ID);
 		//echo $this->lastQuery();
 	}
 	
 	public function Activate()
 	{
 		$ID	= $_POST['id'];
-		$this->execQuery('update','product_brand',"status = 'A'","brand_id=".$ID);
+		$this->execQuery('update',$this->Table,"status = 'A'","brand_id=".$ID);
 	}
 	
 	public function Delete()
 	{
 		$ID	= $_POST['id'];
-		$this->execQuery('update','product_brand',"status = 'I'","brand_id=".$ID);
+		$this->execQuery('update',$this->Table,"status = 'I'","brand_id=".$ID);
 		//echo $this->lastQuery();
 	}
 	
@@ -282,12 +285,11 @@ public function MakeRegs($Mode="List")
 	public function Validate()
 	{
 		$Name 			= strtolower($_POST['name']);
-		$ActualName 	= strtolower($_POST['actualname']);
-
+		$ActualName 	= isset($_POST['actualname'])? strtolower($_POST['actualname']):null;
 	    if($ActualName)
-	    	$TotalRegs  = $this->numRows('product_brand','*',"name = '".$Name."' AND name<> '".$ActualName."'");
+	    	$TotalRegs  = $this->numRows($this->Table,'*',"name = '".$Name."' AND name<> '".$ActualName."'");
     	else
-		    $TotalRegs  = $this->numRows('product_brand','*',"name = '".$Name."'");
+		    $TotalRegs  = $this->numRows($this->Table,'*',"name = '".$Name."'");
 		if($TotalRegs>0) echo $TotalRegs;
 	}
 }

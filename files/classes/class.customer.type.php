@@ -45,7 +45,7 @@ class CustomerType extends DataBase
 
 	public function GetImg()
 	{
-		if(!$this->Data['logo'] || !file_exists($this->Data['logo']))
+		if(!isset($this->Data['logo']) || !$this->Data['logo'] || !file_exists($this->Data['logo']))
 			return $this->GetDefaultImg();
 		else
 			return $this->Data['logo'];
@@ -65,6 +65,8 @@ class CustomerType extends DataBase
 public function MakeRegs($Mode="List")
 	{
 		$Rows	= $this->GetRegs();
+		$Regs	= '';
+		$Restrict	= '';
 		// echo $this->lastQuery();
 		for($i=0;$i<count($Rows);$i++)
 		{
@@ -227,7 +229,8 @@ public function MakeRegs($Mode="List")
 			// h.name as branch_province
 			// i.name as branch_region
 			// j.name as branch_zone
-		$this->SetWhere("a.company_id=".$_SESSION['company_id']);
+		if($_SESSION['company_id'])
+			$this->SetWhere("a.company_id=".$_SESSION['company_id']);
 		//$this->AddWhereString(" AND c.company_id = a.company_id");
 		$this->SetOrder('name');
 		$this->SetGroupBy("a.".$this->TableID);
@@ -237,23 +240,21 @@ public function MakeRegs($Mode="List")
 			$_POST[$Key] = $Value;
 		}
 
-		if($_POST['name']) $this->SetWhereCondition("a.name","LIKE","%".$_POST['name']."%");
+		if(isset($_POST['name'])) $this->SetWhereCondition("a.name","LIKE","%".$_POST['name']."%");
 		// if($_POST['title']) $this->SetWhereCondition("c.title","LIKE","%".$_POST['title']."%");
 		
-		if($_REQUEST['status'])
+		if(isset($_REQUEST['status']))
 		{
-			if($_POST['status']) $this->SetWhereCondition("a.status","=", $_POST['status']);
-			if($_GET['status']) $this->SetWhereCondition("a.status","=", $_GET['status']);
+			if(isset($_POST['status'])) $this->SetWhereCondition("a.status","=", $_POST['status']);
+			if(isset($_GET['status'])) $this->SetWhereCondition("a.status","=", $_GET['status']);
 		}else{
 			$this->SetWhereCondition("a.status","=","A");
 		}
-		if($_POST['view_order_field'])
+		if(isset($_POST['view_order_field']))
 		{
-			if(strtolower($_POST['view_order_mode'])=="desc")
-				$Mode = "DESC";
-			else
+			$Mode = "DESC";
+			if(isset($_POST['view_order_mode']) && strtolower($_POST['view_order_mode'])!="desc")
 				$Mode = $_POST['view_order_mode'];
-
 			$Order = strtolower($_POST['view_order_field']);
 			switch($Order)
 			{
@@ -267,11 +268,11 @@ public function MakeRegs($Mode="List")
 			}
 			$this->SetOrder($Prefix.$Order." ".$Mode);
 		}
-		if($_POST['regsperview'])
+		if(isset($_POST['regsperview']))
 		{
 			$this->SetRegsPerView($_POST['regsperview']);
 		}
-		if(intval($_POST['view_page'])>0)
+		if(isset($_POST['view_page']) && intval($_POST['view_page'])>0)
 			$this->SetPage($_POST['view_page']);
 	}
 
@@ -296,9 +297,9 @@ public function MakeRegs($Mode="List")
 
 	public function Insert()
 	{
-		$Name		= $_POST['name'];
-		$Amount		= $_POST['amount'];
-		$Percentage	= $_POST['percentage'];
+		$Name		= isset($_POST['name'])? $_POST['name']:null;
+		$Amount		= isset($_POST['amount'])? $_POST['amount']:null;
+		$Percentage	= isset($_POST['percentage'])? $_POST['percentage']:null;
 
 		//VALIDATIONS
 		if(!$Name) echo 'Falta Nombre';
@@ -312,9 +313,9 @@ public function MakeRegs($Mode="List")
 	public function Update()
 	{
 		$ID 		= $_POST['id'];
-		$Name		= $_POST['name'];
-		$Amount		= $_POST['amount'];
-		$Percentage	= $_POST['percentage'];
+		$Name		= isset($_POST['name'])?$_POST['name']:null;
+		$Amount		= isset($_POST['amount'])?$_POST['amount']:null;
+		$Percentage	= isset($_POST['percentage'])?$_POST['percentage']:null;
 		
 		//VALIDATIONS
 		if(!$Name) echo 'Falta Nombre';
@@ -370,7 +371,7 @@ public function MakeRegs($Mode="List")
 	public function Validate()
 	{
 		$Name 			= strtolower($_POST['name']);
-		$ActualName 	= strtolower($_POST['actualname']);
+		$ActualName 	= isset($_POST['actualname'])? strtolower($_POST['actualname']):null;
 
 	    if($ActualName)
 	    	$TotalRegs  = $this->numRows($this->Table,'*',"name = '".$Name."' AND name <> '".$ActualName."'");

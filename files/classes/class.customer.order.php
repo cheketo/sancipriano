@@ -420,6 +420,9 @@ public function MakeRegs($Mode="List")
 
 	public function Insert()
 	{
+		// echo "dsaadssad----";
+		// print_r($_POST);
+		// die();
 		// ITEMS DATA
 		$Items = array();
 		$X=0;
@@ -445,8 +448,10 @@ public function MakeRegs($Mode="List")
 		$Branch 		= $this->fetchAssoc('customer_branch','branch_id',"customer_id=".$CustomerID);
 		$BranchID		= $Branch[0]['branch_id'];
 
-		$Insert			= $this->execQuery('insert',$this->Table,'type,branch_id,customer_id,currency_id,extra,total,delivery_date,status,creation_date,created_by,company_id',"'".$Type."',".$BranchID.",".$CustomerID.",".$CurrencyID.",'".$Extra."',".$Total.",'".$Date."','".$Status."',NOW(),".$_SESSION['admin_id'].",".$_SESSION['company_id']);
-		//echo $this->lastQuery();
+		$Insert			= $this->execQuery('insert',$this->Table,'type,branch_id,customer_id,currency_id,extra,total,delivery_date,status,creation_date,created_by,company_id,delivery_id',"'".$Type."',".$BranchID.",".$CustomerID.",".$CurrencyID.",'".$Extra."',".$Total.",'".$Date."','".$Status."',NOW(),".$_SESSION['admin_id'].",".$_SESSION['company_id'].",'0'");
+		// echo $this->lastQuery();
+		// echo "\n\r";
+		// die();
 		$NewID 		= $this->GetInsertId();
 		if($_POST['payorprint']=='Y')
 			echo $NewID;
@@ -461,7 +466,8 @@ public function MakeRegs($Mode="List")
 		}
 
 		$this->execQuery('insert','customer_order_item','order_id,customer_id,product_id,price,quantity,delivery_date,currency_id,creation_date,created_by,company_id',$Fields);
-		//echo $this->lastQuery();
+		// echo $this->lastQuery();
+		// die();
 		if($Type=="N" && $_POST['delivery_man'])
 			$this->Associate($NewID,$_POST['delivery_man']);
 

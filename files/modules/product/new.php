@@ -34,7 +34,9 @@
             <ul>
               <?php 
                 $Categories = $Category->GetAllCategories();
-                
+                $Parent = null;
+                $MaxLevel = 0;
+                $Class = '';
                 foreach($Categories as $Cat)
                 {
                   if($Parent!=$Cat['parent_id'])

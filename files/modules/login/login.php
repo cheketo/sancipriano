@@ -2,8 +2,9 @@
   include("../../includes/inc.main.php");
   $Head->setTitle("Login");
   $Head->setHead();
-
-  if($_COOKIE['rememberuser']){
+  $Checked = '';
+  if( isset($_COOKIE['rememberuser']) && $_COOKIE['rememberuser'])
+  {
       $Checked = 'checked="checked"';
   }
 ?>
@@ -17,11 +18,11 @@
   <!-- /.login-logo -->
     <p class="login-box-msg" style="color:#CCC;">INICIAR SESI&Oacute;N</p>
       <div class="form-group has-feedback">
-        <input type="email" class="form-control" name="user" id="user" placeholder="Email o Usuario" value="<?php echo $_COOKIE['rememberuser'];?>" autofocus>
+        <input type="email" class="form-control" name="user" id="user" placeholder="Email o Usuario" value="<?php if(isset($_COOKIE['rememberuser'])) echo $_COOKIE['rememberuser'];?>" autofocus>
         <span class="fa fa-envelope form-control-feedback"></span>
       </div>
       <div class="form-group has-feedback">
-        <input type="password" class="form-control" name="password" id="password" placeholder="Contrase&ntilde;a" value="<?php echo $_COOKIE['rememberpassword'];?>">
+        <input type="password" class="form-control" name="password" id="password" placeholder="Contrase&ntilde;a" value="<?php if(isset($_COOKIE['rememberpassword'])) echo $_COOKIE['rememberpassword'];?>">
         <span class="fa fa-lock form-control-feedback"></span>
       </div>
       <div class="row">

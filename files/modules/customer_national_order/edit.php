@@ -137,7 +137,7 @@
                     <?php echo insertElement('text','quantity_'.$I,$Item['quantity'],'ItemField'.$I.' form-control calcable QuantityItem txC','validateOnlyNumbers="Solo se permiten n&uacute;meros" placeholder="Cantidad" validateEmpty="Ingrese una cantidad"'); ?>
                   </div>
 
-                  <div id="item_number_<?php echo $I ?>" class="col-sm-1 col-xs-6 txC item_number" total="<?php echo $Item['total']; ?>" item="<?php echo $I ?>">$ <?php echo $Item['total']; ?></div>
+                  <div id="item_number_<?php echo $I ?>" class="col-sm-1 col-xs-6 txC item_number" total="<?php echo number_format($Item['total'],2,'.',''); ?>" item="<?php echo $I ?>">$ <?php echo number_format($Item['total'],2,'.',''); ?></div>
                   <div class="col-sm-2 col-xs-6 txC">
   									  <button type="button" id="SaveItem<?php echo $I ?>" class="btn btnGreen SaveItem" style="margin:0px;" item="<?php echo $I ?>"><i class="fa fa-check"></i></button>
   									  <button type="button" id="EditItem<?php echo $I ?>" class="btn btnBlue EditItem Hidden" style="margin:0px;" item="<?php echo $I ?>"><i class="fa fa-pencil"></i></button>

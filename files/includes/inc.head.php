@@ -7,7 +7,6 @@
 <link rel="stylesheet" href="../../../vendors/bootstrap/bootstrap.min.css">
 <!-- Font Awesome -->
 <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">-->
-
 <!--Old Font Awesome-->
 <script src="https://use.fontawesome.com/e6af76d853.js"></script>
 <!--New Font Awesome-->
@@ -15,10 +14,6 @@
 <!--<link href="https://use.fontawesome.com/releases/v5.0.1/css/all.css" rel="stylesheet">-->
 <!--Font Awesome Animation-->
 <link rel="stylesheet" href="../../../vendors/fontawesome/font-awesome-animation.min.css">
-
-
-
-
 <!-- Ionicons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
 <link rel="stylesheet" href="../../../vendors/animate.css">

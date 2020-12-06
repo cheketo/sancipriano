@@ -42,6 +42,7 @@ class Menu extends DataBase
 	
 	public function GetLinkData()
 	{
+		if(!is_array($this->MenuData)) $this->MenuData = [];
 		if(count($this->MenuData)<1)
 		{
 			if(!$this->ChosenMenu)
@@ -81,14 +82,14 @@ class Menu extends DataBase
 				$I=-1;
 				$Link = $Menu['link'];
 				$Link = explode("?",$Link);
-				$Args = $Link[1];
+				$Args = isset($Link[1])? $Link[1]:null;
 				if($Args)
 				{
 					$Args = explode('&',$Args);
 					foreach($Args as $Arg)
 					{
 						$Arg = explode('=',$Arg);
-						if($_GET[$Arg[0]]==$Arg[1])
+						if(isset($_GET[$Arg[0]]) && isset($Arg[1]) && $_GET[$Arg[0]]==$Arg[1])
 							$I++;
 					}
 					if($I>=$ChosenMenu[1])
@@ -103,7 +104,11 @@ class Menu extends DataBase
 			}
 			return $ChosenMenu[0];
 		}else{
-			return $Menues[0];
+			if( isset($Menues[0]) )
+			{
+				return $Menues[0];
+			}
+			return false;
 		}
 	}
 	

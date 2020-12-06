@@ -490,6 +490,7 @@ $(function(){
 							}
 						}
 					}
+					console.log('target='+target);
 					var haveData	= function(returningData)
 					{
 						$("input,select").blur();

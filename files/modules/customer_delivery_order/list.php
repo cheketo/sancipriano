@@ -6,7 +6,10 @@
   $Head->setStyle('../../../vendors/datepicker/datepicker3.css'); // Date Picker Calendar
   $Head->setTitle("Repartos del D&iacute;a");
   $Head->setIcon($Menu->GetHTMLicon());
-  $Head->setSubTitle('de '.$_SESSION['first_name'].' '.$_SESSION['last_name']);
+  if(isset($_SESSION['first_name']) && isset($_SESSION['last_name']))
+  {
+    $Head->setSubTitle('de '.$_SESSION['first_name'].' '.$_SESSION['last_name']);
+  }
   $Head->setHead();
   
 //   $DB->fetchAssoc('customer_delivery',"*","delivery_man_id=".$_SESSION['admin_id']." AND ")

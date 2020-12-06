@@ -1,4 +1,5 @@
 <?php
+	error_reporting(E_ALL & ~E_NOTICE);
 	session_name("sancipriano");
 	session_cache_expire(15800);
 	session_start();
@@ -19,14 +20,14 @@
 
 	/* SECURIRTY CHECKS */
 	$Security		= new Security();
-	if($Security->checkProfile($_SESSION['admin_id']))
+	if( $Security->checkProfile($_SESSION['admin_id']) )
 	{
 		$Admin 		= new AdminData();
 		$Cookies 	= new Login($Admin->User);
 		$Cookies->setCookies();
 		// if(!$Security->checkCustomer($_SESSION['company_id']))
 		// {
-		// 	header("Location: ../login/process.logout.php?error=customer");
+		// 	header("Location: ../login/proscess.logout.php?error=customer");
 		// 	die();
 		// }
 	}

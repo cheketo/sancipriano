@@ -228,6 +228,8 @@ public function InsertDefaultSearchButtons(){}
 public function MakeRegs($Mode="List")
 	{
 		$Rows	= $this->GetRegs();
+		$Regs	= '';
+		$Restrict = '';
 		// echo $this->lastQuery();
 		// echo '<pre>';
 		// print_r($Rows);
@@ -249,8 +251,6 @@ public function MakeRegs($Mode="List")
         $Orders = 1;
 		for($i=0;$i<count($Rows);$i++)
 		{
-		    
-		    
 			$Row	=	new CustomerDeliveryOrder($Rows[$i][$this->TableID]);
 			// echo '<pre>';
 			// print_r($Row);
@@ -491,6 +491,7 @@ public function MakeRegs($Mode="List")
 	
 	protected function InsertSearchButtons()
 	{
+		$HTML = '';
 // 		if($_REQUEST['status'])
 // 			$Status = $_REQUEST['status'];
 // 		else

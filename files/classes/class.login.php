@@ -43,7 +43,7 @@ class Login extends DataBase
 		$this->UserExists	= count($this->AdminData) > 0;
 		$this->PassMatch	= $this->AdminData[0]['password'] == $this->PasswordHash;
 		$this->Tries		= $this->AdminData[0]['tries']+1;
-		$this->IsMaxTries	= $PasswordHash? false : $this->Tries > $this->getMaxTries();
+		$this->IsMaxTries	= $this->PassMatch? false : $this->Tries > $this->getMaxTries();
 	}
 
 	public function setSessionVars()
@@ -71,7 +71,7 @@ class Login extends DataBase
 	public function setCookies()
 	{
 		$time	= time()+(3600*$this->getHours());
-		$Year = time() + 31536000;
+		$Year 	= time() + 31536000;
 		setcookie("user",$this->AdminData[0]['user'],$time, "/");
 		setcookie("password",$this->AdminData[0]['password'],$time, "/");
 		if($this->RememberUser && $this->Link==self::LOGIN)
@@ -88,7 +88,7 @@ class Login extends DataBase
 
 	public function queryMaxTries()
 	{
-		$Success 								= $this->execQuery("insert",'login_log','user,password,ip,tries,event',"'".$this->User."','".$this->Password."','".$this->IP."','".$this->Tries."','Inhabilitado por Revocaci&oacute;n'");
+		$Success 				= $this->execQuery("insert",'login_log','user,password,ip,tries,event',"'".$this->User."','".$this->Password."','".$this->IP."','".$this->Tries."','Inhabilitado por Revocaci&oacute;n'");
 		$SuccessInhabilitation 	= $this->execQuery('update','admin_user',"tries = 0, status = 'I'","user = '".$this->User."'");
 		return ($Success && $SuccessInhabilitation);
 	}
@@ -151,12 +151,12 @@ class Login extends DataBase
 
 	public static function getHours()
 	{
-  	return self::HOURS;
+  		return self::HOURS;
 	}
 
 	public static function getMaxTries()
 	{
-  	return self::MAX_TRIES;
+  		return self::MAX_TRIES;
 	}
 	
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -1,8 +1,8 @@
 <?php
 class DataBase
 {
-	var $UserDB		= 'root';
-	var $PasswordDB	= 'mysql';
+	var $UserDB		= 'homestead';
+	var $PasswordDB	= 'secret';
 	var $DataBase	= 'sancipriano';
 	var $ServerDB	= '127.0.0.1';
 	var $TypeDB 	= 'Mysql';
@@ -22,7 +22,7 @@ class DataBase
 	var $Table;
 	var $Fields = '*';
 
-	public function __construct($UserDB='root', $PasswordDB='mysql', $DataBase='sancipriano', $ServerDB='127.0.0.1',$TypeDB='Mysql'){
+	public function __construct($UserDB='homestead', $PasswordDB='secret', $DataBase='sancipriano', $ServerDB='127.0.0.1',$TypeDB='Mysql'){
 		$this->UserDB 		= $UserDB;
 		$this->PasswordDB	= $PasswordDB;
 		$this->DataBase		= $DataBase;
@@ -120,6 +120,10 @@ class DataBase
 	public function execQuery($Operation,$Table='',$Fields='',$Where='',$Order='',$GroupBy='',$Limit='')
 	{
 		$Query	= $this->queryBuild($Operation,$Table,$Fields,$Where,$Order,$GroupBy,$Limit);
+		// if($Table == 'product_brand b, admin_country c')
+		// {
+		// 	print_r($Query);die();
+		// }
 		switch($this->TypeDB)
 		{
 			case "Mysql":
@@ -154,7 +158,7 @@ class DataBase
 		{
 			case "Mysql":
 				$Query = mysqli_query($this->StreamConnection,$Query) or mysqli_error($this->StreamConnection);
-				if(!$Result) $this->Error = mysqli_error($this->StreamConnection);
+				// if(!isset($Result) || !$Result) $this->Error = mysqli_error($this->StreamConnection);
 				while($Data[]=mysqli_fetch_row($Query)){}
 				array_pop($Data);
 				$Data = Utf8EncodeArray($Data);
@@ -167,7 +171,12 @@ class DataBase
 		switch($this->TypeDB)
 		{
 			case "Mysql":
-				$Result = mysqli_num_rows($this->execQuery("SELECT",$Table,$Fields,$Where,$Order,$GroupBy,$Limit));
+				$Query = $this->execQuery("SELECT",$Table,$Fields,$Where,$Order,$GroupBy,$Limit);
+				// if(is_bool($Query))
+				// {
+				// 	print_r($Table);die();
+				// }
+				$Result = mysqli_num_rows($Query);
 				if(!$Result) $this->Error = mysqli_error($this->StreamConnection);
 				return $Result;
 			break;
@@ -313,7 +322,7 @@ class DataBase
 
 	public function GetRegs()
 	{
-		if(!$this->Regs)
+		if(!isset($this->Regs) || !$this->Regs)
 		{
 			$this->Regs = $this->fetchAssoc($this->GetTable(),$this->GetFields(),$this->GetWhere(),$this->GetOrder(),$this->GetGroupBy(),$this->GetLimit());
 
@@ -392,7 +401,7 @@ class DataBase
 	{
 		$Total			= $this->GetTotalRegs();
 		$RegsPerView	= $this->GetRegsPerView();
-		if($RegPerView>=$Total || $RegsPerView<=0)
+		if($RegsPerView>=$Total || $RegsPerView<=0)
 		{
 			return 0;
 		}else{
@@ -469,7 +478,9 @@ class DataBase
 
 	public function InsertSearchResults()
 	{
-		if($_POST['view_type']=='grid')
+		$ListClass = '';
+		$GridClass = '';
+		if(isset($_POST['view_type']) && $_POST['view_type']=='grid')
 			$ListClass = 'Hidden';
 		else
 			$GridClass = 'Hidden';

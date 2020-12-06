@@ -1,14 +1,14 @@
 <?php
     include('../../includes/inc.main.php');
     
-    if($_GET['action'])
+    if( isset($_GET['action']) && $_GET['action'])
     {
         $Action = $_GET['action'];
-    }elseif($_POST['action']){
+    }elseif( isset($_POST['action']) && $_POST['action'] ){
         $Action = $_POST['action'];
     }
     $Action = ucfirst($Action);
-    if($_REQUEST['object'])
+    if( isset($_REQUEST['object']) && $_REQUEST['object'] )
     {
         if(strtolower($_REQUEST['object'])!='admindata')
         {
