@@ -496,7 +496,7 @@ public function MakeRegs($Mode="List")
 		// if(!$PriceFob) $PriceFob = 0;
 		// if(!$PriceDispatch) $PriceDispatch = 0;
 		$Insert	= $this->execQuery('insert',$this->Table,'title,category_id,cost,variation_id,brand_id,rack,size_id,stock,stock_min,stock_max,description,creation_date,company_id,created_by',"'".$Title."',".$Category.",".$Cost.",".$Variation.",".$Brand.",'".$Rack."',".$Size.",".((string)$Stock).",".((string)$StockMin).",".((string)$StockMax).",'".$Description."',NOW(),".$_SESSION['company_id'].",".$_SESSION['admin_id']);
-		echo $this->lastQuery();
+		// echo $this->lastQuery();
 		$ID = $this->GetInsertId();
 		$this->ChangeCost($Cost,'NOW()',$ID);
 		$this->InsertCustomerPrices($ID);
