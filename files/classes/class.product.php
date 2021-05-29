@@ -483,9 +483,9 @@ public function MakeRegs($Mode="List")
 		// $ARetailer	= $_POST['amount_retailer']?$_POST['amount_retailer']:0;
 		// $AWholesaler= $_POST['amount_wholesaler']?$_POST['amount_wholesaler']:0;
 		
-		$Stock		= isset($_POST['stock'])? $_POST['stock']:"00";
-		$StockMin	= isset($_POST['stock_min'])? $_POST['stock_min']:"00";
-		$StockMax	= isset($_POST['stock_max'])? $_POST['stock_max']:'0';
+		$Stock		= isset($_POST['stock'])? $_POST['stock']:0;
+		$StockMin	= isset($_POST['stock_min'])? $_POST['stock_min']:0;
+		$StockMax	= isset($_POST['stock_max'])? $_POST['stock_max']:0;
 		$Description= isset($_POST['description'])? $_POST['description']:'';
 		// $Dispatch	= $_POST['dispatch'];
 		// $PriceRetail	= str_replace('$','',$_POST['price_retailer']);
@@ -495,7 +495,7 @@ public function MakeRegs($Mode="List")
 		// if(!$StockMax) $StockMax = 0;
 		// if(!$PriceFob) $PriceFob = 0;
 		// if(!$PriceDispatch) $PriceDispatch = 0;
-		$Insert	= $this->execQuery('insert',$this->Table,'title,category_id,cost,variation_id,brand_id,rack,size_id,stock,stock_min,stock_max,description,creation_date,company_id,created_by',"'".$Title."',".$Category.",".$Cost.",".$Variation.",".$Brand.",'".$Rack."',".$Size.",".$Stock.",".$StockMin.",".$StockMax.",'".$Description."',NOW(),".$_SESSION['company_id'].",".$_SESSION['admin_id']);
+		$Insert	= $this->execQuery('insert',$this->Table,'title,category_id,cost,variation_id,brand_id,rack,size_id,stock,stock_min,stock_max,description,creation_date,company_id,created_by',"'".$Title."',".$Category.",".$Cost.",".$Variation.",".$Brand.",'".$Rack."',".$Size.",".((string)$Stock).",".((string)$StockMin).",".((string)$StockMax).",'".$Description."',NOW(),".$_SESSION['company_id'].",".$_SESSION['admin_id']);
 		echo $this->lastQuery();
 		$ID = $this->GetInsertId();
 		$this->ChangeCost($Cost,'NOW()',$ID);
