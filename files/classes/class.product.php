@@ -483,8 +483,8 @@ public function MakeRegs($Mode="List")
 		// $ARetailer	= $_POST['amount_retailer']?$_POST['amount_retailer']:0;
 		// $AWholesaler= $_POST['amount_wholesaler']?$_POST['amount_wholesaler']:0;
 		
-		$Stock		= isset($_POST['stock']) && $_POST['stock']>0? $_POST['stock']:"0";
-		$StockMin	= isset($_POST['stock_min']) && $_POST['stock_min']>0? $_POST['stock_min']:"0";
+		$Stock		= isset($_POST['stock']) && $_POST['stock']>0? $_POST['stock']:0;
+		$StockMin	= isset($_POST['stock_min']) && $_POST['stock_min']>0? $_POST['stock_min']:0;
 		$StockMax	= isset($_POST['stock_max']) && $_POST['stock_max']>0? $_POST['stock_max']:0;
 		$Description= isset($_POST['description'])? $_POST['description']:'';
 		// $Dispatch	= $_POST['dispatch'];
@@ -521,8 +521,8 @@ public function MakeRegs($Mode="List")
 		// $PWholesaler= $_POST['percentage_wholesaler']?$_POST['percentage_wholesaler']:0;
 		// $ARetailer	= $_POST['amount_retailer']?$_POST['amount_retailer']:0;
 		// $AWholesaler= $_POST['amount_wholesaler']?$_POST['amount_wholesaler']:0;
-		$StockMin	= isset($_POST['stock_min'])? $_POST['stock_min']:0;
-		$StockMax	= isset($_POST['stock_max'])? $_POST['stock_max']:0;
+		$StockMin	= isset($_POST['stock_min']) && $_POST['stock_min']>0? $_POST['stock_min']:0;
+		$StockMax	= isset($_POST['stock_max']) && $_POST['stock_max']>0? $_POST['stock_max']:0;
 		$Description= isset($_POST['description'])? $_POST['description']:'';
 		
 		$Update		= $this->execQuery('update',$this->Table,"title='".$Title."',category_id=".$Category.",brand_id=".$Brand.",cost=".$Cost.",variation_id=".$Variation.",rack='".$Rack."',size_id='".$Size."',stock_min='".$StockMin."',stock_max='".$StockMax."',description='".$Description."',updated_by=".$_SESSION['admin_id'],$this->TableID."=".$ID);
